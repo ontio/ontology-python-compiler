@@ -1,6 +1,6 @@
 <p align="center">
   <img
-    src="https://github.com/ontio/ontology-python-compiler/ontologypic.png"
+    src="https://github.com/ontio/ontology-python-compiler/blob/master/ontologypic.png"
     width="125px;">
 </p>
 
