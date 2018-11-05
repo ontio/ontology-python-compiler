@@ -73,11 +73,11 @@ The compiler may be used like in the following example:
 ```
 from ontology.compiler import Compiler
 
-Compiler.load_and_save('path/to/your/file.py')
+Compiler.Comopile('path/to/your/file.py')
 ```
 
 
 ## License
 
-- Open-source [MIT](LICENSE.md).
+- Open-source [GPL](LICENSE.md).
 - Main author is [@steven](https://github.com/carltraveler)
