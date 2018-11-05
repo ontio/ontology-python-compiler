@@ -27,12 +27,11 @@ if __name__ ==  '__main__':
 
     if runmode == 1:
         print("Runmode 1. Compile file", filename)
-        Compiler.load_and_save(filename)
+        Compiler.Compile(filename)
     elif runmode == 0:
         print("Runmode 0. Dump avm code message of file", filename)
-        module = Compiler.load(filename).default
-        module.write()
-        module.to_s()
+        compiler = Compiler.Compile(filename)
+        compiler.DumpAsm()
 
     if deletedebug:
         deletedebugfile(filename, '.abi.json')
