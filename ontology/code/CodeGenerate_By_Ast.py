@@ -731,7 +731,9 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                 return
 
             # DynamicAppCall get the vararg args.
-            if  func_desc.isyscall and func_desc.name != "DynamicAppCall" and func_desc.name != 'state':
+            if  (func_desc.isyscall or func_desc.is_builtin) and (func_desc.name == "DynamicAppCall" or func_desc.name == 'state'):
+                pass
+            else:
                 if  func_desc.arg_num != len(node.args):
                     self.Print_Error("Function %s Need %d args. but you passed %d args" %(funcname, func_desc.arg_num,len(node.args)))
             for arg in reversed(node.args):
