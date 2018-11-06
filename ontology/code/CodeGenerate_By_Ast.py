@@ -641,6 +641,28 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_BitAnd(self, node):
         self.codegencontext.tokenizer.Emit_Token(VMOp.AND, node)
 
+    def visit_BoolOp(self, node):
+        assert(len(node.values) >= 2)
+        target_label    = self.codegencontext.NewLabel()
+        target_postion  = target_label.to_bytes(2, 'little', signed=True)
+
+        self.visit(node.values[0])
+        for i in range(len(node.values)):
+            if i == 0:
+                continue
+            self.visit(node.values[i])
+            self.visit(node.op) 
+            if (type(node.op).__name__ == 'Or'):
+                self.codegencontext.tokenizer.Emit_Token(VMOp.DUP, node)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.JMPIF, node, target_postion)
+            elif (type(node.op).__name__ == 'And'):
+                self.codegencontext.tokenizer.Emit_Token(VMOp.DUP, node)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.JMPIFNOT, node, target_postion)
+            else:
+                assert(False)
+
+        self.codegencontext.SetLabel(target_label, self.codegencontext.pc + 1)
+
     def visit_And(self, node):
         self.codegencontext.tokenizer.Emit_Token(VMOp.BOOLAND, node)
     def visit_Or(self, node):
@@ -995,7 +1017,7 @@ class CodeGenContext:
         self.file_hash          = None
         self.register_appcall   = {}
         self.register_action    = {}
-        #print(ast.dump(self.main_astree))
+        print(ast.dump(self.main_astree))
 
     def LinkProcess(self):
         all_token = self.tokenizer.vm_tokens.items()
