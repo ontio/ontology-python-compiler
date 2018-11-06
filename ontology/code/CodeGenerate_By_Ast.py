@@ -640,6 +640,8 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.Emit_Token(VMOp.XOR, node)
     def visit_BitAnd(self, node):
         self.codegencontext.tokenizer.Emit_Token(VMOp.AND, node)
+    def visit_FloorDiv(self, node):
+        assert(False)
 
     def visit_BoolOp(self, node):
         assert(len(node.values) >= 2)
@@ -697,6 +699,10 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.current_node = node
         self.visit(node.operand)
         self.visit(node.op)
+    def visit_UAdd(self, node):
+        assert(False)
+    def visit_USub(self, node):
+        assert(False)
 
     def visit_Dict(self, node):
         self.current_node = node
@@ -1017,7 +1023,7 @@ class CodeGenContext:
         self.file_hash          = None
         self.register_appcall   = {}
         self.register_action    = {}
-        print(ast.dump(self.main_astree))
+        #print(ast.dump(self.main_astree))
 
     def LinkProcess(self):
         all_token = self.tokenizer.vm_tokens.items()
