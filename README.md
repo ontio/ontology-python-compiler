@@ -100,5 +100,5 @@ compiler.DumpAsm()
 
 ## License
 
-- Open-source [GPL](LICENSE.md).
+- Open-source [GPL](LICENSE).
 - Main author is [@steven](https://github.com/carltraveler)
