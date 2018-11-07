@@ -49,6 +49,7 @@ The compiler supports a subset of the Python language
 - more syntax check. 
 - add lib api to support list remove. element in.
 - more accuracy debug message dump.
+- for, while break or continue.
 
 #### What will it do
 
@@ -90,7 +91,7 @@ The compiler may be used like in the following example:
 from ontology.compiler import Compiler
 
 # compiler your code. save in 'path/to/your/file.avm'.
-compiler = Compiler.Comopile('path/to/your/file.py')
+compiler = Compiler.Compile('path/to/your/file.py')
 
 # dump the instr instream.
 compiler.DumpAsm()
