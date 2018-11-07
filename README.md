@@ -20,7 +20,6 @@
 - [Installation](#installation)
 - [Usage](#usage)
 - [License](#license)
-- [Donations](#donations)
 
 ## Overview
 
@@ -33,12 +32,29 @@ The compiler supports a subset of the Python language
 
 - Compiles a subset of the Python language to the `.avm` format for use in the [Ontology](https://github.com/ontio/ontology)
 - Works for Python 3.6+
-- supports dictionaries
 
+#### What new compare to the old compiler neo-boa 
+
+- based abstract syntax tree.
+- free line coding.  compare to one line only with one statement restriction.
+- global var assigned.
+- cascade compare.
+- cascade assignment
+- map in map.
+- free string slice.
+- list comprehension.
+- dict comprehension.
+- conditional operation.
+- assert support.
+- more syntax check. 
+- add lib api to support list remove. element in.
+- more accuracy debug message dump.
 
 #### What will it do
 
-- Compile a larger subset of the Python language
+- Compile a larger subset of the Python language.
+- more syntax check.
+- optimize instr stream.
 
 #### Get Help or give help
 
@@ -73,7 +89,11 @@ The compiler may be used like in the following example:
 ```
 from ontology.compiler import Compiler
 
-Compiler.Comopile('path/to/your/file.py')
+# compiler your code. save in 'path/to/your/file.avm'.
+compiler = Compiler.Comopile('path/to/your/file.py')
+
+# dump the instr instream.
+compiler.DumpAsm()
 ```
 
 

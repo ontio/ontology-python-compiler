@@ -978,6 +978,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_Expr(self, node):
+
         self.current_node = node
         if type(node.value).__name__ == 'Call':
             self.generic_visit(node)
@@ -1015,6 +1016,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         assert(False)
 
     def visit_ListComp(self, node):
+
         self.current_node   = node
         # construct load list
         array_name = ListCompName + str(self.func_desc.list_comp_position)
@@ -1141,6 +1143,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         assert(False)
 
     def visit_DictComp(self, node):
+
         self.current_node   = node
         # construct map value
         map_name = ListCompName + str(self.func_desc.list_comp_position)
@@ -1216,6 +1219,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         assert(False)
 
     def visit_IfExp(self, node):
+
         orelse_label    = self.codegencontext.NewLabel()
         orelse_positon  = orelse_label.to_bytes(2, 'little', signed=True)
         end_label       = self.codegencontext.NewLabel()
@@ -1231,6 +1235,9 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.visit(node.orelse)
 
         self.codegencontext.SetLabel(end_label, self.codegencontext.pc + 1)
+
+    def visit_Delete(self, node):
+        assert(False)
         
 class FuncDescription:
     def __init__(self, name, label, node, isyscall, filepath, module_name, is_builtin):
