@@ -11,7 +11,7 @@
 </p>
 
 <ul>
-<li>Free software: MIT license</li>
+<li>Free software: GPL license</li>
 
 
 
