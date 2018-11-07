@@ -165,3 +165,9 @@ def bytes(str0):
 
 def state(*args):
     pass
+
+def append(arg):
+    pass
+
+def remove(arg):
+    pass

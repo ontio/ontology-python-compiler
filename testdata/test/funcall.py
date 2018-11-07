@@ -1,6 +1,6 @@
 #from ontology.interop.System.Runtime import *
 from ontology.interop.System.Runtime import Log
-from ontology.builtins import print, Exception, throw_if_null
+from ontology.builtins import print, Exception, throw_if_null, remove
 
 def Require(condition):
     #ontology.interop.System.Runtime.Log("hello steven")
@@ -56,7 +56,7 @@ def Revert():
     but it will be changed to `ffffffffffffffffffffff` since opcode THROW doesn't
     work, so, revert by calling unused opcode.
     """
-    raise Exception()
+    Exception()
 
 
 #def Main(operation, args):
@@ -85,7 +85,7 @@ def calculate1():
     res = Add(a,Sub(Mul(b, tmp1),b))
     throw_if_null(res == 3)
 
-#def testlistremove(): # do not support list remove. only support map
-#    m = {"name":"steven", "age":31, "company":"onchain", "sex":"male"}
-#    m.remove("company")
-#    throw_if_null(m["name"] == "steven")
+def testlistremove(): # do not support list remove. only support map
+    m = {"name":"steven", "age":31, "company":"onchain", "sex":"male"}
+    m.remove("company")
+    throw_if_null(m["name"] == "steven")

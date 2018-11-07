@@ -93,5 +93,3 @@ def main():
 
     assert(t == 15)
     print("bool test ok")
-
-
