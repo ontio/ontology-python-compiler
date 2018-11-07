@@ -855,7 +855,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                 sys_name =  'System.Runtime.Notify'
                 syscall_name =sys_name.encode('utf-8')
             else:
-                sys_name =  func_desc.blong_module_name + func_desc.name
+                sys_name =  func_desc.blong_module_name +'.' + func_desc.name
                 syscall_name = sys_name.replace(ONTOLOGY_SC_FRAMEWORK, '').encode('utf-8')
 
             length = len(syscall_name)
