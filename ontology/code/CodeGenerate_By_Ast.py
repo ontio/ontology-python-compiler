@@ -715,12 +715,15 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.Emit_Token(VMOp.INVERT, node)
     def visit_UnaryOp(self, node):
         self.current_node = node
+        if type(node.op).__name__ in ['USub', 'UAdd']:
+            self.codegencontext.tokenizer.Emit_Integer(0 , node)
         self.visit(node.operand)
         self.visit(node.op)
+
     def visit_UAdd(self, node):
-        assert(False)
+        self.codegencontext.tokenizer.Emit_Token(VMOp.ADD, node)
     def visit_USub(self, node):
-        assert(False)
+        self.codegencontext.tokenizer.Emit_Token(VMOp.SUB, node)
 
     def visit_Dict(self, node):
         self.current_node = node
