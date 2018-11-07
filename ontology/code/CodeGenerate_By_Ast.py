@@ -1214,6 +1214,23 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
     def visit_Attribute(self, node):
         assert(False)
+
+    def visit_IfExp(self, node):
+        orelse_label    = self.codegencontext.NewLabel()
+        orelse_positon  = orelse_label.to_bytes(2, 'little', signed=True)
+        end_label       = self.codegencontext.NewLabel()
+        end_position    = end_label.to_bytes(2, 'little', signed=True)
+
+        self.visit(node.test)
+        self.codegencontext.tokenizer.Emit_Token(VMOp.JMPIFNOT, node, orelse_positon)
+
+        self.visit(node.body)
+        self.codegencontext.tokenizer.Emit_Token(VMOp.JMP, node, end_position)
+
+        self.codegencontext.SetLabel(orelse_label, self.codegencontext.pc + 1)
+        self.visit(node.orelse)
+
+        self.codegencontext.SetLabel(end_label, self.codegencontext.pc + 1)
         
 class FuncDescription:
     def __init__(self, name, label, node, isyscall, filepath, module_name, is_builtin):
