@@ -1,4 +1,4 @@
-import ontology.builtins
+from ontology.builtins import append
 
 def list_remove_elt(l, elt):
     nl = []

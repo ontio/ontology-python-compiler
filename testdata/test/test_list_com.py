@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from ontology.builtins import range, list, print, append, len
+from ontology.builtins import range, print, append, len
 
 def Main():
     #a = [[x, y] for x in range(10) if x % 2 if x > 3 for y in range(10) if y > 7 if y != 8  ]

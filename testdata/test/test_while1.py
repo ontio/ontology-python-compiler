@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from ontology.builtins import range, list, print
+from ontology.builtins import range, print
 
 def Main():
     i = 0

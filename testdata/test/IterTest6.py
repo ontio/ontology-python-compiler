@@ -1,4 +1,4 @@
-from ontology.builtins import range, list, print, throw_if_null
+from ontology.builtins import range, print, throw_if_null
 
 
 def Main():

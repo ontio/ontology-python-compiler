@@ -342,6 +342,9 @@ class Visitor_Of_FuncDecl(ast.NodeVisitor):
         list_func_imported = []
         for alias in node.names:
             list_func_imported.append(alias.name)
+            if alias.name == 'range' and node.module == 'ontology.builtins':
+                # range depend on list
+                list_func_imported.append('list')
             if alias.asname != None:
                 if self.visited_module == OwnMainModule: 
                     Print_Not_Support(self.codegencontext.main_file_path, node, "from ... import .. as ..")
@@ -529,6 +532,9 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.Emit_LoadLocal(index_position, node)
         self.codegencontext.tokenizer.Emit_Token(VMOp.PICKITEM, node)
         #target_position = self.func_desc.Get_LocalStackPosition(ForIndexPrefix + str(self.func_desc.for_position))
+        assert(type(node.target).__name__ == 'Name')
+        # acctually here can visit node.target.
+        assert(type(node.target.ctx).__name__ == 'Store')
         target_position = self.func_desc.Get_LocalStackPosition(node.target.id) # here Ont only support Name taget. so here just ref it
         self.codegencontext.tokenizer.Emit_StoreLocal(target_position, node.target)
 
