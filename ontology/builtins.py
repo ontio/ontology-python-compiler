@@ -141,12 +141,6 @@ def max(x1, x2):
 def concat(str1, str2):
     pass
 
-def take(array, count):
-    pass
-
-def substr(array, index, count):
-    pass
-
 # no return xxx.
 def reverse(array):
     pass

@@ -243,7 +243,7 @@ class Visitor_Of_Global(ast.NodeVisitor):
                 assert(len(node.targets) == 1)
                 assert(type(node.targets[0]).__name__ == 'Name')
                 register_func_name = node.targets[0].id
-                newfunc = FuncDescription(register_func_name, None, None, True, None, None, False)
+                newfunc = FuncDescription(register_func_name, None, node.targets[0], True, self.codegencontext.main_file_path, OwnMainModule, False)
                 self.codegencontext.funcscope[newfunc.name] = newfunc
                 args = node.value.args
                 newfunc.arg_num = len(args) - 1
@@ -259,7 +259,7 @@ class Visitor_Of_Global(ast.NodeVisitor):
                 assert(len(node.targets) == 1)
                 assert(type(node.targets[0]).__name__ == 'Name')
                 register_func_name = node.targets[0].id
-                newfunc = FuncDescription(register_func_name, None, None, True, None, None, False)
+                newfunc = FuncDescription(register_func_name, None, node.target[0], True, self.codegencontext.main_file_path, OwnMainModule, False)
                 self.codegencontext.funcscope[newfunc.name] = newfunc
                 args = node.value.args
                 newfunc.arg_num = len(args) - 1
@@ -363,7 +363,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.global_converting = is_for_global
 
     def Get_FuncDesc(self, funcname, node):
-        return self.codegencontext.Get_FuncDesc(funcname, node)
+        return self.codegencontext.Get_FuncDesc(funcname, node, self.func_desc.filepath)
 
     # so when get a bug need check in this func. is there any node should transfered do not transfer.
     def generic_visit(self, node):
@@ -429,7 +429,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             self.Print_DoNot_Support("defaults")
 
         for arg in node.args:
-            position = self.func_desc.NewLocal(arg.arg)
+            position = self.func_desc.NewLocal(arg.arg, arg)
             self.codegencontext.tokenizer.Emit_StoreLocal(position, arg)
 
         self.Convert_Gloabal()
@@ -444,6 +444,9 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_Assign(self, node):
         self.current_node = node
         self.visit(node.value)
+
+        if type(node.value).__name__ == 'Call' and type(node.value.func).__name__ == 'Name' and (node.value.func.id == 'RegisterAppCall' or node.value.func.id == 'RegisterAction'):
+            return
 
         for target in node.targets:
             if len(node.targets) > 1:
@@ -792,7 +795,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             self.Print_DoNot_Support("Call function with keywords")
 
         funcname = node.func.id
-        func_desc = self.codegencontext.funcscope[funcname]
+        func_desc = self.Get_FuncDesc(funcname, node)
 
         # prepare args. note. concat, take, has_key, substr do not need reverse
         if funcname in ['concat', 'take', 'has_key', 'substr']:
@@ -903,10 +906,11 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
     def visit_Name(self, node):
         self.current_node = node
-        name_position = self.func_desc.Get_LocalStackPosition(node.id)
         if type(node.ctx).__name__ == 'Load':
+            name_position = self.func_desc.Read_LocalStackPosition(node.id, node)
             self.codegencontext.tokenizer.Emit_LoadLocal(name_position, node)
         elif type(node.ctx).__name__ == 'Store':
+            name_position = self.func_desc.Get_LocalStackPosition(node.id)
             self.codegencontext.tokenizer.Emit_StoreLocal(name_position, node)
         else:
             assert("Wrong Name ctx type")
@@ -973,6 +977,11 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             self.codegencontext.tokenizer.Emit_Integer(1, node)
         elif node.value == False:
             self.codegencontext.tokenizer.Emit_Integer(0, node)
+        elif node.value == None:
+            str_bytes = 'N'.encode('utf-8')
+            self.codegencontext.tokenizer.Emit_Data(str_bytes, node)
+            self.codegencontext.tokenizer.Emit_Integer(0, node)
+            self.codegencontext.tokenizer.Emit_Token(VMOp.LEFT, node)
         else:
             Print_DoNot_Support(self.func_desc, node, "such NameConstant")
 
@@ -1133,13 +1142,13 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_Tuple(self, node):
         assert(False)
 
-    def visit_IfExpr(self, node):
-        assert(False)
-
     def visit_Lambda(self, node):
         assert(False)
 
     def visit_Set(self, node):
+        assert(False)
+
+    def visit_Yield(self, node):
         assert(False)
 
     def visit_Repr(self, node):
@@ -1274,9 +1283,9 @@ class FuncDescription:
         #self.arg_num            = visitor_stacksize.arg_num
         #print("Function %s. stack_size %d  self.arg_num %d" %(self.name, self.stack_size, self.arg_num))
 
-    def NewLocal(self, name):
+    def NewLocal(self, name, node = None):
         if name in self.local_map.keys():
-            print("var %s already defined" %(name))
+            print("[Compile ERROR: file %s. line %d]. Variable '%s' already defined." % (self.filepath, node.lineno, name))
             exit()
         self.local_map[name] = self.local_num
         self.local_num += 1
@@ -1287,7 +1296,13 @@ class FuncDescription:
             return self.local_map[name]
         else:
             return self.NewLocal(name)
-            
+
+    def Read_LocalStackPosition(self, name, node):
+        if name in self.local_map.keys():
+            return self.local_map[name]
+        else:
+            print("[Compile ERROR: file %s. line %d]. Variable '%s' used befored defined." % (self.filepath, node.lineno, name))
+            exit()
 
 class CodeGenContext:
     def __init__(self, SrcPath):
@@ -1574,11 +1589,17 @@ class CodeGenContext:
         funcast = node
         label   = self.NewLabel()
         newfunc = FuncDescription(name ,label, funcast, isyscall, filepath, module_name, is_builtin)
+        if name in self.funcscope.keys():
+            oldfunc = self.funcscope[name]
+            if (not (oldfunc.isyscall or oldfunc.is_builtin)) and name != 'range':
+                print("[ERROR: file %s. line %d]. Function '%s' refined before at line %d." % (filepath, node.lineno, name, oldfunc.src_lineno ))
+                exit()
+
         self.funcscope[newfunc.name] = newfunc
 
-    def Get_FuncDesc(self, funcname, node):
+    def Get_FuncDesc(self, funcname, node, filepath):
         if funcname not in self.funcscope.keys():
-            print("[ERROR: line %d]. Function '%s' do not defined or imported." % (node.lineno, funcname))
+            print("[ERROR: file %s. line %d]. Function '%s' do not defined or imported." % (filepath, node.lineno, funcname))
             exit()
         return self.funcscope[funcname]
 
