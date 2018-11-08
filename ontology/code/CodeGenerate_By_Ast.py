@@ -706,7 +706,8 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_Is(self, node):
         self.codegencontext.tokenizer.Emit_Token(VMOp.EQUAL, node)
     def visit_IsNot(self, node):
-        self.codegencontext.tokenizer.Emit_Token(VMOp.NUMNOTEQUAL, node)
+        self.codegencontext.tokenizer.Emit_Token(VMOp.EQUAL, node)
+        self.codegencontext.tokenizer.Emit_Token(VMOp.NOT, node)
     def visit_In(self, node):
         self.Print_DoNot_Support("in")
     def visit_NotIn(self, node):
