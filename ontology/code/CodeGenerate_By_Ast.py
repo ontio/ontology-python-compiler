@@ -40,9 +40,11 @@ def Print_Not_Support(filepath, node, message):
     exit()
 
 def Print_Error_global(filepath, node , message):
-    print("Compiler ERROR. File: %s .Line: %d. %s" %(filepath, node.lineno, message))
+    print("[Compiler ERROR. File: %s .Line: %d.] %s" %(filepath, node.lineno, message))
     exit()
 
+def Print_Warning_global(filepath, node , message):
+    print("[Compiler WARNING. File: %s .Line: %d.] %s" %(filepath, node.lineno, message))
 
 class ReWrite_CTX_STORE_TO_LOAD(ast.NodeTransformer):
     def __init__(self, func_desc):
@@ -80,6 +82,26 @@ class ReWrite_CTX_LOAD_TO_STORE(ast.NodeTransformer):
         assert(type(node.ctx).__name__ == 'Load')
         node.ctx = ast.Store()
         return node
+
+class CVersion_Visitor(ast.NodeVisitor):
+    def __init__(self, codegencontext):
+        self.Cversion = None
+        self.codegencontext = codegencontext
+
+    def generic_visit(self, node):
+        if hasattr(node, 'lineno') and node.lineno == 1:
+            if type(node).__name__ == 'Assign' and  len(node.targets) == 1 and type(node.targets[0]).__name__ == 'Name' and type(node.value).__name__ ==  'Str':
+                self.Cversion = node.value.s
+                if self.Cversion != __version__:
+                    Print_Warning_global(self.codegencontext.main_file_path, node, "Suggest Place 'Cversion = '%s'' at 1st line of SmartContract." %(__version__))
+            else:
+                Print_Warning_global(self.codegencontext.main_file_path, node, "Suggest Place 'Cversion = '%s'' at 1st line of SmartContract" %(__version__))
+            return
+
+        Print_Warning_global(self.codegencontext.main_file_path, node, "Suggest Place 'Cversion = '%s'' at 1st line of SmartContract" %(__version__))
+
+    def visit_Module(self, node):
+        self.generic_visit(node.body[0])
 
 class FuncVisitor_Of_AnalyzeReturnValue(ast.NodeVisitor):
     def __init__(self, func_desc):
@@ -1521,6 +1543,9 @@ class CodeGenContext:
                 assert(self.funcscope[i].is_register_call)
 
     def StartCodeGenerate(self):
+        # Cversion check.
+        self.Cversion_check()
+
         # Bring Main into funscope first for the entry point. And bring all func into funcscope. Include Import
         main_func_node = self.ResolveFuncDecl(OwnMainModule)
 
@@ -1554,6 +1579,10 @@ class CodeGenContext:
         #self.Dump_Asm()
         self.Generate_Function_Local_Map(self.main_file_path, main_desc)
         self.Generate_Abi_list(main_func_node)
+
+    def Cversion_check(self):
+        Cversion_vistior = CVersion_Visitor(self)
+        Cversion_vistior.visit(self.main_astree)
 
     # Convert Func
     def ConvertFuncDecl(self, func_desc):

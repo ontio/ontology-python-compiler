@@ -1,3 +1,4 @@
+Cversion = '2.0.0'
 #from ontology.interop.System.Runtime import *
 from ontology.interop.System.Runtime import Log
 from ontology.builtins import print, Exception, throw_if_null, remove
