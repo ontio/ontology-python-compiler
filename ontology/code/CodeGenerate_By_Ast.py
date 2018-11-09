@@ -21,6 +21,8 @@ BUILTIN_AND_SYSCALL_LABEL_ADDR  = -2
 ONE_LINE_EXPR_SUPPORT_AST_TYPE   = ['Pass', 'Str']
 # xxx. Migrate have return value acctually.
 WITHOUT_RETURN_BUILTINSYSCALL = ['print', 'throw_if_null', 'breakpoint', 'Notify', 'Put','Destory', 'Delete', 'Exception']
+# all these three List_Attr_func assumed no return value.
+List_Attr_func = ['append', 'remove', 'reverse']
 
 def print_location():
     f_frame = sys._getframe().f_back
@@ -797,8 +799,8 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         assert(type(attr.ctx).__name__ == 'Load')
         func_name = attr.attr
         func_desc = self.Get_FuncDesc(func_name, node)
-        if func_name != 'append' and func_name != 'remove':
-            self.Print_Error("do not support any other Attribute call other than 'append' or 'remove'" )
+        if func_name not in List_Attr_func:
+            self.Print_Error("do not support any other Attribute call other than 'append' or 'remove' or 'reverse'" )
         self.visit(attr.value)
 
         if  func_desc.arg_num != len(node.args):
@@ -825,6 +827,9 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
         funcname = node.func.id
         func_desc = self.Get_FuncDesc(funcname, node)
+
+        if funcname in List_Attr_func:
+            self.Print_Error("function '%s' is list attribute call. can not call directly." %(funcname))
 
         # prepare args. note. concat, take, has_key, substr do not need reverse
         if funcname in ['concat', 'take', 'has_key', 'substr']:
@@ -1038,7 +1043,8 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                 assert(type(attr).__name__ == 'Attribute')
                 assert(type(attr.ctx).__name__ == 'Load')
                 func_name = attr.attr
-                if func_name != 'append' and func_name != 'remove':
+                # all func in List_Attr_func treated ast no return value.
+                if func_name not in List_Attr_func:
                     self.Print_DoNot_Support("dynamic funcname")
             else:
                 self.Print_DoNot_Support("dynamic funcname")
@@ -1073,15 +1079,13 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         array_load.ctx   = ast.Load()
         self.func_desc.list_comp_position += 1
 
+        # construct Attrubute.
+        call_attr       = ast.Attribute(value = array_load, attr = 'append', ctx = ast.Load(), lineno = node.lineno, col_offset = node.col_offset)
+
         # construct append(element)
         node_call       = ast.Call()
-        call_func       = ast.Name()
-        call_func.id    = 'append'
-        call_func.ctx   = ast.Load()
-        call_func.lineno = node.lineno
-        call_func.col_offset = node.col_offset
         call_args       = [node.elt]
-        node_call.func  = call_func
+        node_call.func  = call_attr
         node_call.args  = call_args
         node_call.keywords = []
         node_call.starargs = None

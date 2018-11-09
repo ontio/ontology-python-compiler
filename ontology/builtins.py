@@ -141,8 +141,7 @@ def max(x1, x2):
 def concat(str1, str2):
     pass
 
-# no return xxx.
-def reverse(array):
+def reversed(array):
     pass
 
 def list(length):
@@ -160,8 +159,12 @@ def bytes(str0):
 def state(*args):
     pass
 
+# attr func
 def append(arg):
     pass
 
 def remove(arg):
+    pass
+
+def reverse():
     pass

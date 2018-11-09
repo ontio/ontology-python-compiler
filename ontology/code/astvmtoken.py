@@ -156,6 +156,9 @@ class AstVMTokenizer(object):
         elif op == 'verify_signature':
             return self.Emit_Token(VMOp.VERIFY, node)
         elif op == 'reverse':
+            # no value returned. only used in attr call
+            return self.Emit_Token(VMOp.REVERSE, node)
+        elif op == 'reversed':
             # so dump here to return a reversed value.
             self.Emit_Token(VMOp.DUP, node)
             return self.Emit_Token(VMOp.REVERSE, node)
