@@ -28,25 +28,20 @@ def print_location():
     f_frame = sys._getframe().f_back
     print("Location: ",f_frame.f_code.co_filename, f_frame.f_lineno, f_frame.f_code.co_name)
 
-
 def Print_DoNot_Support(func_desc, node, message):
-    print("Compiler ERROR. File: %s Function: %s .Line: %d. Ontology Python Compiler do not support %s" %(func_desc.filepath, func_desc.name, node.lineno, message))
-    exit()
+    raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. Ontology Python Compiler do not support %s" %(func_desc.filepath, func_desc.name, node.lineno, message))
 
 def Print_Error(func_desc, node , message):
-    print("Compiler ERROR. File: %s Function: %s .Line: %d. %s" %(func_desc.filepath, func_desc.name, node.lineno, message))
-    exit()
+    raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. %s" %(func_desc.filepath, func_desc.name, node.lineno, message))
 
 def Print_Not_Support(filepath, node, message):
-    print("Compiler ERROR. File: %s .Line: %d. Ontology Python Compiler do not support %s" %(filepath, node.lineno, message))
-    exit()
+    raise Exception("[Compiler ERROR. File: %s. Line: %d]. Ontology Python Compiler do not support %s" %(filepath, node.lineno, message))
 
 def Print_Error_global(filepath, node , message):
-    print("[Compiler ERROR. File: %s .Line: %d.] %s" %(filepath, node.lineno, message))
-    exit()
+    raise Exception("[Compiler ERROR. File: %s. Line: %d]. %s" %(filepath, node.lineno, message))
 
 def Print_Warning_global(filepath, node , message):
-    print("[Compiler WARNING. File: %s .Line: %d.] %s" %(filepath, node.lineno, message))
+    print("[Compiler WARNING. File: %s. Line: %d.] %s" %(filepath, node.lineno, message))
 
 class ReWrite_CTX_STORE_TO_LOAD(ast.NodeTransformer):
     def __init__(self, func_desc):
@@ -112,31 +107,29 @@ class FuncVisitor_Of_AnalyzeReturnValue(ast.NodeVisitor):
         self.already_visited    = False
         self.visit_returned       = False
 
-    def Print_DoNot_Support(self, message):
-        print("Compiler ERROR. File: %s Function: %s Line: %d . Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, self.current_node.lineno, message))
-        exit()
+    def Print_DoNot_Support(self, node ,message):
+        raise Exception("[Compiler ERROR. File: %s in function: %s Line: %d]. Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
-    def Print_Error(self, message):
-        print("Compiler ERROR. File: %s Function: %s Line: %d. %s" %(self.func_desc.filepath, self.func_desc.name, self.current_node.lineno, message))
-        exit()
+    def Print_Error(self, node, message):
+        raise Exception("[Compiler ERROR. File: %s in function: %s Line: %d]. %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
         
     def visit_FunctionDef(self, node):
         self.current_node = node
         if self.already_visited :
-            self.Print_DoNot_Support("function define in function")
+            self.Print_DoNot_Support(node, "function define in function.")
         self.already_visited = True
 
         if node.decorator_list != []:
-            self.Print_DoNot_Support("decorator")
+            self.Print_DoNot_Support(node, "decorator.")
         self.generic_visit(node)
 
     def visit_Return(self, node):
         self.current_node = node
         if self.func_desc.have_return_value and node.value == None:
-            self.Print_DoNot_Support("return value before. but here returns None. will get error" )
+            self.Print_Error(node, "return value before. but here returns None. will get error." )
 
         if self.visit_returned and (not self.func_desc.have_return_value) and node.value != None:
-            self.Print_DoNot_Support("return None before. but here returns value. will get error")
+            self.Print_Error(node, "return None before. but here returns value. will get error.")
 
         if node.value != None :
             self.func_desc.have_return_value = True
@@ -185,18 +178,20 @@ class FuncVisitor_Of_StackSize(ast.NodeVisitor):
         self.current_node = node
         ast.NodeVisitor.generic_visit(self, node)
 
-    def Print_DoNot_Support(self, message):
-        print("Compiler ERROR. File: %s Function: %s Line: %d . Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, self.current_node.lineno, message))
-        exit()
+    def Print_DoNot_Support(self, node, message):
+        raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+
+    def Print_Error(self, node, message):
+        raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
     def visit_FunctionDef(self, node):
         self.current_node = node
         if self.already_visited :
-            self.Print_DoNot_Support("function define in function")
+            self.Print_DoNot_Support(node, "function define in function.")
         self.already_visited = True
 
         if node.decorator_list != []:
-            self.Print_DoNot_Support("decorator")
+            self.Print_DoNot_Support(node, "decorator.")
 
         self.generic_visit(node)
 
@@ -218,10 +213,10 @@ class FuncVisitor_Of_StackSize(ast.NodeVisitor):
             pass
         else:
             if node.vararg != None:
-                self.Print_DoNot_Support("vararg")
+                self.Print_DoNot_Support(node, "vararg.")
 
             if node.defaults != []:
-                self.Print_DoNot_Support("defaults")
+                self.Print_DoNot_Support(node, "defaults.")
 
         self.func_desc.arg_num    = len(node.args)
         self.arg_num    = len(node.args)
@@ -275,15 +270,14 @@ class Visitor_Of_Global(ast.NodeVisitor):
                 new_app_call = RegisterAppCall(register_func_name, args)
                 assert(newfunc.arg_num >= 0)
                 if register_func_name in self.codegencontext.register_appcall.keys():
-                    print("ERROR: %s registered before" %(register_func_name))
-                    exit()
+                    Print_Error_global(self.codegencontext.main_file_path, node, "%s registered before." %(register_func_name))
                 self.codegencontext.register_appcall[register_func_name] = new_app_call
                 return
             elif self.codegencontext.funcscope[node.value.func.id].isyscall and node.value.func.id == 'RegisterAction':
                 assert(len(node.targets) == 1)
                 assert(type(node.targets[0]).__name__ == 'Name')
                 register_func_name = node.targets[0].id
-                newfunc = FuncDescription(register_func_name, None, node.target[0], True, self.codegencontext.main_file_path, OwnMainModule, False)
+                newfunc = FuncDescription(register_func_name, None, node.targets[0], True, self.codegencontext.main_file_path, OwnMainModule, False)
                 self.codegencontext.funcscope[newfunc.name] = newfunc
                 args = node.value.args
                 newfunc.arg_num = len(args) - 1
@@ -291,8 +285,7 @@ class Visitor_Of_Global(ast.NodeVisitor):
                 assert(newfunc.arg_num >= 0)
                 newaction = NotifyAction(register_func_name, args)
                 if register_func_name in self.codegencontext.register_action.keys():
-                    print("ERROR: %s registered before" %(register_func_name))
-                    exit()
+                    Print_Error_global(self.codegencontext.main_file_path, node, "%s registered before." %(register_func_name))
                 self.codegencontext.register_action[register_func_name] = newaction
                 return
             else:
@@ -336,8 +329,7 @@ class Visitor_Of_FuncDecl(ast.NodeVisitor):
     def visit_FunctionDef(self, node):
         if node.name == 'main' or node.name == 'Main':
             if not self.is_main_module:
-                print("%s was Imported. Can not have Main func" %(self.visited_module))
-                exit()
+                Print_Error_global(self.module_file_path , node, "%s was Imported. Can not have Main func other the main file of your project." %(self.visited_module))
 
             self.main_func_node = node
             return
@@ -370,10 +362,7 @@ class Visitor_Of_FuncDecl(ast.NodeVisitor):
                 # range depend on list
                 list_func_imported.append('list')
             if alias.asname != None:
-                if self.visited_module == OwnMainModule: 
-                    Print_Not_Support(self.codegencontext.main_file_path, node, "from ... import .. as ..")
-                else:
-                    Print_Not_Support(self.module_file_path, node, "from ... import .. as ..")
+                Print_Not_Support(self.module_file_path,  node,  "from ... import .. as ..")
 
         self.codegencontext.ResolveFuncDecl(node.module, list_func_imported)
 
@@ -400,21 +389,20 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
     def visit_ClassDef(self, node):
         self.current_node = node
-        self.Print_DoNot_Support("Class def")
+        self.Print_DoNot_Support(node, "Class def.")
 
-    def Print_DoNot_Support(self, message):
-        print("Compiler ERROR. [File: %s Function: %s ] Line: %d . Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, self.current_node.lineno, message))
-        exit()
+    def Print_DoNot_Support(self, node ,message):
+        raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
-    def Print_Error(self, message):
-        print("Compiler ERROR. File: %s Function: %s Line: %d. %s" %(self.func_desc.filepath, self.func_desc.name, self.current_node.lineno, message))
-        exit()
+    def Print_Error(self, node, message):
+        raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
     def visit_Module(self, node):
         self.current_node = node
         if not self.is_for_global:
-            print("Compiler Error. Impossible get Module in Function decl.")
-            exit()
+            self.Print_Error(node, "Impossible get Module in Function decl.")
+            assert(False)
+
         self.generic_visit(node)
 
     def visit_FunctionDef(self, node):
@@ -422,7 +410,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         if self.is_for_global:
             return
         if self.already_visited:
-            self.Print_DoNot_Support("Function define in function")
+            self.Print_DoNot_Support("Function define in function.")
 
         self.already_visited = True
 
@@ -446,14 +434,14 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_arguments(self, node):
         self.current_node = node
         if self.is_for_global:
-            print("Compiler Bug. Global can not have argument")
-            exit()
+            self.Print_Error(node, "Compiler Bug. Global can not have argument.")
+            assert(False)
 
         if node.vararg != None:
-            self.Print_DoNot_Support("vararg")
+            self.Print_DoNot_Support(node, "vararg.")
 
         if node.defaults != []:
-            self.Print_DoNot_Support("defaults")
+            self.Print_DoNot_Support(node, "defaults.")
 
         for arg in node.args:
             position = self.func_desc.NewLocal(arg.arg, arg)
@@ -509,10 +497,10 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.current_node = node
         # assert the prequisite
         if type(node.target).__name__ != 'Name':
-            self.Print_DoNot_Support("multi iter")
+            self.Print_DoNot_Support(node, "multi iter.")
 
         if node.orelse != []:
-            self.Print_DoNot_Support("for orelse")
+            self.Print_DoNot_Support(node, "for orelse.")
 
         self.is_in_loop = True
         # alloc Label.
@@ -586,7 +574,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_While(self, node):
         self.current_node = node
         if node.orelse !=[]:
-            self.Print_DoNot_Support("While orelse")
+            self.Print_DoNot_Support(node, "While orelse.")
         # alloc Label.
         self.is_in_loop = True
         while_start_label = self.codegencontext.NewLabel()
@@ -623,7 +611,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_Break(self, node):
         self.current_node = node
         if not self.is_in_loop:
-            self.Print_Error("can not break in non loop")
+            self.Print_Error(node, "can not break in non loop.")
         assert(len(self.latest_loop_break_label) == 2)
         # jmp to the end label
         target_label    = self.latest_loop_break_label[1]
@@ -633,7 +621,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_Continue(self, node):
         self.current_node = node
         if not self.is_in_loop:
-            self.Print_Error("can not continue in non loop")
+            self.Print_Error(node, "can not continue in non loop.")
         assert(len(self.latest_loop_break_label) == 2)
         # jmp to the end label
         target_label    = self.latest_loop_break_label[0]
@@ -692,7 +680,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_BitAnd(self, node):
         self.codegencontext.tokenizer.Emit_Token(VMOp.AND, node)
     def visit_FloorDiv(self, node):
-        assert(False)
+        raise Exception("[Compiler ERROR. File: %s. in function: %s.]. Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, "FloorDiv"))
 
     def visit_BoolOp(self, node):
         assert(len(node.values) >= 2)
@@ -739,9 +727,10 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.Emit_Token(VMOp.EQUAL, node)
         self.codegencontext.tokenizer.Emit_Token(VMOp.NOT, node)
     def visit_In(self, node):
-        self.Print_DoNot_Support("in")
+        raise Exception("[Compiler ERROR. File: %s. in function: %s.]. Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, "\'in\'"))
+
     def visit_NotIn(self, node):
-        self.Print_DoNot_Support("not in")
+        raise Exception("[Compiler ERROR. File: %s. in function: %s.]. Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, "\'not in\'"))
 
     def visit_Not(self, node):
         self.codegencontext.tokenizer.Emit_Token(VMOp.NOT, node)
@@ -776,14 +765,14 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_Assert(self, node):
         self.current_node = node
         if node.msg != None:
-            self.Print_DoNot_Support("Assert with message")
+            self.Print_DoNot_Support(node, "Assert with message.")
         self.visit(node.test)
         self.codegencontext.tokenizer.Emit_Token(VMOp.THROWIFNOT, node)
 
     def visit_List(self, node):
         self.current_node = node
         if type(node.ctx).__name__ != 'Load':
-            self.Print_DoNot_Support((type(node.ctx).__name__) + "type List")
+            self.Print_DoNot_Support(node, (type(node.ctx).__name__) + "type List.")
         else:
             for expr in node.elts:
                 self.visit(expr)
@@ -800,18 +789,18 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         func_name = attr.attr
         func_desc = self.Get_FuncDesc(func_name, node)
         if func_name not in List_Attr_func:
-            self.Print_Error("do not support any other Attribute call other than 'append' or 'remove' or 'reverse'" )
+            self.Print_Error(node, "do not support any other Attribute call other than 'append' or 'remove' or 'reverse'" )
         self.visit(attr.value)
 
         if  func_desc.arg_num != len(node.args):
-            self.Print_Error("function '%s' need %d args. But you passed %d args" %(func_name, func_desc.arg_num,len(node.args)))
+            self.Print_Error(node, "function '%s' need %d args. But you passed %d args" %(func_name, func_desc.arg_num,len(node.args)))
 
         for arg in reversed(node.args):
             self.visit(arg)
 
         vmtoken = self.codegencontext.tokenizer.Emit_Builtins(func_name, node)
         if vmtoken == None:
-            self.Print_DoNot_Support("builtin %s" %(funcname))
+            self.Print_DoNot_Support(node, "builtin '%s'." %(funcname))
 
     def visit_Call(self, node):
         self.current_node = node
@@ -820,16 +809,16 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             return
 
         if type(node.func).__name__ != 'Name' or type(node.func.ctx).__name__ != 'Load':
-            self.Print_DoNot_Support("expr func")
+            self.Print_DoNot_Support(node, type(node.func).__name__ + "type func call.")
 
         if node.keywords != []:
-            self.Print_DoNot_Support("Call function with keywords")
+            self.Print_DoNot_Support(node, "Call function with keywords.")
 
         funcname = node.func.id
         func_desc = self.Get_FuncDesc(funcname, node)
 
         if funcname in List_Attr_func:
-            self.Print_Error("function '%s' is list attribute call. can not call directly." %(funcname))
+            self.Print_Error(node, "function '%s' is list attribute call. can not call directly." %(funcname))
 
         # prepare args. note. concat, take, has_key, substr do not need reverse
         if funcname in ['concat', 'take', 'has_key', 'substr']:
@@ -845,7 +834,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                 pass
             else:
                 if  func_desc.arg_num != len(node.args):
-                    self.Print_Error("Function %s Need %d args. but you passed %d args" %(funcname, func_desc.arg_num,len(node.args)))
+                    self.Print_Error(node, "Function '%s' Need '%d' args. but you passed '%d' args" %(funcname, func_desc.arg_num,len(node.args)))
             for arg in reversed(node.args):
                 self.visit(arg)
 
@@ -865,7 +854,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                 return
             vmtoken = self.codegencontext.tokenizer.Emit_Builtins(funcname, node)
             if vmtoken == None:
-                self.Print_DoNot_Support("builtin %s" %(funcname))
+                self.Print_DoNot_Support(node, "builtin '%s'." %(funcname))
             return
         else: 
             assert(func_desc.isyscall)
@@ -959,13 +948,13 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             # note. here due to support str slice. how ever python can not difference the list and str by the node.value. so only can support one type slice.
             elif type(node.slice).__name__ == 'Slice':
                 if node.slice.step != None:
-                    self.Print_DoNot_Support("slice with step")
+                    self.Print_DoNot_Support(node, "slice with step.")
 
                 if node.slice.upper != None:
                     self.visit(node.slice.upper)
                     uppernode = node.slice.upper
-                    if type(uppernode).__name__ == 'UnaryOp' and type(uppernode.op).__name__ == 'USub':
-                        Print_Error(self.func_desc, node ,"slice upper smaller than 0")
+                    if type(uppernode).__name__ == 'UnaryOp' and type(uppernode.op).__name__ == 'USub' and type(uppernode.operand).__name__ == 'Num':
+                        self.Print_Error(node, "slice upper smaller than 0.")
                 else:
                     self.codegencontext.tokenizer.Emit_Token(VMOp.DUP, node)
                     self.codegencontext.tokenizer.Emit_Token(VMOp.ARRAYSIZE, node)
@@ -973,14 +962,14 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                 if node.slice.lower != None:
                     self.visit(node.slice.lower)
                     lowernode = node.slice.lower
-                    if type(lowernode).__name__ == 'UnaryOp' and type(lowernode.op).__name__ == 'USub':
-                        Print_Error(self.func_desc, node ,"slice lower smaller than 0")
+                    if type(lowernode).__name__ == 'UnaryOp' and type(lowernode.op).__name__ == 'USub' and type(lowernode.operand).__name__ == 'Num':
+                        self.Print_Error(node ,"slice lower smaller than 0.")
                 else:
                     self.codegencontext.tokenizer.Emit_Integer(0, node)
 
                 self.codegencontext.tokenizer.Emit_Slice(node)
             else:
-                self.Print_DoNot_Support("Subscript such slice")
+                self.Print_DoNot_Support(node, "Subscript such slice.")
 
         elif type(node.ctx).__name__ == 'Store':
             if type(node.slice).__name__ == 'Index':
@@ -989,7 +978,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                 self.codegencontext.tokenizer.Emit_Token(VMOp.ROT, node)
                 self.codegencontext.tokenizer.Emit_Token(VMOp.SETITEM, node)
             else:
-                self.Print_DoNot_Support("Subscript Slice Assgin")
+                self.Print_DoNot_Support(node, "Subscript Slice Assgin.")
         else:
             assert("Wrong Name ctx type")
 
@@ -1017,7 +1006,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             self.codegencontext.tokenizer.Emit_Integer(0, node)
             self.codegencontext.tokenizer.Emit_Token(VMOp.LEFT, node)
         else:
-            Print_DoNot_Support(self.func_desc, node, "such NameConstant")
+            self.Print_DoNot_Support(node, "such NameConstant.")
 
     def visit_Index(self, node):
         self.current_node = node
@@ -1037,7 +1026,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                         self.codegencontext.tokenizer.Emit_Token(VMOp.DROP, node)
                 # here hypothesis all buildins and syscall other than conditon will return a value.
                 elif not (funcname in WITHOUT_RETURN_BUILTINSYSCALL or funcname in self.codegencontext.register_action.keys()):
-                    self.Print_DoNot_Support("Builtins or syscall %s call with no value assigned" %(funcname))
+                    self.Print_DoNot_Support(node, "Builtins or syscall %s call with no value assigned" %(funcname))
             elif type(node.value.func).__name__ == 'Attribute':
                 attr = node.value.func
                 assert(type(attr).__name__ == 'Attribute')
@@ -1045,9 +1034,9 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                 func_name = attr.attr
                 # all func in List_Attr_func treated ast no return value.
                 if func_name not in List_Attr_func:
-                    self.Print_DoNot_Support("dynamic funcname")
+                    self.Print_DoNot_Support(node, "dynamic funcname.")
             else:
-                self.Print_DoNot_Support("dynamic funcname")
+                self.Print_DoNot_Support(node, "dynamic funcname.")
         elif type(node.value).__name__ in ONE_LINE_EXPR_SUPPORT_AST_TYPE:
             if type(node.value).__name__ == 'Pass':
                 self.generic_visit(node)
@@ -1057,7 +1046,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             else:
                 self.generic_visit(node)
         else:
-            self.Print_DoNot_Support("Expr with one line. due to carefull handle stack stack.")
+            self.Print_DoNot_Support(node, "Expr with one line. due to carefull handle stack stack.")
 
     def compile_comprehension(self, node, body, elt):
         assert(False)
@@ -1149,43 +1138,43 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.Emit_LoadLocal(array_position, node)
 
     def visit_SetComp(self, node):
-        assert(False)
+        self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
     def visit_GeneratorExp(self, node):
-        assert(False)
+        self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
     def visit_Raise(self, node):
-        assert(False)
+        self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
     def visit_TryExcept(self, node):
-        assert(False)
+        self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
     def visit_TryFinally(self, node):
-        assert(False)
+        self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
     def visit_With(self, node):
-        assert(False)
+        self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
     def visit_Exec(self, node):
-        assert(False)
+        self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
     def visit_Global(self, node):
-        assert(False)
+        self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
     def visit_Tuple(self, node):
-        assert(False)
+        self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
     def visit_Lambda(self, node):
-        assert(False)
+        self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
     def visit_Set(self, node):
-        assert(False)
+        self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
     def visit_Yield(self, node):
-        assert(False)
+        self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
     def visit_Repr(self, node):
-        assert(False)
+        self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
     def visit_DictComp(self, node):
 
@@ -1318,8 +1307,8 @@ class FuncDescription:
 
     def NewLocal(self, name, node = None):
         if name in self.local_map.keys():
-            print("[Compile ERROR: file %s. line %d]. Variable '%s' already defined." % (self.filepath, node.lineno, name))
-            exit()
+            Print_Error_global(self.filepath, node, "Variable '%s' already defined." % (name))
+
         self.local_map[name] = self.local_num
         self.local_num += 1
         return self.local_num - 1
@@ -1334,8 +1323,7 @@ class FuncDescription:
         if name in self.local_map.keys():
             return self.local_map[name]
         else:
-            print("[Compile ERROR: file %s. line %d]. Variable '%s' used befored defined." % (self.filepath, node.lineno, name))
-            exit()
+            Print_Error_global(self.filepath, node, "Variable '%s' used before defined." % (name))
 
 class CodeGenContext:
     def __init__(self, SrcPath):
@@ -1590,6 +1578,8 @@ class CodeGenContext:
 
     # Convert Func
     def ConvertFuncDecl(self, func_desc):
+        #assert(func_desc.func_ast != None)
+        #ast.fix_missing_locations(func_desc.func_ast)
         #func_desc.Calculate_StackSize(self.global_num)
 
         # build dynamic stack first
@@ -1632,15 +1622,13 @@ class CodeGenContext:
         if name in self.funcscope.keys():
             oldfunc = self.funcscope[name]
             if (not (oldfunc.isyscall or oldfunc.is_builtin)) and name != 'range':
-                print("[ERROR: file %s. line %d]. Function '%s' refined before at line %d." % (filepath, node.lineno, name, oldfunc.src_lineno ))
-                exit()
+                raise Exception("[ERROR: file %s. line %d]. Function '%s' defined before at line %d." % (filepath, node.lineno, name, oldfunc.src_lineno ))
 
         self.funcscope[newfunc.name] = newfunc
 
     def Get_FuncDesc(self, funcname, node, filepath):
         if funcname not in self.funcscope.keys():
-            print("[ERROR: file %s. line %d]. Function '%s' do not defined or imported." % (filepath, node.lineno, funcname))
-            exit()
+            raise Exception("[ERROR: file %s. line %d]. Function '%s' do not defined or imported." % (filepath, node.lineno, funcname))
         return self.funcscope[funcname]
 
 def CodeGenerate(SrcPath):
