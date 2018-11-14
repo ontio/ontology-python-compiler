@@ -57,8 +57,15 @@ def Revert():
     but it will be changed to `ffffffffffffffffffffff` since opcode THROW doesn't
     work, so, revert by calling unused opcode.
     """
-    Exception()
+    Exception("wrong")
 
+def new_Revert():
+    """
+    Revert the transaction. The opcodes of this function is `09f7f6f5f4f3f2f1f000f0`,
+    but it will be changed to `ffffffffffffffffffffff` since opcode THROW doesn't
+    work, so, revert by calling unused opcode.
+    """
+    raise Exception("wrong")
 
 #def Main(operation, args):
 def Main():

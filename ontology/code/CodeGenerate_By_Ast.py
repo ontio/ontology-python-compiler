@@ -1149,7 +1149,16 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
     def visit_Raise(self, node):
-        self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
+        if hasattr(node, 'exc'):
+            exc = node.exc
+            #if type(exc).__name__ == 'Call' and type(exc.func).__name__ == 'Name' and type(exc.func.ctx).__name__ == 'Load' and exc.func.id == 'Exception' and exc.keywords == [] and len(exc.args) == 1 and type(exc.args[0]).__name__ == 'Str': 
+            if type(exc).__name__ == 'Call' and type(exc.func).__name__ == 'Name' and type(exc.func.ctx).__name__ == 'Load' and exc.func.id == 'Exception' :
+                self.visit(exc)
+                #self.codegencontext.tokenizer.Emit_Builtins('Exception', node.exc)
+            else:
+                self.Print_Error(node, "Only Support 'Raise Exception(str_message)'.")
+        else:
+            self.Print_Error(node, "Only Support 'Raise Exception(str_message)'.")
 
     def visit_TryExcept(self, node):
         self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")

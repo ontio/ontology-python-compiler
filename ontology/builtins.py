@@ -147,7 +147,7 @@ def reversed(array):
 def list(length):
     pass
 
-def Exception():
+def Exception(message):
     pass
 
 def bytearray(Bytes):
