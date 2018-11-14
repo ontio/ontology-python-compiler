@@ -1,4 +1,4 @@
-Cversion = '2.0.0'
+OntCversion = '2.0.0'
 #!/usr/bin/env python3
 from ontology.builtins import *
 

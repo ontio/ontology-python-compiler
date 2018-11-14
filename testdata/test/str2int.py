@@ -1,4 +1,4 @@
-Cversion = '2.0.0'
+OntCversion = '2.0.0'
 from ontology.builtins import print, len
 from ontology.libont import int, elt_in
 def main():

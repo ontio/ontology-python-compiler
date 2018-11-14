@@ -1,2 +1,2 @@
 clean:
-	rm -f *.avm *.json *.str *.Map
+	rm -f *.avm *.json *.str *.Map *.warning

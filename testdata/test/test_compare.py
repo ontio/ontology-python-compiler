@@ -1,4 +1,4 @@
-Cversion = '2.0.0'
+OntCversion = '2.0.0'
 import ontology.builtins
 def Main():
     strx = "hello steven"

@@ -23,6 +23,7 @@ ONE_LINE_EXPR_SUPPORT_AST_TYPE   = ['Pass', 'Str']
 WITHOUT_RETURN_BUILTINSYSCALL = ['print', 'throw_if_null', 'breakpoint', 'Notify', 'Put','Destory', 'Delete', 'Exception']
 # all these three List_Attr_func assumed no return value.
 List_Attr_func = ['append', 'remove', 'reverse']
+warning_file_path = None
 
 def print_location():
     f_frame = sys._getframe().f_back
@@ -40,8 +41,12 @@ def Print_Not_Support(filepath, node, message):
 def Print_Error_global(filepath, node , message):
     raise Exception("[Compiler ERROR. File: %s. Line: %d]. %s" %(filepath, node.lineno, message))
 
-def Print_Warning_global(filepath, node , message):
-    print("[Compiler WARNING. File: %s. Line: %d.] %s" %(filepath, node.lineno, message))
+def Print_Warning_global(filepath, node, message):
+    assert(warning_file_path != None)
+    message_w = "[Compiler WARNING. File: %s. Line: %d.] %s" %(filepath, node.lineno, message)
+    print(message_w)
+    with open(warning_file_path, 'a+') as out_file:
+        out_file.write(message_w)
 
 class ReWrite_CTX_STORE_TO_LOAD(ast.NodeTransformer):
     def __init__(self, func_desc):
@@ -82,20 +87,20 @@ class ReWrite_CTX_LOAD_TO_STORE(ast.NodeTransformer):
 
 class CVersion_Visitor(ast.NodeVisitor):
     def __init__(self, codegencontext):
-        self.Cversion = None
+        self.OntCversion = None
         self.codegencontext = codegencontext
 
     def generic_visit(self, node):
         if hasattr(node, 'lineno') and node.lineno == 1:
             if type(node).__name__ == 'Assign' and  len(node.targets) == 1 and type(node.targets[0]).__name__ == 'Name' and type(node.value).__name__ ==  'Str':
-                self.Cversion = node.value.s
-                if self.Cversion != __version__:
-                    Print_Warning_global(self.codegencontext.main_file_path, node, "Suggest Place 'Cversion = '%s'' at 1st line of SmartContract." %(__version__))
+                self.OntCversion = node.value.s
+                if self.OntCversion != __version__ or node.targets[0].id != 'OntCversion':
+                    Print_Warning_global(self.codegencontext.main_file_path, node, "Suggest Place 'OntCversion = '%s'' at 1st line of SmartContract." %(__version__))
             else:
-                Print_Warning_global(self.codegencontext.main_file_path, node, "Suggest Place 'Cversion = '%s'' at 1st line of SmartContract" %(__version__))
+                Print_Warning_global(self.codegencontext.main_file_path, node, "Suggest Place 'OntCversion = '%s'' at 1st line of SmartContract" %(__version__))
             return
 
-        Print_Warning_global(self.codegencontext.main_file_path, node, "Suggest Place 'Cversion = '%s'' at 1st line of SmartContract" %(__version__))
+        Print_Warning_global(self.codegencontext.main_file_path, node, "Suggest Place 'OntCversion = '%s'' at 1st line of SmartContract" %(__version__))
 
     def visit_Module(self, node):
         self.generic_visit(node.body[0])
@@ -1339,6 +1344,10 @@ class CodeGenContext:
         self.file_hash          = None
         self.register_appcall   = {}
         self.register_action    = {}
+        global warning_file_path
+        warning_file_path       = self.Generate_new_name(SrcPath, '.py', '.warning')
+        with open(warning_file_path, 'w+') as out_file:
+            out_file.write("")
         #print(ast.dump(self.main_astree))
 
     def LinkProcess(self):
