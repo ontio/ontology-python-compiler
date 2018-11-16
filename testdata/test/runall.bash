@@ -3,5 +3,5 @@
 for f in $(ls *.py)
 do
 	own=$0
-	[[ $f != ${own##*/} ]] &&  ../run.py -n $f -m 1 -d
+	[[ $f != ${own##*/} ]] &&  ../../run.py -n $f -m 1
 done

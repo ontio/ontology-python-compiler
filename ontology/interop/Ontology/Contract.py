@@ -26,13 +26,10 @@ def GetScript(contract):
     pass
 
 
-def Create(script, parameter_list, return_type, properties, name, version, author, email, description):
+def Create(script, need_storage, name, version, author, email, description):
     """
-
     :param script:
-    :param parameter_list:
-    :param return_type:
-    :param properties:
+    :param need_storage:
     :param name
     :param version:
     :param author:
@@ -42,12 +39,9 @@ def Create(script, parameter_list, return_type, properties, name, version, autho
     pass
 
 
-def Migrate(script, parameter_list, return_type, properties, name, version, author, email, description):
+def Migrate(script, need_storage, name, version, author, email, description):
     """
-
     :param script:
-    :param parameter_list:
-    :param return_type:
     :param need_storage:
     :param name
     :param version:
