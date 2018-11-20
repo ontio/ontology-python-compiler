@@ -1,4 +1,4 @@
-def Invoke(param,method,contractAddress,ver):
+def Invoke(version, contractAddress, method, args):
     """
 
     """
