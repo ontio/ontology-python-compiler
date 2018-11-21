@@ -1,23 +1,3 @@
-
-class TransactionAttribute:
-
-    @property
-    def Usage(self):
-        """
-
-        :return:
-        """
-        return GetUsage(self)
-
-    @property
-    def Data(self):
-        """
-
-        :return:
-        """
-        return GetData(self)
-
-
 def GetUsage(transaction_attr):
     """
 
