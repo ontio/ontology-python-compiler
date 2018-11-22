@@ -12,7 +12,7 @@ def AddressToBase58(arg):
     """
     pass
 
-def GetRandomHash():
+def GetCurrentBlockHash():
     """
     return current block hash
     """
