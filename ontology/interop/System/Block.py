@@ -17,7 +17,7 @@ def GetTransactions(block):
     pass
 
 
-def GetTransaction(block, index):
+def GetTransactionByIndex(block, index):
     """
 
     :param block: the block to get the transaction from

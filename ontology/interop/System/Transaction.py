@@ -1,4 +1,4 @@
-def GetHash(transaction):
+def GetTransactionHash(transaction):
     """
 
     :param transaction:

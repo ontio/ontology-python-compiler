@@ -884,15 +884,26 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
             if action_reset_the_syscall_name:
                 sys_name =  'System.Runtime.Notify'
-                syscall_name =sys_name.encode('utf-8')
+                syscall_name = sys_name.encode('utf-8')
             else:
                 sys_name =  func_desc.blong_module_name +'.' + func_desc.name
+                if 'System.Header.GetBlockHash' in sys_name:
+                    sys_name = sys_name.replace('GetBlockHash', 'GetHash')
+                elif 'System.Transaction.GetTransactionHash' in sys_name:
+                    sys_name = sys_name.replace('GetTransactionHash', 'GetHash')
+                elif 'System.Block.GetTransactionByIndex' in sys_name:
+                    sys_name = sys_name.replace('GetTransactionByIndex', 'GetTransaction')
+                elif 'System.Blockchain.GetTransactionByHash' in sys_name:
+                    sys_name = sys_name.replace('GetTransactionByHash', 'GetTransaction')
+
                 syscall_name = sys_name.replace(ONTOLOGY_SC_FRAMEWORK, '').encode('utf-8')
 
             length = len(syscall_name)
             systemcall_name_array = bytearray([length]) + bytearray(syscall_name)
             vmtoken = self.codegencontext.tokenizer.Emit_Token(VMOp.SYSCALL, node, systemcall_name_array)
-            vmtoken.syscall_name = sys_name 
+
+            syscall_print           = sys_name.replace(ONTOLOGY_SC_FRAMEWORK, '')
+            vmtoken.syscall_name    = syscall_print
 
             return
 

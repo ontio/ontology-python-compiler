@@ -23,7 +23,7 @@ def GetBlock(height_or_hash):
     pass
 
 
-def GetTransaction(hash):
+def GetTransactionByHash(hash):
     """
 
     :param hash:
