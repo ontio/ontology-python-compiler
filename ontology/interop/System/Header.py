@@ -7,7 +7,7 @@ def GetIndex(header):
     pass
 
 
-def GetHash(header):
+def GetBlockHash(header):
     """
 
     gets the hash of the header
