@@ -12,7 +12,7 @@
 |              ontology.interop.Ontology.Native |                    Invoke |                   param,method,contractAddress,ver | nvoke native contract |
 |             ontology.interop.Ontology.Runtime |           Base58ToAddress |                                                arg | transfer base58 address to byte array |
 |             ontology.interop.Ontology.Runtime |           AddressToBase58 |                                                arg | byte array address to base58 |
-|             ontology.interop.Ontology.Runtime |             GetRandomHash |                                                    | get current block hash |
+|             ontology.interop.Ontology.Runtime | GetCurrentBlockHash |                                                    | get current block hash |
 |         ontology.interop.Ontology.Transaction |                   GetType |                                        transaction | get transaction type |
 |         ontology.interop.Ontology.Transaction |             GetAttributes |                                        transaction | get transaction attributes |
 |                ontology.interop.System.Action |            RegisterAction |                                  event_name, *args | register a notirfy event |
@@ -20,12 +20,12 @@
 |            ontology.interop.System.Blockchain |                 GetHeight |                                                    | get height of block chain |
 |            ontology.interop.System.Blockchain |                 GetHeader |                                     height_or_hash | get header by height or hash |
 |            ontology.interop.System.Blockchain |                  GetBlock |                                     height_or_hash | get block by height or hash |
-|            ontology.interop.System.Blockchain |            GetTransaction |                                               hash | get transaction by hash |
+|            ontology.interop.System.Blockchain | GetTransactionByHash |                                               hash | get transaction by hash |
 |            ontology.interop.System.Blockchain |               GetContract |                                        script_hash | get contract by script hash |
 | ontology.interop.System.Blockchain | GetTransactionHeight | heigh of transaction |  |
 |                 ontology.interop.System.Block |       GetTransactionCount |                                              block | get transaction count of block |
 |                 ontology.interop.System.Block |           GetTransactions |                                              block | get transactions of block |
-|                 ontology.interop.System.Block |            GetTransaction |                                       block, index | get the transaction by index |
+|                 ontology.interop.System.Block | GetTransactionByIndex |                                       block, index | get the transaction by index |
 |              ontology.interop.System.Contract |         GetStorageContext |                                           contract | get contract storage context |
 |              ontology.interop.System.Contract |                   Destroy |                                                    | destroy current contract(self) |
 |       ontology.interop.System.ExecutionEngine |        GetScriptContainer |                                                    | get the current script container of a smart contract execution |
@@ -33,7 +33,7 @@
 |       ontology.interop.System.ExecutionEngine |      GetCallingScriptHash |                                                    | get the hash of the script ( smart contract ) which began execution of the current script. |
 |       ontology.interop.System.ExecutionEngine |        GetEntryScriptHash |                                                    | get the hash of the script ( smart contract ) which began execution of the smart contract. |
 |                ontology.interop.System.Header |                  GetIndex |                                             header | get the height/index of header |
-|                ontology.interop.System.Header |                   GetHash |                                             header | get the hash of header |
+|                ontology.interop.System.Header |       GetBlockHash |                                             header | get the hash of header |
 |                ontology.interop.System.Header |               GetPrevHash |                                             header | get the hash of the previous header in the blockchain        |
 |                ontology.interop.System.Header |              GetTimestamp |                                             header | get the timestamp of when the header was created |
 |               ontology.interop.System.Runtime |                GetTrigger |                                                    | get trigger |
@@ -49,7 +49,7 @@
 |               ontology.interop.System.Storage |                       Get |                                       context, key | get the storage by key |
 |               ontology.interop.System.Storage |                       Put |                                context, key, value | put the key-value storage |
 |               ontology.interop.System.Storage |                    Delete |                                       context, key | delete storage by key |
-|           ontology.interop.System.Transaction |                   GetHash |                                        transaction | Get the Transaction of hash |
+|           ontology.interop.System.Transaction | GetTransactionHash |                                        transaction | Get the Transaction of hash |
 
 
 
