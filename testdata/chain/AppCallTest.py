@@ -1,3 +1,4 @@
+OntCversion = '2.0.0'
 from ontology.interop.System.App import RegisterAppCall, DynamicAppCall
 from ontology.interop.Ontology.Runtime import Base58ToAddress
 import ontology.builtins
