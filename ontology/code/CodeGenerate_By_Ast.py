@@ -456,6 +456,9 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.global_converting = False
 
     def Convert_Gloabal(self):
+        if self.func_desc.blong_module_name != OwnMainModule:
+            return
+
         # global own the visitor by itself. but note the tokenizer confict.
         CodeGenVisitor = Visitor_Of_FunCodeGen(self.codegencontext, self.func_desc, True)
         # due the  args translate first. so get the argname have the upper priority. so if have the same name of args and the global. 
@@ -1313,8 +1316,9 @@ class FuncDescription:
         self.list_comp_position       = 0
         self.have_return_value  = False
         self.arg_num    = 0
-        if self.isyscall:
-            self.blong_module_name = module_name
+        assert(module_name != None)
+        #if self.isyscall:
+        self.blong_module_name = module_name
 
         self.local_num  = 0
         self.local_map  = {}
