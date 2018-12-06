@@ -39,7 +39,8 @@ The compiler supports a subset of the Python language
 - free line coding.  compare to one line only with one statement restriction.
 - global var assigned.
 - cascade compare.
-- cascade assignment
+- cascade assignment.
+- if expr.
 - map in map.
 - free string slice.
 - list comprehension.
@@ -47,7 +48,7 @@ The compiler supports a subset of the Python language
 - conditional operation.
 - assert support.
 - more syntax check. 
-- add lib api to support list remove. element in.
+- add lib api to support list remove. element in. more api please libont.py
 - more accuracy debug message dump.
 - for, while break or continue.
 

@@ -481,13 +481,14 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
     def visit_AugAssign(self, node):
         self.current_node = node
-        # load value
-        self.visit(node.value)
-
-        # load target
+        # load target first. a augop p. a is the deeper stack item. when use + *, the value irelate with the squence, howerver the div will get error.
         self.ctx_transformer = ReWrite_CTX_STORE_TO_LOAD(self.func_desc)
         target_newnode = self.ctx_transformer.visit(node.target)
         self.visit(target_newnode)
+
+        # load value
+        self.visit(node.value)
+
         # cal the by op
         self.visit(node.op)
 
