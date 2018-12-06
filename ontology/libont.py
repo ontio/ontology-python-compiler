@@ -51,6 +51,42 @@ def int(arg, scale):
         n = n * scale
     return num
 
+def str(arg_int, scale):
+    if scale != 10 and scale != 16:
+        assert(False)
+
+    arg_int += 0
+    res = ''
+    trans_map = {0:'0', 1:'1', 2:'2', 3:'3', 4:'4', 5:'5', 6:'6', 7:'7', 8:'8', 9:'9', 0xa:'a',0xb:'b', 0xc:'c', 0xd:'d', 0xe:'e', 0xf:'f'}
+    iter_t = arg_int
+
+    while iter_t != 0:
+        t = iter_t % scale
+        res = concat(trans_map[t], res)
+        iter_t /= scale
+
+    return res
+
+def byte2int(cur_byte):
+    return concat(cur_byte, b'\x00')
+
+def bytes2hexstring(arg, big):
+    slen = len(arg)
+    if big:
+        trans_map = {0:'0', 1:'1', 2:'2', 3:'3', 4:'4', 5:'5', 6:'6', 7:'7', 8:'8', 9:'9', 0xa:'A',0xb:'B', 0xc:'C', 0xd:'D', 0xe:'E', 0xf:'F'}
+    else:
+        trans_map = {0:'0', 1:'1', 2:'2', 3:'3', 4:'4', 5:'5', 6:'6', 7:'7', 8:'8', 9:'9', 0xa:'a',0xb:'b', 0xc:'c', 0xd:'d', 0xe:'e', 0xf:'f'}
+    res = ''
+    for i in range(0, slen):
+        cur_byte = arg[i: i+1]
+        cur_byte = concat(cur_byte, b'\x00')
+        t = (cur_byte & 0xf0) >> 4 # >> has higher priority then & operator
+        res = concat(res, trans_map[t])
+        t = cur_byte & 0x0f
+        res = concat(res, trans_map[t])
+
+    return res
+
 # note integer 0 have zero bytes. alway can make int to bytearray. but can not convert '0000abcd0000' will lose 0 bytes
 def hexstring2bytes(arg):
     elt_p0 = ['0','1','2','3','4','5','6','7','8','9']

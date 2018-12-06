@@ -57,7 +57,7 @@ class AstVMTokenizer(object):
             out = 0x50 + i
             return self.Emit_Token(out, node)
         bigint = BigInteger(i)
-        outdata = bigint.ToByteArray(signed=False)
+        outdata = bigint.ToByteArray()
         return self.Emit_Data(outdata, node)
 
     def Emit_Token(self, vm_op, node, data=None):
