@@ -10,8 +10,10 @@ from ontology import __version__
 import json
 from ontology.code.StaticAppCall import RegisterAppCall, NotifyAction
 
-ONTOLOGY_SC_FRAMEWORK   = 'ontology.interop.'
-ONTOLOGY_BUILTINS_M     = 'ontology.builtins'
+ONTOLOGY_SC_FRAMEWORK       = 'ontology.interop.'
+ONTOLOGY_SC_FRAMEWORK_boa   = 'boa.interop.'
+ONTOLOGY_BUILTINS_M         = 'ontology.builtins'
+ONTOLOGY_BUILTINS_M_boa     = 'boa.builtins'
 OwnMainModule           = 'OwnMainModule'
 ForIndexPrefix          = 'ForIndexPrefix_Var###'
 ListCompName            = 'ListCompName###'
@@ -184,7 +186,10 @@ class FuncVisitor_Of_StackSize(ast.NodeVisitor):
         ast.NodeVisitor.generic_visit(self, node)
 
     def Print_DoNot_Support(self, node, message):
-        raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+        if hasattr(node, 'lineno'):
+            raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+        else:
+            raise Exception("[Compiler ERROR. File: %s. in function: %s. ]. Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, message))
 
     def Print_Error(self, node, message):
         raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
@@ -323,9 +328,9 @@ class Visitor_Of_FuncDecl(ast.NodeVisitor):
             self.module_file_path   = self.codegencontext.main_file_path
             self.module_ast_tree    = self.codegencontext.main_astree
 
-        if ONTOLOGY_SC_FRAMEWORK in self.visited_module:
+        if (ONTOLOGY_SC_FRAMEWORK in self.visited_module) or (ONTOLOGY_SC_FRAMEWORK_boa in self.visited_module):
             self.isyscall_module = True
-        elif self.visited_module == ONTOLOGY_BUILTINS_M:
+        elif (self.visited_module == ONTOLOGY_BUILTINS_M) or (self.visited_module == ONTOLOGY_BUILTINS_M_boa):
             self.is_builtin_module = True
 
         assert((self.isyscall_module and self.is_builtin_module) == False)
@@ -363,7 +368,7 @@ class Visitor_Of_FuncDecl(ast.NodeVisitor):
         list_func_imported = []
         for alias in node.names:
             list_func_imported.append(alias.name)
-            if alias.name == 'range' and node.module == 'ontology.builtins':
+            if alias.name == 'range' and (node.module == ONTOLOGY_BUILTINS_M or node.module == ONTOLOGY_BUILTINS_M_boa):
                 # range depend on list
                 list_func_imported.append('list')
             if alias.asname != None:
@@ -900,13 +905,15 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                 elif 'System.Blockchain.GetTransactionByHash' in sys_name:
                     sys_name = sys_name.replace('GetTransactionByHash', 'GetTransaction')
 
-                syscall_name = sys_name.replace(ONTOLOGY_SC_FRAMEWORK, '').encode('utf-8')
+                syscall_name = sys_name.replace(ONTOLOGY_SC_FRAMEWORK, '')
+                syscall_name = syscall_name.replace(ONTOLOGY_SC_FRAMEWORK_boa, '').encode('utf-8')
 
             length = len(syscall_name)
             systemcall_name_array = bytearray([length]) + bytearray(syscall_name)
             vmtoken = self.codegencontext.tokenizer.Emit_Token(VMOp.SYSCALL, node, systemcall_name_array)
 
             syscall_print           = sys_name.replace(ONTOLOGY_SC_FRAMEWORK, '')
+            syscall_print           = syscall_print.replace(ONTOLOGY_SC_FRAMEWORK_boa, '')
             vmtoken.syscall_name    = syscall_print
 
             return
