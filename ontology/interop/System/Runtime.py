@@ -1,12 +1,5 @@
 
 
-def GetTrigger():
-    """
-
-    """
-    pass
-
-
 def CheckWitness(hash_or_pubkey):
     """
 
