@@ -29,6 +29,7 @@ Local_ArgLen = 'Local_ArgLen###FixedName'
 Function_Call_Arglen = 'Function_Call_Arglen###FixedName'
 Global_simulation_func_name = 'Global#Code'
 BUILTIN_AND_SYSCALL_LABEL_ADDR = -2
+DCALL_TARGET_BYTES = 6
 # keys, values, has_key current not support
 # buildins_list           = ['state', 'bytes', 'bytearray', 'ToScriptHash', 'print', 'list', 'len', 'abs', 'min', 'max', 'concat', 'take', 'substr', 'keys', 'values', 'has_key', 'sha1', 'sha256', 'hash160', 'hash256', 'verify_signature', 'reverse', 'append', 'remove', 'Exception', 'throw_if_null', 'breakpoint']
 ONE_LINE_EXPR_SUPPORT_AST_TYPE = ['Pass', 'Str']
@@ -1264,7 +1265,8 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
         if not (func_desc.is_builtin or func_desc.isyscall):
             call_target_label = func_desc.label
-            call_data = call_target_label.to_bytes(2, 'little', signed=True)
+            #call_data = call_target_label.to_bytes(2, 'little', signed=True)
+            call_data = call_target_label.to_bytes(DCALL_TARGET_BYTES, 'little', signed=True)
         elif func_desc.is_builtin:
             if funcname == 'bytearray' or funcname == 'bytes':
                 return
@@ -1337,10 +1339,11 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         if not self.is_for_global:
             global_postion = self.func_desc.Read_LocalStackPosition(Global_VarEnv)
             self.codegencontext.tokenizer.Emit_PickGlobal(global_postion, node)
-            self.codegencontext.tokenizer.Emit_Token(VMOp.CALL, node, call_data)
         else:
             self.codegencontext.tokenizer.Emit_Token(VMOp.DUPFROMALTSTACK, node)
-            self.codegencontext.tokenizer.Emit_Token(VMOp.CALL, node, call_data)
+
+        self.codegencontext.tokenizer.Emit_Data(call_data, node)
+        self.codegencontext.tokenizer.Emit_Token(VMOp.DCALL, node)
 
     # only save a bool(true or false) to the evalution stack.
     def visit_Compare(self, node):
@@ -1988,19 +1991,30 @@ class CodeGenContext:
 
     def LinkProcess(self):
         all_token = self.tokenizer.vm_tokens.items()
-        link_op = [VMOp.JMP, VMOp.JMPIF, VMOp.JMPIFNOT, VMOp.CALL]
+        link_op = [VMOp.JMP, VMOp.JMPIF, VMOp.JMPIFNOT, VMOp.CALL, VMOp.DJMP]
         prev_addr = -1
         for addr, vmtoken in all_token:
             assert(vmtoken.addr == addr)
             assert(prev_addr < addr)
 
             if vmtoken.vm_op in link_op:
-                target_label = int.from_bytes(vmtoken.data, byteorder='little')
-                target_addr = self.labels[target_label]
-                assert(target_addr != -1)
-                vmtoken.target = target_addr
-                offset = target_addr - vmtoken.addr
-                vmtoken.data = offset.to_bytes(2, 'little', signed=True)
+                if vmtoken.vm_op != VMOp.DJMP:
+                    target_label = int.from_bytes(vmtoken.data, byteorder='little')
+                    target_addr = self.labels[target_label]
+                    assert(target_addr != -1)
+                    vmtoken.target = target_addr
+                    offset = target_addr - vmtoken.addr
+                    vmtoken.data = offset.to_bytes(2, 'little', signed=True)
+                else:
+                    assert(prev_vmtoken.out_op == DCALL_TARGET_BYTES)
+                    target_label = int.from_bytes(prev_vmtoken.data, byteorder='little')
+                    target_addr = self.labels[target_label]
+                    assert(target_addr != -1)
+                    prev_vmtoken.target = target_addr
+                    offset = target_addr
+                    prev_vmtoken.data = offset.to_bytes(DCALL_TARGET_BYTES, 'little', signed=True)
+
+            prev_vmtoken = vmtoken
 
         prev_addr = addr
         self.write_code()

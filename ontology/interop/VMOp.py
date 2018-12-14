@@ -44,6 +44,7 @@ DUPFROMALTSTACK = b'\x6A'
 TOALTSTACK = b'\x6B'  # Puts the input onto the top of the alt stack. Removes it from the main stack.
 FROMALTSTACK = b'\x6C'  # Puts the input onto the top of the main stack. Removes it from the alt stack.
 XDROP = b'\x6D'
+DCALL = b'\x6E'
 XSWAP = b'\x72'
 XTUCK = b'\x73'
 DEPTH = b'\x74'  # Puts the number of stack items onto the stack.
