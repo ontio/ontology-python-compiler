@@ -1596,6 +1596,9 @@ class CodeGenContext:
         #self.Print_FuncScope()
 
         # Convert Main.
+        if main_func_node == None:
+            raise Exception("No Entry function defined. Please define a 'Main' function")
+
         self.current_func_node = main_func_node
         main_desc = FuncDescription('Main', None, main_func_node,False, self.main_file_path, OwnMainModule, False)
         main_desc.Calculate_StackSize(self.global_num)
