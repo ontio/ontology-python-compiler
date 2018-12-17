@@ -37,7 +37,10 @@ class Compiler(object):
 
         Compiler.__instance = None
         compiler = Compiler.instance()
-        compiler.CodeGenerate = CodeGenerate(os.path.abspath(path))
+        try:
+            compiler.CodeGenerate = CodeGenerate(os.path.abspath(path))
+        except Exception as error:
+            raise Exception(error)
 
         return compiler
 
