@@ -22,7 +22,7 @@ BUILTIN_AND_SYSCALL_LABEL_ADDR  = -2
 #buildins_list           = ['state', 'bytes', 'bytearray','ToScriptHash', 'print', 'list','len','abs','min','max','concat','take' ,'substr','keys','values', 'has_key','sha1', 'sha256','hash160', 'hash256', 'verify_signature', 'reverse','append','remove', 'Exception', 'throw_if_null','breakpoint']
 ONE_LINE_EXPR_SUPPORT_AST_TYPE   = ['Pass', 'Str']
 # xxx. Migrate have return value acctually.
-WITHOUT_RETURN_BUILTINSYSCALL = ['print', 'throw_if_null', 'breakpoint', 'Notify', 'Put','Destory', 'Delete', 'Exception']
+WITHOUT_RETURN_BUILTINSYSCALL = ['print','Log', 'throw_if_null', 'breakpoint', 'Notify', 'Put','Destroy', 'Delete', 'Exception']
 # all these three List_Attr_func assumed no return value.
 List_Attr_func = ['append', 'remove', 'reverse']
 warning_file_path = None

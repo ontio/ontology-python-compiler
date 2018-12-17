@@ -1,4 +1,4 @@
-def AsReadOnly():
+def AsReadOnly(context):
     """
 
     """
