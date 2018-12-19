@@ -45,9 +45,10 @@ The compiler supports a subset of the Python language.
 - conditional operation.
 - assert support.
 - more syntax check. 
-- add lib api to support list remove. element in. more api please libont.py
+- add lib api to support list remove. element in. more api please check [libont.py](https://github.com/ontio/ontology-python-compiler/blob/master/ontology/libont.py)
 - more accuracy debug message dump.
 - for, while break or continue.
+- logic and, or operation return true or false. support cascade usage
 
 #### What will it do
 

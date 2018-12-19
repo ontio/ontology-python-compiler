@@ -1286,7 +1286,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.Emit_LoadLocal(map_position, node)
 
     def visit_Attribute(self, node):
-        assert(False)
+        self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
     def visit_IfExp(self, node):
 
@@ -1307,7 +1307,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.SetLabel(end_label, self.codegencontext.pc + 1)
 
     def visit_Delete(self, node):
-        assert(False)
+        self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
         
 class FuncDescription:
     def __init__(self, name, label, node, isyscall, filepath, module_name, is_builtin):
