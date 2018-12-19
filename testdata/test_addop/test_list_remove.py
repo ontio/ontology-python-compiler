@@ -11,3 +11,8 @@ def Main():
     assert(l[1] == 8)
     assert(l[2] == 6)
     assert(l[3] == 5)
+
+    l = [0]
+    assert(len(l) == 1)
+    l.remove(0)
+    assert(len(l) == 0)

@@ -3,7 +3,7 @@ from ontology.builtins import print, range, len
 
 def Main():
     map0 = {'1':'11111', '2':'22222', '3':'33333', '4':'44444', '5':'55555'}
-    str0 = '123456'
+    str0 = '12345'
     for i in range(0,len(str0)):
         print(map0[str0[i]])
 
