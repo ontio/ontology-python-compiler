@@ -1991,14 +1991,14 @@ class CodeGenContext:
 
     def LinkProcess(self):
         all_token = self.tokenizer.vm_tokens.items()
-        link_op = [VMOp.JMP, VMOp.JMPIF, VMOp.JMPIFNOT, VMOp.CALL, VMOp.DJMP]
+        link_op = [VMOp.JMP, VMOp.JMPIF, VMOp.JMPIFNOT, VMOp.CALL, VMOp.DCALL]
         prev_addr = -1
         for addr, vmtoken in all_token:
             assert(vmtoken.addr == addr)
             assert(prev_addr < addr)
 
             if vmtoken.vm_op in link_op:
-                if vmtoken.vm_op != VMOp.DJMP:
+                if vmtoken.vm_op != VMOp.DCALL:
                     target_label = int.from_bytes(vmtoken.data, byteorder='little')
                     target_addr = self.labels[target_label]
                     assert(target_addr != -1)
