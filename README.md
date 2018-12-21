@@ -18,7 +18,7 @@
   - [Installation](#installation)
   - [Usage](#usage)
   - [License](#license)
-  - [DEBUGINFO](#DEBUGINFO)
+  - [DebugInfo](#DebugInfo)
 
 
 ## Overview
@@ -106,7 +106,7 @@ compiler.DumpAsm()
 
 
 
-## DEBUGINFO
+## DebugInfo
 
 FuncName:   indicate the opcode blongs to which function. Global#Code is for Code in Global.
 
@@ -123,7 +123,6 @@ JumpTarget:  the target address(offset) of jump instruct.
 TargetOff:      the relative offset between target address and current jump instruction.  	 	      
 
 ```
-st line of SmartContract
 FuncName                       Lineno     Col   Offset     OpCode               JumpTarget           TargetOff           
 Global#Code                    1          0     0          PUSH2               
 Global#Code                    1          0     1          NEWARRAY            
