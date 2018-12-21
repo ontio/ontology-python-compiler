@@ -17,6 +17,7 @@
   - [Installation](#installation)
   - [Usage](#usage)
   - [License](#license)
+  - [DEBUGINFO](#DEBUGINFO)
 
 
 ## Overview
@@ -97,3 +98,57 @@ compiler.DumpAsm()
 
 - Open-source [LGPL](LICENSE).
 - Main author is [@steven](https://github.com/carltraveler)
+
+
+
+## DEBUGINFO
+
+FuncName:   indicate the opcode blongs to which function.
+
+Lineno:          indicate the opcode blongs to which line number in source code.
+
+Col :               indicate the opcode blongs to which columns in source code.
+
+offset:            the address of Opcode. from 0 to len of avm.
+
+Opcode:        the Opcode.
+
+JumpTarget:  the target address(offset) of jump instruct.
+
+TargetOff:      the relative offset between target address and current jump instruction.  	 	      
+
+```
+st line of SmartContract
+FuncName                       Lineno     Col   Offset     OpCode               JumpTarget           TargetOff           
+Main                           1          0     0          PUSH2               
+Main                           1          0     1          NEWARRAY            
+Main                           1          0     2          TOALTSTACK          
+Main                           2          8     3          PUSH10              
+Main                           2          4     4          DUPFROMALTSTACK     
+Main                           2          4     5          PUSH0               
+Main                           2          4     6          PUSH2               
+Main                           2          4     7          ROLL                
+Main                           2          4     8          SETITEM             
+Main                           3          16    9          DUPFROMALTSTACK     
+Main                           3          16    10         PUSH0               
+Main                           3          16    11         PICKITEM            
+Main                           3          11    12         CALL                 18                   6                   
+Main                           3          4     15         FROMALTSTACK        
+Main                           3          4     16         DROP                
+Main                           3          4     17         RET                 
+test                           5          0     18         PUSH2               
+test                           5          0     19         NEWARRAY            
+test                           5          0     20         TOALTSTACK          
+test                           5          9     21         DUPFROMALTSTACK     
+test                           5          9     22         PUSH0               
+test                           5          9     23         PUSH2               
+test                           5          9     24         ROLL                
+test                           5          9     25         SETITEM             
+test                           6          11    26         DUPFROMALTSTACK     
+test                           6          11    27         PUSH0               
+test                           6          11    28         PICKITEM            
+test                           6          4     29         FROMALTSTACK        
+test                           6          4     30         DROP                
+test                           6          4     31         RET      
+```
+
