@@ -18,4 +18,8 @@ def GetRandomHash():
     """
     pass
 
-
+def JsonMarshalMap(arg):
+    """
+    return Json marshaled map
+    """
+    pass
