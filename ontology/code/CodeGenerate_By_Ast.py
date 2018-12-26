@@ -698,25 +698,24 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
     def visit_BoolOp(self, node):
         assert(len(node.values) >= 2)
-        target_label    = self.codegencontext.NewLabel()
-        target_postion  = target_label.to_bytes(2, 'little', signed=True)
+        End_target_label        = self.codegencontext.NewLabel()
+        End_target_postion      = End_target_label.to_bytes(2, 'little', signed=True)
 
-        self.visit(node.values[0])
         for i in range(len(node.values)):
-            if i == 0:
-                continue
             self.visit(node.values[i])
-            self.visit(node.op) 
-            if (type(node.op).__name__ == 'Or'):
-                self.codegencontext.tokenizer.Emit_Token(VMOp.DUP, node)
-                self.codegencontext.tokenizer.Emit_Token(VMOp.JMPIF, node, target_postion)
-            elif (type(node.op).__name__ == 'And'):
-                self.codegencontext.tokenizer.Emit_Token(VMOp.DUP, node)
-                self.codegencontext.tokenizer.Emit_Token(VMOp.JMPIFNOT, node, target_postion)
-            else:
-                assert(False)
+            if  i != (len(node.values) - 1):
+                if (type(node.op).__name__ == 'Or'):
+                    self.codegencontext.tokenizer.Emit_Token(VMOp.DUP, node)
+                    self.codegencontext.tokenizer.Emit_Token(VMOp.JMPIF, node, End_target_postion)
+                    self.codegencontext.tokenizer.Emit_Token(VMOp.DROP, node)
+                elif (type(node.op).__name__ == 'And'):
+                    self.codegencontext.tokenizer.Emit_Token(VMOp.DUP, node)
+                    self.codegencontext.tokenizer.Emit_Token(VMOp.JMPIFNOT, node, End_target_postion)
+                    self.codegencontext.tokenizer.Emit_Token(VMOp.DROP, node)
+                else:
+                    assert(False)
 
-        self.codegencontext.SetLabel(target_label, self.codegencontext.pc + 1)
+        self.codegencontext.SetLabel(End_target_label, self.codegencontext.pc + 1)
 
     def visit_And(self, node):
         self.codegencontext.tokenizer.Emit_Token(VMOp.BOOLAND, node)
@@ -925,20 +924,55 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.current_node = node
         opslen          = len(node.ops)
         comparatorslen  = len(node.comparators)
+        assert(opslen == comparatorslen)
+        assert(opslen > 0)
+
         jump_target_label = self.codegencontext.NewLabel()
         jump_target_position = jump_target_label.to_bytes(2, 'little', signed=True)
-        for i in range(opslen):
-            if i > 0:
-                self.visit(node.comparators[i - 1])
-            else:
-                self.visit(node.left)
 
+        # set a init top stack item. 
+        self.visit(node.left)
+
+        for i in range(opslen):
+            #V(n-1)
             self.visit(node.comparators[i])
+
+            #V(n-1), Vn
+
+            self.codegencontext.tokenizer.Emit_Token(VMOp.TUCK, node)
+
+            #V(n), V(n-1), V(n)
+
             self.visit(node.ops[i])
+
+            #V(n), B
+
+            if i == opslen - 1:
+                break
+
             self.codegencontext.tokenizer.Emit_Token(VMOp.DUP, node)
+
+            #V(n), B, B
+
             self.codegencontext.tokenizer.Emit_Token(VMOp.JMPIFNOT, node, jump_target_position)
 
+            #V(n), B
+
+            self.codegencontext.tokenizer.Emit_Token(VMOp.DROP, node)
+
+            #V(n)
+
         self.codegencontext.SetLabel(jump_target_label, self.codegencontext.pc + 1)
+
+        #V(n), B
+
+        self.codegencontext.tokenizer.Emit_Token(VMOp.SWAP, node)
+
+        #B, V(n)
+
+        self.codegencontext.tokenizer.Emit_Token(VMOp.DROP, node)
+
+        #B. last return
 
     def visit_Num(self, node):
         self.current_node = node
