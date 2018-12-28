@@ -47,5 +47,9 @@ def Main():
     assert(c[6] == 4)
     assert(c[7] == 8)
 
-    for i in c:
-        print(i)
+    t = [[x, y] for x in range(0,10) if x > 9 if and_test() > 3 for y in range(0,10) if y > 7 if y != 8  ]
+    assert(len(t) == 0)
+
+def and_test():
+    assert(False)
+    return 5

@@ -513,13 +513,15 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         if type(node.target).__name__ != 'Name':
             self.Print_DoNot_Support(node, "multi iter.")
 
-        if node.orelse != []:
-            self.Print_DoNot_Support(node, "for orelse.")
+        #if node.orelse != []:
+        #    self.Print_DoNot_Support(node, "for orelse.")
 
-        self.is_in_loop = True
+        #self.is_in_loop = True
         # alloc Label.
-        for_start_label = self.codegencontext.NewLabel()
-        for_end_label   = self.codegencontext.NewLabel()
+        for_start_label         = self.codegencontext.NewLabel()
+        for_end_label           = self.codegencontext.NewLabel()
+        for_no_break_end_label  = self.codegencontext.NewLabel()
+
         self.latest_loop_break_label = [for_start_label, for_end_label]
         # index_position: init index.
         self.codegencontext.tokenizer.Emit_Integer(0, node)
@@ -550,7 +552,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.Emit_LoadLocal(index_position, node)
         self.codegencontext.tokenizer.Emit_LoadLocal(len_position, node)
         self.codegencontext.tokenizer.Emit_Token(VMOp.LT, node)
-        jumpostion_for_end = for_end_label.to_bytes(2, 'little', signed=True)
+        jumpostion_for_end = for_no_break_end_label.to_bytes(2, 'little', signed=True)
         self.codegencontext.tokenizer.Emit_Token(VMOp.JMPIFNOT, node, jumpostion_for_end)
 
         # target_position: update save iter. xxx. must use target. so the body can ref it
@@ -571,6 +573,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.Emit_StoreLocal(index_position, node)
 
         # generate body.
+        self.is_in_loop = True
         for stmt in node.body:
             # any visit have chance the latest_loop_break_label. so here revese it.
             self.visit(stmt)
@@ -581,21 +584,30 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         # generate jump to condition assert
         jumpostion_for_start = for_start_label.to_bytes(2, 'little', signed=True)
         self.codegencontext.tokenizer.Emit_Token(VMOp.JMP, self.current_node, jumpostion_for_start)
-        self.codegencontext.SetLabel(for_end_label, self.codegencontext.pc + 1)
+
+        self.codegencontext.SetLabel(for_no_break_end_label, self.codegencontext.pc + 1)
         self.is_in_loop = False
+        for stmt in node.orelse:
+            self.visit(stmt)
+
+        self.codegencontext.SetLabel(for_end_label, self.codegencontext.pc + 1)
         #self.codegencontext.tokenizer.Emit_Token(VMOp.NOP, stmt)
 
     def visit_While(self, node):
         self.current_node = node
-        if node.orelse !=[]:
-            self.Print_DoNot_Support(node, "While orelse.")
+
+        #if node.orelse !=[]:
+        #    self.Print_DoNot_Support(node, "While orelse.")
+
         # alloc Label.
         self.is_in_loop = True
         while_start_label = self.codegencontext.NewLabel()
         while_end_label   = self.codegencontext.NewLabel()
+        while_no_break_end_label  = self.codegencontext.NewLabel()
+
         self.latest_loop_break_label = [while_start_label, while_end_label]
         jumpostion_while_start = while_start_label.to_bytes(2, 'little', signed=True)
-        jumpostion_while_end = while_end_label.to_bytes(2, 'little', signed=True)
+        jumpostion_while_end = while_no_break_end_label.to_bytes(2, 'little', signed=True)
 
         # generate code condition.
         self.codegencontext.SetLabel(while_start_label, self.codegencontext.pc + 1)
@@ -612,10 +624,14 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         # current_node will update when visit.indicate the last node of visited
         self.codegencontext.tokenizer.Emit_Token(VMOp.JMP, self.current_node, jumpostion_while_start)
 
+        self.codegencontext.SetLabel(while_no_break_end_label, self.codegencontext.pc + 1)
+        self.is_in_loop = False
+        for stmt in node.orelse:
+            self.visit(stmt)
+
         # generate jump to condition assert
         self.codegencontext.SetLabel(while_end_label, self.codegencontext.pc + 1)
         # self.codegencontext.tokenizer.Emit_Token(VMOp.NOP, stmt)
-        self.is_in_loop = False
         return
 
     def visit_Pass(self, node):
@@ -1160,20 +1176,22 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                 for test in generator.ifs:
                     bodyiftest.values.append(test)
                 if node_for_prev == None:
-                    bodyif.body         = [array_load, node_call]
+                    #bodyif.body         = [array_load, node_call]
+                    bodyif.body         = [node_call]
                 else:
                     bodyif.body         = [node_for_prev]
                 bodyif.test             = bodyiftest
                 bodyif.orelse           = []
                 bodyif.lineno           = generator.ifs[0].lineno
-                bodyif.col_offset = generator.ifs[0].col_offset
+                bodyif.col_offset       = generator.ifs[0].col_offset
             elif len(generator.ifs) == 1:
                 bodyif.test             = generator.ifs[0]
                 bodyif.orelse           = []
                 bodyif.lineno           = generator.ifs[0].lineno
                 bodyif.col_offset       = generator.ifs[0].col_offset
                 if node_for_prev == None:
-                    bodyif.body         = [array_load, node_call]
+                    #bodyif.body         = [array_load, node_call]
+                    bodyif.body         = [node_call]
                 else:
                     bodyif.body         = [node_for_prev]
             else:
@@ -1189,7 +1207,8 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                 node_for.body   = [bodyif]
             else:
                 if node_for_prev == None:
-                    node_for.body   = [array_load, node_call]
+                    #node_for.body   = [array_load, node_call]
+                    node_for.body   = [node_call]
                 else:
                     node_for.body   = [node_for_prev]
 

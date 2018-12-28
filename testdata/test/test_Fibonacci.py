@@ -11,9 +11,6 @@ def Main():
     assert(fibresult == 6765)
     print(fibresult)
 
-    return fibresult
-
-
 def fibR(n):
     """
 

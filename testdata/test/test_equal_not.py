@@ -48,5 +48,3 @@ def Main():
 
         print("bytearrays m and m2 are equal")
     assert(m == 3)
-
-    return m
