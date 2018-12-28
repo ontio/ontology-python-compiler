@@ -19,9 +19,6 @@ def Main():
     assert(k == 10)
     print(k)
 
-    return True
-
-
 def mymethod(a, b):
 
     return a + b

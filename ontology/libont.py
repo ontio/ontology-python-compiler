@@ -51,6 +51,18 @@ def int(arg, scale):
         n = n * scale
     return num
 
+def AddressFromVmCode(code):
+    Address = None
+    assert(len(code) > 0)
+    addr = hash160(code)
+
+    for i in reversed(range(0,21)):
+        if i < 1:
+            break
+        Address = concat(Address, addr[i-1:i])
+
+    return Address
+
 def str(arg_int, scale):
     if scale != 10 and scale != 16:
         assert(False)

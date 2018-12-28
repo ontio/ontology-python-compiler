@@ -133,6 +133,10 @@ class AstVMTokenizer(object):
             return self.Emit_Token(VMOp.MIN, node)
         elif op == 'max':
             return self.Emit_Token(VMOp.MAX, node)
+        elif op == 'ord':
+            self.Emit_Integer(0, node)
+            self.Emit_Token(VMOp.ADD, node)
+            return self.Emit_Token(VMOp.NOP, node)
         elif op == 'concat':
             return self.Emit_Token(VMOp.CAT, node)
         elif op == 'take':

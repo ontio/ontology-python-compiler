@@ -159,6 +159,9 @@ def bytes(str0):
 def state(*args):
     pass
 
+def ord(char):
+    pass
+
 # attr func
 def append(arg):
     pass
