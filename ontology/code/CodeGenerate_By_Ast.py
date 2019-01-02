@@ -50,6 +50,24 @@ def Print_Warning_global(filepath, node, message):
     with open(warning_file_path, 'a+') as out_file:
         out_file.write(message_w)
 
+class generic_modify_node(ast.NodeTransformer):
+    def generic_visit(self, node):
+        if hasattr(node, "lineno"):
+            self.parent_node_lineno = node.lineno
+            self.parent_node_col    = node.col_offset
+        ast.NodeVisitor.generic_visit(self, node)
+        return node
+
+    def visit_In(self, node):
+        node.lineno         = self.parent_node_lineno
+        node.col_offset     = self.parent_node_col
+        return node
+
+    def visit_NotIn(self, node):
+        node.lineno         = self.parent_node_lineno
+        node.col_offset     = self.parent_node_col
+        return node
+
 class ReWrite_CTX_STORE_TO_LOAD(ast.NodeTransformer):
     def __init__(self, func_desc):
         self.func_desc = func_desc
@@ -260,6 +278,9 @@ class Visitor_Of_Global(ast.NodeVisitor):
         self.global_num = 0
         self.codegencontext = codegencontext
 
+    def visit_Return(self,node):
+        Print_Error_global(self.codegencontext.main_file_path, node, "can not \"return\" outside of function.")
+
     def generic_visit(self, node):
         ast.NodeVisitor.generic_visit(self, node)
 
@@ -423,6 +444,9 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             self.Print_DoNot_Support("Function define in function.")
 
         self.already_visited = True
+
+        fixed_line_visitor = generic_modify_node()
+        fixed_line_visitor.visit(node)
 
         if not (self.func_desc.isyscall or self.func_desc.is_builtin): 
             # syscall and builtin get no func code. so do not set the label
@@ -755,11 +779,100 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_IsNot(self, node):
         self.codegencontext.tokenizer.Emit_Token(VMOp.EQUAL, node)
         self.codegencontext.tokenizer.Emit_Token(VMOp.NOT, node)
+
     def visit_In(self, node):
-        raise Exception("[Compiler ERROR. File: %s. in function: %s.]. Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, "\'in\'"))
+
+        # assume target a, and iter l in stack like the first below.
+        Start_target_label          = self.codegencontext.NewLabel()
+        End_target_label            = self.codegencontext.NewLabel()
+        End_target_label_bytes      = End_target_label.to_bytes(2, 'little', signed=True)
+        Start_target_label_bytes    = Start_target_label.to_bytes(2, 'little', signed=True)
+
+        # a, l
+        self.codegencontext.tokenizer.Emit_Token(VMOp.PUSH0, node) # set i to 0
+        self.codegencontext.SetLabel(Start_target_label, self.codegencontext.pc + 1)
+
+        # a, l, i. while start.
+        self.codegencontext.tokenizer.Emit_Token(VMOp.OVER, node)
+
+        # a, l, i, l
+        self.codegencontext.tokenizer.Emit_Token(VMOp.ARRAYSIZE, node)
+
+        # a, l, i, len
+        self.codegencontext.tokenizer.Emit_Token(VMOp.OVER, node)
+
+        # a, l, i, len, i
+        self.codegencontext.tokenizer.Emit_Token(VMOp.SWAP, node)
+
+        # a, l, i, i, len
+        self.codegencontext.tokenizer.Emit_Token(VMOp.LT, node)
+
+        # a, l, i, B  # assert while conditon.
+        self.codegencontext.tokenizer.Emit_Token(VMOp.DUP, node)
+
+        # a, l, i, B, B
+        self.codegencontext.tokenizer.Emit_Token(VMOp.JMPIFNOT, node, End_target_label_bytes)
+
+        # a, l, i, B
+        self.codegencontext.tokenizer.Emit_Token(VMOp.DROP, node)
+
+        # a, l, i, assert True. goto the body.
+        ##########################
+        self.codegencontext.tokenizer.Emit_Token(VMOp.PUSH2, node)
+        self.codegencontext.tokenizer.Emit_Token(VMOp.PICK, node)
+
+        # a, l, i, a
+        self.codegencontext.tokenizer.Emit_Token(VMOp.PUSH2, node)
+        self.codegencontext.tokenizer.Emit_Token(VMOp.PICK, node)
+
+        # a, l, i, a, l
+        self.codegencontext.tokenizer.Emit_Token(VMOp.PUSH2, node)
+        self.codegencontext.tokenizer.Emit_Token(VMOp.PICK, node)
+
+        # a, l, i, a, l, i
+        self.codegencontext.tokenizer.Emit_Token(VMOp.PICKITEM, node)
+
+        # a, l, i, a, l[i]
+        self.codegencontext.tokenizer.Emit_Token(VMOp.EQUAL, node)
+
+        # a, l, i, B
+        self.codegencontext.tokenizer.Emit_Token(VMOp.TOALTSTACK, node)
+
+        # a, l, i
+        self.codegencontext.tokenizer.Emit_Token(VMOp.PUSH1, node)
+        self.codegencontext.tokenizer.Emit_Token(VMOp.ADD, node)
+
+        # a, l, i = i + 1
+        self.codegencontext.tokenizer.Emit_Token(VMOp.FROMALTSTACK, node)
+
+        # a, l, i = i + 1, B
+        self.codegencontext.tokenizer.Emit_Token(VMOp.JMPIFNOT, node, Start_target_label_bytes)
+
+        # a, l, i
+        self.codegencontext.tokenizer.Emit_Token(VMOp.PUSHT, node)
+
+        # a, l, i, B
+
+        ##########################
+
+        # while conditon False or find the Value.
+        self.codegencontext.SetLabel(End_target_label, self.codegencontext.pc + 1)
+
+        # a, l, i, B
+        self.codegencontext.tokenizer.Emit_Token(VMOp.TOALTSTACK, node)
+
+        # a, l, i
+        self.codegencontext.tokenizer.Emit_Token(VMOp.DROP, node)
+        self.codegencontext.tokenizer.Emit_Token(VMOp.DROP, node)
+        self.codegencontext.tokenizer.Emit_Token(VMOp.DROP, node)
+
+        self.codegencontext.tokenizer.Emit_Token(VMOp.FROMALTSTACK, node)
+
+        # B, last value
 
     def visit_NotIn(self, node):
-        raise Exception("[Compiler ERROR. File: %s. in function: %s.]. Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, "\'not in\'"))
+        self.visit_In(node)
+        self.codegencontext.tokenizer.Emit_Token(VMOp.NOT, node)
 
     def visit_Not(self, node):
         self.codegencontext.tokenizer.Emit_Token(VMOp.NOT, node)
