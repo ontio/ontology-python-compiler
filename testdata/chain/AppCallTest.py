@@ -2,10 +2,10 @@ OntCversion = '2.0.0'
 from ontology.interop.System.App import RegisterAppCall, DynamicAppCall
 from ontology.interop.Ontology.Runtime import Base58ToAddress
 import ontology.builtins
-from ontology.libont import elt_in
+from ontology.libont import elt_in, hexstring2bytes, bytearray_reverse
 
 #this address is add_test.py
-CalculatorContract = RegisterAppCall('145c69fdc3c648f0846e8c366e6578564f047f1c', 'operation', 'args')
+CalculatorContract = RegisterAppCall('1a6f62cc0ff3d9ae32b0b924aeda2056a9fdfccb', 'operation', 'args')
 
 NAME = "AppCall000"
 
@@ -15,7 +15,7 @@ def Main(operation, args):
         print("StaticAppCall")
         return CalculatorContract(operation, args)
     elif operation[0:1] == 'd':
-        address = bytearray(b'\x1c\x7f\x04\x4f\x56\x78\x65\x6e\x36\x8c\x6e\x84\xf0\x48\xc6\xc3\xfd\x69\x5c\x14')
+        address = bytearray_reverse(hexstring2bytes('1a6f62cc0ff3d9ae32b0b924aeda2056a9fdfccb'))
         print("DynamicAppCall")
         operation = operation[1:]
         print(operation)

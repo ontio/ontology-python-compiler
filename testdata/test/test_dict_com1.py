@@ -2,8 +2,9 @@ OntCversion = '2.0.0'
 #!/usr/bin/env python3
 import ontology.builtins
 
+
+b = {i:j for i in range(1, 5) for j in range(5,8)}
 def main():
-    b = {i:j for i in range(1, 5) for j in range(5,8)}
     assert(b[1] == 7)
     assert(b[2] == 7)
     assert(b[3] == 7)

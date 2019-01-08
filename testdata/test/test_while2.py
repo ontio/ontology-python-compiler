@@ -1,9 +1,11 @@
 OntCversion = '2.0.0'
 #!/usr/bin/env python3
 from ontology.builtins import *
+i = 0
+items2 = 0
 
 def Main():
-    i = 0
+    global items2, i
     j = 0
     k = 0
     h = 0
@@ -60,3 +62,12 @@ def Main():
 
     print(i) # i = 8342
     assert(i == 8342)
+
+    test()
+
+def test():
+    assert(i == 8342)
+    assert(items2[0] == 'a')
+    assert(items2[1] == 'b')
+    assert(items2[2] == 'c')
+    assert(items2[3] == 'd')
