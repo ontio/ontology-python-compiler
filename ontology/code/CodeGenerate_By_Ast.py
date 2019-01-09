@@ -10,13 +10,19 @@ from ontology import __version__
 import json
 from ontology.code.StaticAppCall import RegisterAppCall, NotifyAction
 
+# Global arg set.
 ONTOLOGY_SC_FRAMEWORK       = 'ontology.interop.'
 ONTOLOGY_SC_FRAMEWORK_boa   = 'boa.interop.'
 ONTOLOGY_BUILTINS_M         = 'ontology.builtins'
 ONTOLOGY_BUILTINS_M_boa     = 'boa.builtins'
-OwnMainModule           = 'OwnMainModule'
-ForIndexPrefix          = 'ForIndexPrefix_Var###'
-ListCompName            = 'ListCompName###'
+OwnMainModule               = 'OwnMainModule'
+ForIndexPrefix              = 'ForIndexPrefix_Var###'
+ListCompName                = 'ListCompName###'
+ref_type_local              = 'Local'
+ref_type_global             = 'Global'
+
+Global_VarEnv               = 'Global_VarEnv###FixedName'
+Global_simulation_func_name = 'Global#Code'
 BUILTIN_AND_SYSCALL_LABEL_ADDR  = -2
 # keys, values, has_key current not support
 #buildins_list           = ['state', 'bytes', 'bytearray','ToScriptHash', 'print', 'list','len','abs','min','max','concat','take' ,'substr','keys','values', 'has_key','sha1', 'sha256','hash160', 'hash256', 'verify_signature', 'reverse','append','remove', 'Exception', 'throw_if_null','breakpoint']
@@ -50,6 +56,25 @@ def Print_Warning_global(filepath, node, message):
     with open(warning_file_path, 'a+') as out_file:
         out_file.write(message_w)
 
+class Visit_FirstGlobalNode(ast.NodeVisitor):
+    def __init__(self):
+        self.first_global_node = None
+
+    def generic_visit(self, node):
+        self.first_global_node = node
+
+    def visit_Module(self, node):
+        for stmt in node.body:
+            self.visit(stmt)
+            if self.first_global_node != None:
+                break
+
+    def visit_Import(self, node):
+        pass
+
+    def visit_ImportFrom(self, node):
+        pass
+
 class generic_modify_node(ast.NodeTransformer):
     def generic_visit(self, node):
         if hasattr(node, "lineno"):
@@ -64,6 +89,11 @@ class generic_modify_node(ast.NodeTransformer):
         return node
 
     def visit_NotIn(self, node):
+        node.lineno         = self.parent_node_lineno
+        node.col_offset     = self.parent_node_col
+        return node
+
+    def visit_arguments(self, node):
         node.lineno         = self.parent_node_lineno
         node.col_offset     = self.parent_node_col
         return node
@@ -192,12 +222,13 @@ class Abivisitor_step1(ast.NodeVisitor):
             self.AbiFunclist.append({"name":node.name, "parameters":args})
 
 class FuncVisitor_Of_StackSize(ast.NodeVisitor):
-    def __init__(self, func_desc):
+    def __init__(self, func_desc, is_global):
         self.stack_size         = 0
         self.func_desc          = func_desc
         self.already_visited    = False
         self.current_node       = None
         self.arg_num            = 0
+        self.is_global          = is_global
 
     def generic_visit(self, node):
         self.current_node = node
@@ -213,6 +244,8 @@ class FuncVisitor_Of_StackSize(ast.NodeVisitor):
         raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
     def visit_FunctionDef(self, node):
+        if self.is_global:
+            return 
         self.current_node = node
         if self.already_visited :
             self.Print_DoNot_Support(node, "function define in function.")
@@ -234,6 +267,9 @@ class FuncVisitor_Of_StackSize(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_arguments(self, node):
+        if self.is_global:
+            assert(False)
+
         self.current_node = node
 
         # these kinds of system call have vararg.
@@ -251,6 +287,8 @@ class FuncVisitor_Of_StackSize(ast.NodeVisitor):
         self.stack_size += len(node.args)
 
     def visit_Return(self, node):
+        if self.is_global:
+            assert(False)
         self.current_node = node
         self.stack_size += 1
         self.generic_visit(node)
@@ -408,6 +446,8 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.is_in_loop         = False
         self.codegencontext.tokenizer.current_func = func_desc
         self.codegencontext.tokenizer.global_converting = is_for_global
+        self.main_func_node     = None
+        self.global_declare     = []
 
     def Get_FuncDesc(self, funcname, node):
         return self.codegencontext.Get_FuncDesc(funcname, node, self.func_desc.filepath)
@@ -438,8 +478,12 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
     def visit_FunctionDef(self, node):
         self.current_node = node
+
         if self.is_for_global:
+            if node.name == 'main' or node.name == 'Main':
+                self.main_func_node = node
             return
+
         if self.already_visited:
             self.Print_DoNot_Support("Function define in function.")
 
@@ -477,14 +521,23 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         if node.defaults != []:
             self.Print_DoNot_Support(node, "defaults.")
 
+        if self.func_desc.isyscall or self.func_desc.is_builtin:
+            self.Print_Error(node, "Compiler Bug. builtins or syscall should not handle arguments. ")
+
+        GlobalArgNode = ast.Name(id = Global_VarEnv, ctx = ast.Load())
+        ast.copy_location(GlobalArgNode, node)
+
+        position = self.func_desc.NewLocal(Global_VarEnv, GlobalArgNode)
+        self.codegencontext.tokenizer.Emit_StoreLocal(position, GlobalArgNode)
+
         for arg in node.args:
             position = self.func_desc.NewLocal(arg.arg, arg)
             self.codegencontext.tokenizer.Emit_StoreLocal(position, arg)
 
-        self.Convert_Gloabal()
-        self.codegencontext.tokenizer.global_converting = False
+        #self.Convert_Global()
+        #self.codegencontext.tokenizer.global_converting = False
 
-    def Convert_Gloabal(self):
+    def Convert_Global(self):
         if self.func_desc.blong_module_name != OwnMainModule:
             return
 
@@ -560,6 +613,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
         # result_position: save the result. xxx. if node.iter just Name. so here refine the address, will get error.
         # no need result_position. just revisit the node.iter is ok. 
+        # here asumed have a result = iter. and this must be local.
         result_position = self.func_desc.Get_LocalStackPosition(ForIndexPrefix + str(self.func_desc.for_position))
         self.func_desc.for_position += 1
         self.codegencontext.tokenizer.Emit_StoreLocal(result_position, node)
@@ -587,8 +641,13 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         assert(type(node.target).__name__ == 'Name')
         # acctually here can visit node.target.
         assert(type(node.target.ctx).__name__ == 'Store')
-        target_position = self.func_desc.Get_LocalStackPosition(node.target.id) # here Ont only support Name taget. so here just ref it
+
+        """
+        # old way. now change to visit node.target.
+        target_position = self.func_desc.Get_LocalStackPosition(node.target.id, node.target) # here Ont only support Name taget. so here just ref it
         self.codegencontext.tokenizer.Emit_StoreLocal(target_position, node.target)
+        """
+        self.visit(node.target)
 
         # update save index.
         self.codegencontext.tokenizer.Emit_LoadLocal(index_position, node)
@@ -932,6 +991,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         func_desc = self.Get_FuncDesc(func_name, node)
         if func_name not in List_Attr_func:
             self.Print_Error(node, "do not support any other Attribute call other than 'append' or 'remove' or 'reverse'" )
+        assert(func_desc.isyscall or func_desc.is_builtin)
         self.visit(attr.value)
 
         if  func_desc.arg_num != len(node.args):
@@ -1046,7 +1106,13 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
             return
 
-        self.codegencontext.tokenizer.Emit_Token(VMOp.CALL, node, call_data)
+        if not self.is_for_global:
+            global_postion = self.func_desc.Read_LocalStackPosition(Global_VarEnv)
+            self.codegencontext.tokenizer.Emit_PickGlobal(global_postion, node)
+            self.codegencontext.tokenizer.Emit_Token(VMOp.CALL, node, call_data)
+        else:
+            self.codegencontext.tokenizer.Emit_Token(VMOp.DUPFROMALTSTACK, node)
+            self.codegencontext.tokenizer.Emit_Token(VMOp.CALL, node, call_data)
 
     # only save a bool(true or false) to the evalution stack.
     def visit_Compare(self, node):
@@ -1118,15 +1184,78 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.Emit_Data(str_bytes, node)
 
     def visit_Name(self, node):
+        global_postion = self.func_desc.Read_LocalStackPosition(Global_VarEnv, node)
+
+        if not self.is_for_global:
+            assert(global_postion != None)
         self.current_node = node
+
+        # like the orignal python sematic.
+        # howerver if you want store a global. it must init global var in global code for alloc space.
         if type(node.ctx).__name__ == 'Load':
-            name_position = self.func_desc.Read_LocalStackPosition(node.id, node)
-            self.codegencontext.tokenizer.Emit_LoadLocal(name_position, node)
+
+            if self.check_var_global(node.id):
+                name_position = self.func_desc.Read_Global_Position(node.id)
+                if name_position == None:
+                    Print_Error_global(self.func_desc.filepath, node, "Global Variable '%s' used before defined." % (node.id))
+                else:
+                    self.codegencontext.tokenizer.Emit_LoadGlobal(name_position, global_postion, node)
+            else:
+                name_position = self.func_desc.Read_LocalStackPosition(node.id, node)
+                if name_position == None:
+                    name_position = self.func_desc.Read_Global_Position(node.id)
+
+                    if name_position == None:
+                        Print_Error_global(self.func_desc.filepath, node, "Variable '%s' used before defined." % (node.id))
+
+                    self.codegencontext.tokenizer.Emit_LoadGlobal(name_position, global_postion, node)
+                else:
+                    self.codegencontext.tokenizer.Emit_LoadLocal(name_position, node)
+
         elif type(node.ctx).__name__ == 'Store':
-            name_position = self.func_desc.Get_LocalStackPosition(node.id)
-            self.codegencontext.tokenizer.Emit_StoreLocal(name_position, node)
+
+            if self.check_var_global(node.id):
+                name_position = self.func_desc.Read_Global_Position(node.id, node)
+                if name_position == None:
+                    Print_Error_global(self.func_desc.filepath, node, "Global Variable '%s' used before defined." % (node.id))
+                else:
+                    self.codegencontext.tokenizer.Emit_StoreGlobal(name_position, global_postion, node)
+            else:
+                name_position = self.func_desc.Get_LocalStackPosition(node.id, node)
+                assert(name_position != None)
+                self.codegencontext.tokenizer.Emit_StoreLocal(name_position, node)
+                assert(self.func_desc.ref_type[node.id] == ref_type_local)
+
         else:
             assert("Wrong Name ctx type")
+
+        # the usual method. local first. like 'C' lauguage.
+        """
+        if type(node.ctx).__name__ == 'Load':
+            name_position = self.func_desc.Read_LocalStackPosition(node.id, node)
+            if name_position != None:
+                self.codegencontext.tokenizer.Emit_LoadLocal(name_position, node)
+            else:
+                name_position = self.func_desc.Read_Global_Position(node.id)
+                if name_position == None:
+                    Print_Error_global(self.func_desc.filepath, node, "Variable '%s' used before defined." % (node.id))
+
+                self.codegencontext.tokenizer.Emit_LoadGlobal(name_position, global_postion, node)
+
+        elif type(node.ctx).__name__ == 'Store':
+            name_position = self.func_desc.Read_LocalStackPosition(node.id, node)
+            if name_position != None:
+                self.codegencontext.tokenizer.Emit_StoreLocal(name_position, node)
+            else:
+                name_position = self.func_desc.Read_Global_Position(node.id)
+                if name_position == None:
+                    name_position = self.func_desc.NewLocal(node.id, node)
+                    self.codegencontext.tokenizer.Emit_StoreLocal(name_position, node)
+                else:
+                    self.codegencontext.tokenizer.Emit_StoreGlobal(name_position, global_postion, node)
+        else:
+            assert("Wrong Name ctx type")
+        """
 
     def visit_Subscript(self, node):
         self.current_node = node
@@ -1360,9 +1489,6 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_Exec(self, node):
         self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
-    def visit_Global(self, node):
-        self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
-
     def visit_Tuple(self, node):
         self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
@@ -1377,6 +1503,26 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
     def visit_Repr(self, node):
         self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
+
+    def visit_Global(self, node):
+        if self.is_for_global:
+            Print_Error_global(self.func_desc.filepath, node, "use Global keywards is useless in Global Code.")
+
+        # can not check all. like global use. all variable asumed be locals. so all Golbal should be statement in the first line of function.
+        for var in node.names:
+            if var in self.func_desc.ref_type:
+                self.Print_Error(node, "Variable {} is used prior to global declaration.".format(var))
+
+            self.global_declare.append(var)
+
+    def check_var_global(self, name):
+        if self.is_for_global:
+            return False
+
+        if name in self.global_declare:
+            return True
+        else:
+            return False
 
     def visit_DictComp(self, node):
 
@@ -1476,37 +1622,63 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
         
 class FuncDescription:
-    def __init__(self, name, label, node, isyscall, filepath, module_name, is_builtin):
-        self.name       = name
-        self.label      = label
-        self.func_ast   = node
-        if node:
-            self.src_lineno = node.lineno
-        self.filepath   = filepath
-        self.isyscall   = isyscall
-        self.is_builtin = is_builtin
-        self.is_register_call  = False
+    def __init__(self, name, label, node, isyscall, filepath, module_name, is_builtin, is_global = None, global_map = None):
+        self.name               = name
+        self.filepath           = filepath
+        self.is_global          = is_global
         self.for_position       = 0
-        self.list_comp_position       = 0
-        self.have_return_value  = False
-        self.arg_num    = 0
-        assert(module_name != None)
-        #if self.isyscall:
-        self.blong_module_name = module_name
+        self.list_comp_position = 0
+        self.blong_module_name  = module_name
+        self.local_num          = 0
+        self.local_map          = {}
+        self.stack_size         = 0
+        self.func_ast           = node
+        self.global_map         = global_map
+        self.ref_type           = {}
 
-        self.local_num  = 0
-        self.local_map  = {}
-        # note. when self.is_builtin or self.isyscall assert. this value have no meanning
-        self.stack_size = 0
-        assert((self.isyscall and self.is_builtin) == False)
+        if is_global:
+            assert(global_map == None)
+            self.name           = Global_simulation_func_name
+            self.first_global_node = node
 
-    def Calculate_StackSize(self, global_num):
-        self.stack_size         = global_num
-        visitor_stacksize       = FuncVisitor_Of_StackSize(self)
+            #self.global_postion = 0
+            #self.global_map     = {}
+        else:
+            self.label          = label
+            if node:
+                self.src_lineno = node.lineno
+            self.is_register_call   = False
+            self.have_return_value  = False
+            self.arg_num        = 0
+            assert(module_name != None)
+            #if self.isyscall:
+            self.isyscall       = isyscall
+            self.is_builtin     = is_builtin
+
+            # note. when self.is_builtin or self.isyscall assert. this value have no meanning
+            assert((self.isyscall and self.is_builtin) == False)
+
+    def Calculate_StackSize(self):
+        if self.is_global:
+            self.stack_size         = 0
+        else:
+            self.stack_size         = 1 # Global_VarEnv
+
+        visitor_stacksize       = FuncVisitor_Of_StackSize(self, self.is_global)
         visitor_stacksize.visit(self.func_ast)
         self.stack_size         += visitor_stacksize.stack_size
         #self.arg_num            = visitor_stacksize.arg_num
         #print("Function %s. stack_size %d  self.arg_num %d" %(self.name, self.stack_size, self.arg_num))
+
+    def Check_VarRefLocal(self, name):
+        if not (name in self.ref_type):
+            assert(False)
+        return self.ref_type[name] == ref_type_local
+
+    def Check_VarRefGlobal(self, name):
+        if not (name in self.ref_type):
+            assert(False)
+        return self.ref_type[name] == ref_type_global
 
     def NewLocal(self, name, node = None):
         if name in self.local_map.keys():
@@ -1514,19 +1686,51 @@ class FuncDescription:
 
         self.local_map[name] = self.local_num
         self.local_num += 1
+
+        if (name in self.ref_type) and (self.ref_type[name] == ref_type_global):
+            if node != None:
+                Print_Error_global(self.filepath, node, "Variable {} has ref as Global Variable. Check your code.".format(name))
+            else:
+                raise Exception("Variable {} has ref as Global Variable. Check your code.".format(name))
+
+        self.ref_type[name] = ref_type_local
         return self.local_num - 1
 
-    def Get_LocalStackPosition(self, name):
-        if name in self.local_map.keys():
-            return self.local_map[name]
+    def Get_LocalStackPosition(self, name, node = None):
+        position = self.Read_LocalStackPosition(name, node)
+        if position != None:
+            return position
         else:
-            return self.NewLocal(name)
+            return self.NewLocal(name, node)
 
-    def Read_LocalStackPosition(self, name, node):
+    def Read_LocalStackPosition(self, name, node = None):
         if name in self.local_map.keys():
+            if (name in self.ref_type) and (self.ref_type[name] == ref_type_global):
+                if node != None:
+                    Print_Error_global(self.filepath, node, "Variable {} has ref as Global Variable. Check your code.".format(name))
+                else:
+                    raise Exception("Variable {} has ref as Global Variable. Check your code.".format(name))
+
+            assert(self.ref_type[name] == ref_type_local)
             return self.local_map[name]
         else:
-            Print_Error_global(self.filepath, node, "Variable '%s' used before defined." % (name))
+            return None
+
+    # code can both have global and local var with same name. but in function only can be local or global.
+    def Read_Global_Position(self, name, node = None):
+        if self.global_map == None:
+            return None
+        else:
+            if name in self.global_map.keys():
+                if (name in self.ref_type) and (self.ref_type[name] == ref_type_local):
+                    if node != None:
+                        Print_Error_global(self.filepath, node, "Variable {} has ref as Local Variable. Check your code.".format(name))
+                    else:
+                        raise Exception("Variable {} has ref as Local Variable. Check your code.".format(name))
+                self.ref_type[name] = ref_type_global
+                return self.global_map[name]
+            else:
+                return None
 
 class CodeGenContext:
     def __init__(self, SrcPath):
@@ -1542,6 +1746,7 @@ class CodeGenContext:
         self.file_hash          = None
         self.register_appcall   = {}
         self.register_action    = {}
+        self.global_simulation_func = None
         global warning_file_path
         warning_file_path       = self.Generate_new_name(SrcPath, '.py', '.warning')
         with open(warning_file_path, 'w+') as out_file:
@@ -1741,14 +1946,58 @@ class CodeGenContext:
             else:
                 assert(self.funcscope[i].is_register_call)
 
+    def Convert_Global_First(self):
+
+        visitor = Visit_FirstGlobalNode()
+        visitor.visit(self.main_astree)
+
+        fixed_line_visitor = generic_modify_node()
+        fixed_line_visitor.visit(self.main_astree)
+
+        self.global_simulation_func = FuncDescription(name = Global_simulation_func_name, label = None , node = self.main_astree, isyscall = None, filepath = self.main_file_path, module_name = OwnMainModule, is_builtin = None,is_global = True)
+
+        self.global_simulation_func.Calculate_StackSize()
+
+        CodeGenVisitor = Visitor_Of_FunCodeGen(self, self.global_simulation_func, True)
+        self.tokenizer.build_function_stack(self.global_simulation_func.stack_size, visitor.first_global_node)
+
+        CodeGenVisitor.visit(self.main_astree)
+
+        self.tokenizer.Emit_Token(VMOp.FROMALTSTACK, CodeGenVisitor.main_func_node)
+
+    def Set_GlobalMap_For_User_Func(self):
+        """
+        set func_desc for OwnMainModule.
+        so each OwnMainModule function get the Global Map.
+        access the Global Var.
+        """
+
+        for func_desc in self.funcscope.values():
+            if (not (func_desc.isyscall or func_desc.is_builtin)) and func_desc.blong_module_name == OwnMainModule:
+                func_desc.global_map         = self.global_simulation_func.local_map 
+
     def StartCodeGenerate(self):
+        """
+        ResolveFuncDecl first before Convert_Global_First
+        because of Convert_Global_First need all Function infomation. 
+        Golbal Code may call any function user have defined or imported.
+        so need the func infomation in funcscope.
+
+        howerver ResolveFuncDecl will create Function Desc. 
+        so the Glocal simulation function still do dot translation. 
+        and do do have the global map.
+        so ResolveFuncDecl can not fill this field when ResolveFuncDecl.
+
+        so after the Convert_Global_First. refield the FuncDescription's global_map field.
+        and each function in OwnMainModule can access the global var.
+        """
         # Cversion check.
         self.Cversion_check()
 
         # Bring Main into funscope first for the entry point. And bring all func into funcscope. Include Import
         main_func_node = self.ResolveFuncDecl(OwnMainModule)
 
-        # assert global size for all func.
+        # assert global size for all func. do the speical func for this func main job. 
         self.Calculate_GlobalSzie()
 
         # anlynze if the func have return value. and calculate the stack size
@@ -1757,7 +2006,15 @@ class CodeGenContext:
                 analyze_return_value_vistor = FuncVisitor_Of_AnalyzeReturnValue(func_desc)
                 analyze_return_value_vistor.visit(func_desc.func_ast)
             if not func_desc.is_register_call: 
-                func_desc.Calculate_StackSize(self.global_num)
+                func_desc.Calculate_StackSize()
+
+        """
+        Convert Global Code only one time now.
+        support any syntax Neptone support.
+        """
+        self.Convert_Global_First()
+
+        self.Set_GlobalMap_For_User_Func()
 
         #self.Print_FuncScope()
 
@@ -1766,8 +2023,8 @@ class CodeGenContext:
             raise Exception("No Entry function defined. Please define a 'Main' function")
 
         self.current_func_node = main_func_node
-        main_desc = FuncDescription('Main', None, main_func_node,False, self.main_file_path, OwnMainModule, False)
-        main_desc.Calculate_StackSize(self.global_num)
+        main_desc = FuncDescription('Main', None, main_func_node,False, self.main_file_path, OwnMainModule, False, False, self.global_simulation_func.local_map)
+        main_desc.Calculate_StackSize()
         self.ConvertFuncDecl(main_desc)
 
         # Iter the funcscope. Convert all other Func.
@@ -1828,7 +2085,12 @@ class CodeGenContext:
         name    = node.name
         funcast = node
         label   = self.NewLabel()
+        #if not (isyscall or is_builtin):
+        #    newfunc = FuncDescription(name ,label, funcast, isyscall, filepath, module_name, is_builtin, False, self.global_simulation_func.local_map)
+        #else:
+        #    newfunc = FuncDescription(name ,label, funcast, isyscall, filepath, module_name, is_builtin)
         newfunc = FuncDescription(name ,label, funcast, isyscall, filepath, module_name, is_builtin)
+
         if name in self.funcscope.keys():
             oldfunc = self.funcscope[name]
             if (not (oldfunc.isyscall or oldfunc.is_builtin)) and name != 'range':

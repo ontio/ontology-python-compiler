@@ -90,16 +90,41 @@ class AstVMTokenizer(object):
 
         return self.Emit_Token(code, node, byts)
 
+    def Emit_PickGlobal(self, global_postion, node):
+        assert(global_postion != None and global_postion >= 0)
+        self.Emit_Token(VMOp.DUPFROMALTSTACK, node)
+        self.Emit_Integer(global_postion, node)
+        self.Emit_Token(VMOp.PICKITEM, node)
+
+    def Emit_LoadGlobal(self, position, global_postion ,node):
+        assert(position != None and position >= 0)
+        assert(global_postion != None and global_postion >= 0)
+        self.Emit_Token(VMOp.DUPFROMALTSTACK, node)
+        self.Emit_Integer(global_postion, node)
+        self.Emit_Token(VMOp.PICKITEM, node)
+        self.Emit_Integer(position, node)
+        self.Emit_Token(VMOp.PICKITEM, node)
+
+    def Emit_StoreGlobal(self, position, global_postion, node):
+        assert(position != None and position >= 0)
+        assert(global_postion != None and global_postion >= 0)
+        self.Emit_Token(VMOp.DUPFROMALTSTACK, node)
+        self.Emit_Integer(global_postion, node)
+        self.Emit_Token(VMOp.PICKITEM, node)
+        self.Emit_Integer(position, node)
+        self.Emit_Integer(2, node)
+        self.Emit_Token(VMOp.ROLL, node)
+        self.Emit_Token(VMOp.SETITEM, node)
+
     def Emit_LoadLocal(self, position, node):
+        assert(position != None and position >= 0)
         self.Emit_Token(VMOp.DUPFROMALTSTACK, node)
         self.Emit_Integer(position, node)
         self.Emit_Token(VMOp.PICKITEM, node)
 
     def Emit_StoreLocal(self, position, node):
+        assert(position != None and position >= 0)
         self.Emit_Token(VMOp.DUPFROMALTSTACK, node)
-        if position < 0:
-            print("ERROR: stack position")
-            exit()
         self.Emit_Integer(position, node)
         self.Emit_Integer(2, node)
         self.Emit_Token(VMOp.ROLL, node)

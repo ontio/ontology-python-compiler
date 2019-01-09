@@ -6,10 +6,11 @@
 </p>
 
 
-<h1 align="center">ontology-python-compiler</h1>
+<h1 align="center">Neptune</h1>
 <p align="center">
   Python compiler for Ontology
 </p>
+
 
 
 - Free software: LGPL license
@@ -35,7 +36,7 @@ The compiler supports a subset of the Python language.
 
 - based abstract syntax tree.
 - free line coding.  compare to one line only with one statement restriction.
-- global var assigned.
+- global var assigned. any syntax Code can place to global which the "Neptune" support.
 - cascade compare. original python sematic 
 - cascade assignment.
 - if expr.
@@ -50,6 +51,10 @@ The compiler supports a subset of the Python language.
 - more accuracy debug message dump.
 - for, while break or continue.
 - logic and, or operation. support cascade usage. original python sematic
+- if in.
+- loop else.
+- global var shared between local functions. and if you store a global var. other local function can see the assignment. the sematic is same with original python. now global code only run one time before all function(include Main function).
+- support global keyword.
 
 #### What will it do
 
@@ -103,7 +108,7 @@ compiler.DumpAsm()
 
 ## DebugInfo
 
-FuncName:   indicate the opcode blongs to which function.
+FuncName:   indicate the opcode blongs to which function. Global#Code is for Code in Global.
 
 Lineno:          indicate the opcode blongs to which line number in source code.
 
@@ -119,35 +124,39 @@ TargetOff:      the relative offset between target address and current jump inst
 
 ```
 FuncName                       Lineno     Col   Offset     OpCode               JumpTarget           TargetOff           
-Main                           1          0     0          PUSH2               
-Main                           1          0     1          NEWARRAY            
-Main                           1          0     2          TOALTSTACK          
-Main                           2          8     3          PUSH10              
-Main                           2          4     4          DUPFROMALTSTACK     
-Main                           2          4     5          PUSH0               
-Main                           2          4     6          PUSH2               
-Main                           2          4     7          ROLL                
-Main                           2          4     8          SETITEM             
-Main                           3          16    9          DUPFROMALTSTACK     
-Main                           3          16    10         PUSH0               
-Main                           3          16    11         PICKITEM            
-Main                           3          11    12         CALL                 18                   6                   
-Main                           3          4     15         FROMALTSTACK        
-Main                           3          4     16         DROP                
-Main                           3          4     17         RET                 
-test                           5          0     18         PUSH2               
-test                           5          0     19         NEWARRAY            
-test                           5          0     20         TOALTSTACK          
-test                           5          9     21         DUPFROMALTSTACK     
-test                           5          9     22         PUSH0               
-test                           5          9     23         PUSH2               
-test                           5          9     24         ROLL                
-test                           5          9     25         SETITEM             
-test                           6          11    26         DUPFROMALTSTACK     
-test                           6          11    27         PUSH0               
-test                           6          11    28         PICKITEM            
-test                           6          4     29         FROMALTSTACK        
-test                           6          4     30         DROP                
-test                           6          4     31         RET      
+Global#Code                    1          0     0          PUSH2               
+Global#Code                    1          0     1          NEWARRAY            
+Global#Code                    1          0     2          TOALTSTACK          
+Global#Code                    1          14    3          PUSHBYTES5          
+Global#Code                    1          0     9          DUPFROMALTSTACK     
+Global#Code                    1          0     10         PUSH0               
+Global#Code                    1          0     11         PUSH2               
+Global#Code                    1          0     12         ROLL                
+Global#Code                    1          0     13         SETITEM             
+Global#Code                    3          4     14         PUSH2               
+Global#Code                    3          0     15         DUPFROMALTSTACK     
+Global#Code                    3          0     16         PUSH1               
+Global#Code                    3          0     17         PUSH2               
+Global#Code                    3          0     18         ROLL                
+Global#Code                    3          0     19         SETITEM             
+Global#Code                    4          0     20         FROMALTSTACK        
+Main                           4          0     21         PUSH3               
+Main                           4          0     22         NEWARRAY            
+Main                           4          0     23         TOALTSTACK          
+Main                           4          0     24         DUPFROMALTSTACK     
+Main                           4          0     25         PUSH0               
+Main                           4          0     26         PUSH2               
+Main                           4          0     27         ROLL                
+Main                           4          0     28         SETITEM             
+Main                           5          8     29         PUSH0               
+Main                           5          4     30         DUPFROMALTSTACK     
+Main                           5          4     31         PUSH1               
+Main                           5          4     32         PUSH2               
+Main                           5          4     33         ROLL                
+Main                           5          4     34         SETITEM             
+Main                           6          8     35         DUPFROMALTSTACK     
+Main                           6          8     36         PUSH0               
+Main                           6          8     37         PICKITEM            
+Main                           6          8     38         CALL                 49                   11    
 ```
 
