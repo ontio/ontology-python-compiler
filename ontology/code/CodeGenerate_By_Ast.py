@@ -414,6 +414,8 @@ class Visitor_Of_FuncDecl(ast.NodeVisitor):
                     self.codegencontext.NewFunc(node, self.isyscall_module, self.module_file_path, self.visited_module, False)
                 else:
                     self.codegencontext.NewFunc(node, self.isyscall_module, self.module_file_path, self.visited_module, self.is_builtin_module)
+                # if func be added. then added the depend import. so if you want resolve the depend auto. add the dependence in the first line of function.
+                self.generic_visit(node)
 
     def visit_Import(self, node):
         # all func will add to funcscope
@@ -2093,7 +2095,7 @@ class CodeGenContext:
 
         if name in self.funcscope.keys():
             oldfunc = self.funcscope[name]
-            if (not (oldfunc.isyscall or oldfunc.is_builtin)) and name != 'range':
+            if ((not (oldfunc.isyscall or oldfunc.is_builtin)) and name != 'range') and (oldfunc.func_ast.lineno != newfunc.func_ast.lineno or oldfunc.blong_module_name != newfunc.blong_module_name):
                 raise Exception("[ERROR: file %s. line %d]. Function '%s' defined before at line %d." % (filepath, node.lineno, name, oldfunc.src_lineno ))
 
         self.funcscope[newfunc.name] = newfunc
