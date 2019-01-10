@@ -1,9 +1,7 @@
 OntCversion = '2.0.0'
-from ontology.builtins import print
 from ontology.libont import str, hex
 from ontology.interop.System.App import RegisterAppCall, DynamicAppCall
 from ontology.interop.Ontology.Runtime import Base58ToAddress
-import ontology.builtins
 from ontology.libont import elt_in, hexstring2bytes, bytearray_reverse
 
 a = 12345678987654321

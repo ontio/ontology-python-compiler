@@ -1,5 +1,4 @@
 OntCversion = '2.0.0'
-from ontology.builtins import len, print
 from ontology.libont import hexstring2bytes, bytearray_reverse
 
 def Main():

@@ -1,6 +1,5 @@
 OntCversion = '2.0.0'
 #!/usr/bin/env python3
-import ontology.builtins
 
 def main():
     a = [5, 6, 7]

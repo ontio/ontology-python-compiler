@@ -1,6 +1,5 @@
 OntCversion = '2.0.0'
 #!/usr/bin/env python3
-from ontology.builtins import print, range, len 
 
 x = 6
 y = [9,8,7,6]

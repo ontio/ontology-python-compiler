@@ -1,5 +1,4 @@
 OntCversion = '2.0.0'
-import ontology.builtins
 a = 'hello'
 b = 'world'
 c = 'c'

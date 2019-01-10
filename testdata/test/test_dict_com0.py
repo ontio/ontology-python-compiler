@@ -1,6 +1,5 @@
 OntCversion = '2.0.0'
 #!/usr/bin/env python3
-import ontology.builtins
 
 def main():
     b = {i:i*i for i in range(1, 5)}

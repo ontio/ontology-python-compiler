@@ -1,5 +1,4 @@
 OntCversion = '2.0.0'
-from ontology.builtins import print, len
 from ontology.libont import int
 def main():
     a = '-012345'

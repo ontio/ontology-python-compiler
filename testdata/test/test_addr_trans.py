@@ -1,6 +1,5 @@
 OntCversion = '2.0.0'
 from ontology.libont import str, hex, hexstring2address, address2hexstring
-from ontology.builtins import print
 
 def Main():
     addr = 'f0a4da50914a53fb58635bd2d1445cf4ddcd9ed8'

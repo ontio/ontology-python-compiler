@@ -1,6 +1,5 @@
 OntCversion = '2.0.0'
 #!/usr/bin/env python3
-from ontology.builtins import print
 
 def main():
     m = 999

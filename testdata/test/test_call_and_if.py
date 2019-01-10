@@ -1,5 +1,4 @@
 OntCversion = '2.0.0'
-import ontology.builtins
 def Main():
     test(10, 2)
     res = test(2, 2)

@@ -1,5 +1,4 @@
 OntCversion = '2.0.0'
-from ontology.builtins import append, print
 
 m = {0:'a', 'a':'b', 'b':'c'}
 

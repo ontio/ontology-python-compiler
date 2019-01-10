@@ -1,7 +1,6 @@
 OntCversion = '2.0.0'
 from ontology.interop.System.App import RegisterAppCall, DynamicAppCall
 from ontology.interop.Ontology.Runtime import Base58ToAddress
-import ontology.builtins
 from ontology.libont import elt_in, hexstring2bytes, bytearray_reverse
 
 #this address is add_test.py

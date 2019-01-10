@@ -1,6 +1,5 @@
 OntCversion = '2.0.0'
 from ontology.libont import split
-from ontology.builtins import print
 
 def Main():
     s = "@abcd@efg@hijklmn@op@q@rst@uvwxy@z@"
