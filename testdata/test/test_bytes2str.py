@@ -1,6 +1,5 @@
 OntCversion = '2.0.0'
-from ontology.builtins import print
-from ontology.libont import bytes2hexstring, hexstring2bytes, elt_in
+from ontology.libont import bytes2hexstring, hexstring2bytes
 
 def Main():
     a = b'\x01\xef\xab\xcd\x23\x45\xff\xfe\xef\xed\xdc\xba\xa9\xf9\xe9\x9a\x9f\x9e\x99\x8e\x00\x01\x02\x10\x11\x1a\xa1\xff\xf1\xf0\xf0'

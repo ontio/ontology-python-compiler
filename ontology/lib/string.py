@@ -41,6 +41,7 @@ def _horspool_search(T, P):
     return -1
 
 def find(s, p):
+    from ontology.lib.string import _horspool_search, _sunday_search
     alg = 1
     if alg == 1:
         return _horspool_search(s, p)

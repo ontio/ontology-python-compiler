@@ -15,6 +15,7 @@ def elt_in(l, elt):
     return False
 
 def int(arg, scale):
+    from ontology.libont import elt_in
     slen = len(arg)
     n = 1
     num = 0
@@ -52,6 +53,7 @@ def int(arg, scale):
     return num
 
 def AddressFromVmCode(code):
+    from ontology.builtins import hash160
     Address = None
     assert(len(code) > 0)
     addr = hash160(code)
@@ -63,7 +65,15 @@ def AddressFromVmCode(code):
 
     return Address
 
-def str(arg_int, scale):
+def str(arg_int):
+    from ontology.libont import str_scale
+    return str_scale(arg_int, 10)
+
+def hex(arg_int):
+    from ontology.libont import str_scale
+    return concat('0x', str_scale(arg_int, 16))
+
+def str_scale(arg_int, scale):
     if scale != 10 and scale != 16:
         assert(False)
 
@@ -99,8 +109,17 @@ def bytes2hexstring(arg, big):
 
     return res
 
+def hexstring2address(arg):
+    from ontology.libont import hexstring2bytes, bytearray_reverse
+    return bytearray_reverse(hexstring2bytes(arg))
+
+def address2hexstring(arg):
+    from ontology.libont import bytes2hexstring, bytearray_reverse
+    return bytes2hexstring(bytearray_reverse(arg), 0)
+
 # note integer 0 have zero bytes. alway can make int to bytearray. but can not convert '0000abcd0000' will lose 0 bytes
 def hexstring2bytes(arg):
+    from ontology.libont import elt_in
     elt_p0 = ['0','1','2','3','4','5','6','7','8','9']
     elt_p1 = ['a', 'b', 'c', 'd', 'e', 'f']
     elt_p2 = ['A', 'B', 'C', 'D', 'E', 'F']

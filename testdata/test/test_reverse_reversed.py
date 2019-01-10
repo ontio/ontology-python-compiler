@@ -1,5 +1,4 @@
 OntCversion = '2.0.0'
-from ontology.builtins import reverse, reversed, print
 
 def main():
     a = [0,1,2,3,4]

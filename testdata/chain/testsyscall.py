@@ -5,7 +5,6 @@ from ontology.interop.System.Header import GetBlockHash
 from ontology.interop.System.Transaction import GetTransactionHash
 
 from ontology.interop.System.Blockchain import GetBlock
-from ontology.builtins import print
 
 def main(Height):
     Block   = GetBlock(Height)

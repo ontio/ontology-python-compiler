@@ -1,6 +1,5 @@
 OntCversion = '2.0.0'
 #!/usr/bin/evn python3
-import ontology.builtins
 
 def Main():
 

@@ -1,5 +1,4 @@
 OntCversion = '2.0.0'
-from ontology.builtins import print, len
 
 def Main():
     l = [1,2,3,4]

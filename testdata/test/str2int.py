@@ -1,6 +1,5 @@
 OntCversion = '2.0.0'
-from ontology.builtins import print, len
-from ontology.libont import int, elt_in
+from ontology.libont import int
 def main():
     a = '-012345'
     b = int(a, 10)
