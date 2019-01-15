@@ -2,12 +2,13 @@ import ast
 import os
 import binascii
 import importlib
+import json
+
 from ontology.util import Digest
 from ontology.code.astvmtoken import *
 from ontology.interop import VMOp
 from binascii import a2b_hex
 from ontology import __version__
-import json
 from ontology.code.StaticAppCall import RegisterAppCall, NotifyAction
 
 # Global arg set.
@@ -25,10 +26,10 @@ Global_VarEnv               = 'Global_VarEnv###FixedName'
 Global_simulation_func_name = 'Global#Code'
 BUILTIN_AND_SYSCALL_LABEL_ADDR  = -2
 # keys, values, has_key current not support
-#buildins_list           = ['state', 'bytes', 'bytearray','ToScriptHash', 'print', 'list','len','abs','min','max','concat','take' ,'substr','keys','values', 'has_key','sha1', 'sha256','hash160', 'hash256', 'verify_signature', 'reverse','append','remove', 'Exception', 'throw_if_null','breakpoint']
+# buildins_list           = ['state', 'bytes', 'bytearray', 'ToScriptHash', 'print', 'list', 'len', 'abs', 'min', 'max', 'concat', 'take', 'substr', 'keys', 'values', 'has_key', 'sha1', 'sha256', 'hash160', 'hash256', 'verify_signature', 'reverse', 'append', 'remove', 'Exception', 'throw_if_null', 'breakpoint']
 ONE_LINE_EXPR_SUPPORT_AST_TYPE   = ['Pass', 'Str']
 # xxx. Migrate have return value acctually.
-WITHOUT_RETURN_BUILTINSYSCALL = ['print','Log', 'throw_if_null', 'breakpoint', 'Notify', 'Put','Destroy', 'Delete', 'Exception']
+WITHOUT_RETURN_BUILTINSYSCALL = ['print', 'Log', 'throw_if_null', 'breakpoint', 'Notify', 'Put', 'Destroy', 'Delete', 'Exception']
 # all these three List_Attr_func assumed no return value.
 List_Attr_func = ['append', 'remove', 'reverse']
 warning_file_path = None
@@ -38,13 +39,13 @@ def print_location():
     print("Location: ",f_frame.f_code.co_filename, f_frame.f_lineno, f_frame.f_code.co_name)
 
 def Print_DoNot_Support(func_desc, node, message):
-    raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. Ontology Python Compiler do not support %s" %(func_desc.filepath, func_desc.name, node.lineno, message))
+    raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. The Neptune Compiler does not support %s" %(func_desc.filepath, func_desc.name, node.lineno, message))
 
 def Print_Error(func_desc, node , message):
     raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. %s" %(func_desc.filepath, func_desc.name, node.lineno, message))
 
 def Print_Not_Support(filepath, node, message):
-    raise Exception("[Compiler ERROR. File: %s. Line: %d]. Ontology Python Compiler do not support %s" %(filepath, node.lineno, message))
+    raise Exception("[Compiler ERROR. File: %s. Line: %d]. The Neptune Compiler does not support %s" %(filepath, node.lineno, message))
 
 def Print_Error_global(filepath, node , message):
     raise Exception("[Compiler ERROR. File: %s. Line: %d]. %s" %(filepath, node.lineno, message))
@@ -101,7 +102,7 @@ class generic_modify_node(ast.NodeTransformer):
 class ReWrite_CTX_STORE_TO_LOAD(ast.NodeTransformer):
     def __init__(self, func_desc):
         self.func_desc = func_desc
-    
+
     def visit_Name(self, node):
         assert(type(node.ctx).__name__ == 'Store')
         node.ctx = ast.Load()
@@ -145,12 +146,12 @@ class CVersion_Visitor(ast.NodeVisitor):
             if type(node).__name__ == 'Assign' and  len(node.targets) == 1 and type(node.targets[0]).__name__ == 'Name' and type(node.value).__name__ ==  'Str':
                 self.OntCversion = node.value.s
                 if self.OntCversion != __version__ or node.targets[0].id != 'OntCversion':
-                    Print_Warning_global(self.codegencontext.main_file_path, node, "Suggest Place 'OntCversion = '%s'' at 1st line of SmartContract." %(__version__))
+                    Print_Warning_global(self.codegencontext.main_file_path, node, "Place 'OntCversion = '%s'' at 1st line of SmartContract." %(__version__))
             else:
-                Print_Warning_global(self.codegencontext.main_file_path, node, "Suggest Place 'OntCversion = '%s'' at 1st line of SmartContract" %(__version__))
+                Print_Warning_global(self.codegencontext.main_file_path, node, "Place 'OntCversion = '%s'' at 1st line of SmartContract" %(__version__))
             return
 
-        Print_Warning_global(self.codegencontext.main_file_path, node, "Suggest Place 'OntCversion = '%s'' at 1st line of SmartContract" %(__version__))
+        Print_Warning_global(self.codegencontext.main_file_path, node, "Place 'OntCversion = '%s'' at 1st line of SmartContract" %(__version__))
 
     def visit_Module(self, node):
         self.generic_visit(node.body[0])
@@ -163,11 +164,11 @@ class FuncVisitor_Of_AnalyzeReturnValue(ast.NodeVisitor):
         self.visit_returned       = False
 
     def Print_DoNot_Support(self, node ,message):
-        raise Exception("[Compiler ERROR. File: %s in function: %s Line: %d]. Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+        raise Exception("[Compiler ERROR. File: %s in function: %s Line: %d]. The Neptuen Compiler does not support %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
     def Print_Error(self, node, message):
         raise Exception("[Compiler ERROR. File: %s in function: %s Line: %d]. %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
-        
+
     def visit_FunctionDef(self, node):
         self.current_node = node
         if self.already_visited :
@@ -181,10 +182,10 @@ class FuncVisitor_Of_AnalyzeReturnValue(ast.NodeVisitor):
     def visit_Return(self, node):
         self.current_node = node
         if self.func_desc.have_return_value and node.value == None:
-            self.Print_Error(node, "return value before. but here returns None. will get error." )
+            self.Print_Error(node, "You are returning a value and None, this will result in an error." )
 
         if self.visit_returned and (not self.func_desc.have_return_value) and node.value != None:
-            self.Print_Error(node, "return None before. but here returns value. will get error.")
+            self.Print_Error(node, "You are returning a value and None, this will result in an error.")
 
         if node.value != None :
             self.func_desc.have_return_value = True
@@ -218,7 +219,7 @@ class Abivisitor_step1(ast.NodeVisitor):
             # contruct args list first
             for arg in node.args.args:
                 args.append({"name": arg.arg, "type":""})
-                
+
             self.AbiFunclist.append({"name":node.name, "parameters":args})
 
 class FuncVisitor_Of_StackSize(ast.NodeVisitor):
@@ -236,19 +237,19 @@ class FuncVisitor_Of_StackSize(ast.NodeVisitor):
 
     def Print_DoNot_Support(self, node, message):
         if hasattr(node, 'lineno'):
-            raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+            raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. The Neptune Compiler does not support %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
         else:
-            raise Exception("[Compiler ERROR. File: %s. in function: %s. ]. Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, message))
+            raise Exception("[Compiler ERROR. File: %s. in function: %s. ]. The Neptune Compiler does not support %s" %(self.func_desc.filepath, self.func_desc.name, message))
 
     def Print_Error(self, node, message):
         raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
     def visit_FunctionDef(self, node):
         if self.is_global:
-            return 
+            return
         self.current_node = node
-        if self.already_visited :
-            self.Print_DoNot_Support(node, "function define in function.")
+        if self.already_visited:
+            self.Print_DoNot_Support(node, "Cannot define a function within another function.")
         self.already_visited = True
 
         if node.decorator_list != []:
@@ -366,17 +367,17 @@ class Visitor_Of_Global(ast.NodeVisitor):
 class Visitor_Of_FuncDecl(ast.NodeVisitor):
     def __init__(self, codegencontext, visited_module, list_func_imported):
         self.main_func_node     = None
-        self.visited_module     = visited_module; 
+        self.visited_module     = visited_module;
         self.codegencontext     = codegencontext
         self.isyscall_module    = False
         self.is_builtin_module  = False
         self.is_main_module     = False
         self.list_func_imported = list_func_imported
-        if visited_module == OwnMainModule: 
+        if visited_module == OwnMainModule:
             self.is_main_module = True
             assert(self.list_func_imported == None)
 
-        if visited_module != OwnMainModule: 
+        if visited_module != OwnMainModule:
             pymodule = importlib.import_module(visited_module, visited_module)
             module_file_path = pymodule.__file__
             source = open(module_file_path, 'rb')
@@ -465,7 +466,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.Print_DoNot_Support(node, "Class def.")
 
     def Print_DoNot_Support(self, node ,message):
-        raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+        raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. The Neptune Compiler does not support %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
     def Print_Error(self, node, message):
         raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. %s" %(self.func_desc.filepath, self.func_desc.name, node.lineno, message))
@@ -494,7 +495,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         fixed_line_visitor = generic_modify_node()
         fixed_line_visitor.visit(node)
 
-        if not (self.func_desc.isyscall or self.func_desc.is_builtin): 
+        if not (self.func_desc.isyscall or self.func_desc.is_builtin):
             # syscall and builtin get no func code. so do not set the label
             if node.name != 'Main' and node.name != 'main':
                 self.codegencontext.SetLabel(self.codegencontext.funcscope[node.name].label, self.codegencontext.pc + 1)
@@ -545,7 +546,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
         # global own the visitor by itself. but note the tokenizer confict.
         CodeGenVisitor = Visitor_Of_FunCodeGen(self.codegencontext, self.func_desc, True)
-        # due the  args translate first. so get the argname have the upper priority. so if have the same name of args and the global. 
+        # due the  args translate first. so get the argname have the upper priority. so if have the same name of args and the global.
         CodeGenVisitor.visit(self.codegencontext.main_astree)
 
     def visit_Assign(self, node):
@@ -614,12 +615,12 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.latest_loop_break_label = [for_start_label, for_end_label]
 
         # result_position: save the result. xxx. if node.iter just Name. so here refine the address, will get error.
-        # no need result_position. just revisit the node.iter is ok. 
+        # no need result_position. just revisit the node.iter is ok.
         # here asumed have a result = iter. and this must be local.
         result_position = self.func_desc.Get_LocalStackPosition(ForIndexPrefix + str(self.func_desc.for_position))
         self.func_desc.for_position += 1
         self.codegencontext.tokenizer.Emit_StoreLocal(result_position, node)
-        
+
         # len_position: load the result. and init len(result).
         self.codegencontext.tokenizer.Emit_LoadLocal(result_position, node)
         self.codegencontext.tokenizer.Emit_Token(VMOp.ARRAYSIZE, node)
@@ -703,7 +704,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.latest_loop_break_label = [while_start_label, while_end_label]
         self.is_in_loop = True
         for stmt in node.body:
-            self.visit(stmt) 
+            self.visit(stmt)
             self.latest_loop_break_label = [while_start_label, while_end_label]
             self.is_in_loop = True
         # current_node will update when visit.indicate the last node of visited
@@ -726,7 +727,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_Break(self, node):
         self.current_node = node
         if not self.is_in_loop:
-            self.Print_Error(node, "can not break in non loop.")
+            self.Print_Error(node, "You cannot break outside of a loop.")
         assert(len(self.latest_loop_break_label) == 2)
         # jmp to the end label
         target_label    = self.latest_loop_break_label[1]
@@ -736,7 +737,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_Continue(self, node):
         self.current_node = node
         if not self.is_in_loop:
-            self.Print_Error(node, "can not continue in non loop.")
+            self.Print_Error(node, "You cannot continue outside of a loop.")
         assert(len(self.latest_loop_break_label) == 2)
         # jmp to the end label
         target_label    = self.latest_loop_break_label[0]
@@ -750,7 +751,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         # indicate body after all if
         body_target_label = self.codegencontext.NewLabel()
         body_target_position = body_target_label.to_bytes(2, 'little', signed=True)
-        
+
         # codegen condition test.
         self.visit(node.test)
         jump_target_position = jump_target_label.to_bytes(2, 'little', signed=True)
@@ -795,7 +796,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_BitAnd(self, node):
         self.codegencontext.tokenizer.Emit_Token(VMOp.AND, node)
     def visit_FloorDiv(self, node):
-        raise Exception("[Compiler ERROR. File: %s. in function: %s.]. Ontology Python Compiler do not support %s" %(self.func_desc.filepath, self.func_desc.name, "FloorDiv"))
+        raise Exception("[Compiler ERROR. File: %s. in function: %s.]. The Neptune Compiler does not support %s" %(self.func_desc.filepath, self.func_desc.name, "FloorDiv"))
 
     def visit_BoolOp(self, node):
         assert(len(node.values) >= 2)
@@ -979,7 +980,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         else:
             for expr in node.elts:
                 self.visit(expr)
-            
+
             self.codegencontext.tokenizer.Emit_Integer(len(node.elts), node)
             self.codegencontext.tokenizer.Emit_Token(VMOp.PACK , node)
             self.codegencontext.tokenizer.Emit_Token(VMOp.DUP, node)
@@ -992,12 +993,12 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         func_name = attr.attr
         func_desc = self.Get_FuncDesc(func_name, node)
         if func_name not in List_Attr_func:
-            self.Print_Error(node, "do not support any other Attribute call other than 'append' or 'remove' or 'reverse'" )
+            self.Print_Error(node, "do not support any other Attribute call other than 'append' or 'remove' or 'reverse'")
         assert(func_desc.isyscall or func_desc.is_builtin)
         self.visit(attr.value)
 
         if  func_desc.arg_num != len(node.args):
-            self.Print_Error(node, "function '%s' need %d args. But you passed %d args" %(func_name, func_desc.arg_num,len(node.args)))
+            self.Print_Error(node, "Function '%s' requires exactly '%d' arguments but you passed '%d' args" %(func_name, func_desc.arg_num,len(node.args)))
 
         for arg in reversed(node.args):
             self.visit(arg)
@@ -1022,7 +1023,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         func_desc = self.Get_FuncDesc(funcname, node)
 
         if funcname in List_Attr_func:
-            self.Print_Error(node, "function '%s' is list attribute call. can not call directly." %(funcname))
+            self.Print_Error(node, "function '%s' is list attribute call, you cannot call it directly." %(funcname))
 
         # prepare args. note. concat, take, has_key, substr do not need reverse
         if funcname in ['concat', 'take', 'has_key', 'substr']:
@@ -1038,7 +1039,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                 pass
             else:
                 if  func_desc.arg_num != len(node.args):
-                    self.Print_Error(node, "Function '%s' Need '%d' args. but you passed '%d' args" %(funcname, func_desc.arg_num,len(node.args)))
+                    self.Print_Error(node, "Function '%s' requires exactly '%d' arguments but you passed '%d' args" %(funcname, func_desc.arg_num,len(node.args)))
             for arg in reversed(node.args):
                 self.visit(arg)
 
@@ -1060,7 +1061,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             if vmtoken == None:
                 self.Print_DoNot_Support(node, "builtin '%s'." %(funcname))
             return
-        else: 
+        else:
             assert(func_desc.isyscall)
             action_reset_the_syscall_name = False
             # convert DynamicAppCall first
@@ -1127,7 +1128,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         jump_target_label = self.codegencontext.NewLabel()
         jump_target_position = jump_target_label.to_bytes(2, 'little', signed=True)
 
-        # set a init top stack item. 
+        # set a init top stack item.
         self.visit(node.left)
 
         for i in range(opslen):
@@ -1413,7 +1414,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
             if len(generator.ifs) > 1:
                 bodyiftest              = ast.BoolOp()
-                bodyiftest.lineno       = generator.ifs[0].lineno 
+                bodyiftest.lineno       = generator.ifs[0].lineno
                 bodyiftest.col_offset   = generator.ifs[0].col_offset
                 bodyiftest.op           = ast.And()
                 bodyiftest.values       = []
@@ -1470,7 +1471,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_Raise(self, node):
         if hasattr(node, 'exc'):
             exc = node.exc
-            #if type(exc).__name__ == 'Call' and type(exc.func).__name__ == 'Name' and type(exc.func.ctx).__name__ == 'Load' and exc.func.id == 'Exception' and exc.keywords == [] and len(exc.args) == 1 and type(exc.args[0]).__name__ == 'Str': 
+            #if type(exc).__name__ == 'Call' and type(exc.func).__name__ == 'Name' and type(exc.func.ctx).__name__ == 'Load' and exc.func.id == 'Exception' and exc.keywords == [] and len(exc.args) == 1 and type(exc.args[0]).__name__ == 'Str':
             if type(exc).__name__ == 'Call' and type(exc.func).__name__ == 'Name' and type(exc.func.ctx).__name__ == 'Load' and exc.func.id == 'Exception' :
                 self.visit(exc)
                 #self.codegencontext.tokenizer.Emit_Builtins('Exception', node.exc)
@@ -1554,7 +1555,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
             if len(generator.ifs) > 1:
                 bodyiftest              = ast.BoolOp()
-                bodyiftest.lineno       = generator.ifs[0].lineno 
+                bodyiftest.lineno       = generator.ifs[0].lineno
                 bodyiftest.col_offset   = generator.ifs[0].col_offset
                 bodyiftest.op           = ast.And()
                 bodyiftest.values       = []
@@ -1622,7 +1623,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
     def visit_Delete(self, node):
         self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
-        
+
 class FuncDescription:
     def __init__(self, name, label, node, isyscall, filepath, module_name, is_builtin, is_global = None, global_map = None):
         self.name               = name
@@ -1764,7 +1765,7 @@ class CodeGenContext:
             assert(prev_addr < addr)
 
             if vmtoken.vm_op in link_op:
-                target_label    = int.from_bytes(vmtoken.data, byteorder = 'little') 
+                target_label    = int.from_bytes(vmtoken.data, byteorder = 'little')
                 target_addr     = self.labels[target_label]
                 assert(target_addr != -1)
                 vmtoken.target  = target_addr
@@ -1792,7 +1793,7 @@ class CodeGenContext:
 
             if vmtoken.vm_op in link_op:
                 assert(vmtoken.node.lineno)
-                offset          = int.from_bytes(vmtoken.data, byteorder = 'little', signed=True) 
+                offset          = int.from_bytes(vmtoken.data, byteorder = 'little', signed=True)
                 target_addr     =  offset + addr
                 print("{:<30} {:<10} {:<5} {:<10} {:<20} {:<20} {:<20}".format(vmtoken.cur_func.name,vmtoken.node.lineno, vmtoken.node.col_offset, vmtoken.addr, vmop_name, target_addr, offset))
             elif vmtoken.vm_op is VMOp.SYSCALL:
@@ -1878,7 +1879,7 @@ class CodeGenContext:
         FunctionsVarMap.append({"Method": main_func_desc.name, "VarMap": main_func_desc.local_map})
 
         for name, func_desc in self.funcscope.items():
-            if not (func_desc.isyscall or func_desc.is_builtin): 
+            if not (func_desc.isyscall or func_desc.is_builtin):
                 FunctionsVarMap.append({"Method": name, "VarMap": func_desc.local_map})
 
         FunctionsVarMap_t = {"Functions": FunctionsVarMap}
@@ -1896,7 +1897,7 @@ class CodeGenContext:
         step1 = Abivisitor_step1(step0.Funclist)
         step1.visit(self.main_astree)
         ABI_result["functions"] = step1.AbiFunclist
-        
+
         savedfile = self.Generate_new_name(self.main_file_path,'.py', '.abi.json')
         json_data = json.dumps(ABI_result, indent=4)
         self.write_file_with_str(json_data, savedfile)
@@ -1927,7 +1928,7 @@ class CodeGenContext:
 
         self.write_file_with_bytes(data, output_path)
 
-        data_str = binascii.hexlify(data).decode('ascii') 
+        data_str = binascii.hexlify(data).decode('ascii')
         with open(output_path_str, 'w') as out_file:
             out_file.write(data_str)
 
@@ -1976,17 +1977,17 @@ class CodeGenContext:
 
         for func_desc in self.funcscope.values():
             if (not (func_desc.isyscall or func_desc.is_builtin)) and func_desc.blong_module_name == OwnMainModule:
-                func_desc.global_map         = self.global_simulation_func.local_map 
+                func_desc.global_map         = self.global_simulation_func.local_map
 
     def StartCodeGenerate(self):
         """
         ResolveFuncDecl first before Convert_Global_First
-        because of Convert_Global_First need all Function infomation. 
+        because of Convert_Global_First need all Function infomation.
         Golbal Code may call any function user have defined or imported.
         so need the func infomation in funcscope.
 
-        howerver ResolveFuncDecl will create Function Desc. 
-        so the Glocal simulation function still do dot translation. 
+        howerver ResolveFuncDecl will create Function Desc.
+        so the Glocal simulation function still do dot translation.
         and do do have the global map.
         so ResolveFuncDecl can not fill this field when ResolveFuncDecl.
 
@@ -1999,7 +2000,7 @@ class CodeGenContext:
         # Bring Main into funscope first for the entry point. And bring all func into funcscope. Include Import
         main_func_node = self.ResolveFuncDecl(OwnMainModule)
 
-        # assert global size for all func. do the speical func for this func main job. 
+        # assert global size for all func. do the speical func for this func main job.
         self.Calculate_GlobalSzie()
 
         # anlynze if the func have return value. and calculate the stack size
@@ -2007,7 +2008,7 @@ class CodeGenContext:
             if not (func_desc.isyscall or func_desc.is_builtin):
                 analyze_return_value_vistor = FuncVisitor_Of_AnalyzeReturnValue(func_desc)
                 analyze_return_value_vistor.visit(func_desc.func_ast)
-            if not func_desc.is_register_call: 
+            if not func_desc.is_register_call:
                 func_desc.Calculate_StackSize()
 
         """
@@ -2117,4 +2118,4 @@ class CodeGenContext:
 def CodeGenerate(SrcPath):
     codegencontext = CodeGenContext(SrcPath)
     codegencontext.StartCodeGenerate()
-    return codegencontext 
+    return codegencontext
