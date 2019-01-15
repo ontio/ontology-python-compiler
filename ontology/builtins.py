@@ -45,12 +45,6 @@ def take(source, count):
 
 
 def range(start, stop):
-    """
-    range(start, stop) -> list object
-    Return an list that is a a sequence of integers from start (inclusive)
-    to stop (exclusive).  range(i, j) produces i, i+1, i+2, ..., j-1.
-    """
-
     length = stop - start
 
     out = list(length)

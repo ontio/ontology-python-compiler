@@ -13,17 +13,19 @@ from ontology import __version__
 from ontology.code.StaticAppCall import RegisterAppCall, NotifyAction
 
 # Global arg set.
-ONTOLOGY_SC_FRAMEWORK = 'ontology.interop.'
-ONTOLOGY_SC_FRAMEWORK_boa = 'boa.interop.'
-ONTOLOGY_BUILTINS_M = 'ontology.builtins'
-ONTOLOGY_BUILTINS_M_boa = 'boa.builtins'
-OwnMainModule = 'OwnMainModule'
-ForIndexPrefix = 'ForIndexPrefix_Var###'
-ListCompName = 'ListCompName###'
-ref_type_local = 'Local'
-ref_type_global = 'Global'
-Builtins_Module = 'ontology.builtins'
-Global_VarEnv = 'Global_VarEnv###FixedName'
+ONTOLOGY_SC_FRAMEWORK       = 'ontology.interop.'
+ONTOLOGY_SC_FRAMEWORK_boa   = 'boa.interop.'
+ONTOLOGY_BUILTINS_M         = 'ontology.builtins'
+ONTOLOGY_BUILTINS_M_boa     = 'boa.builtins'
+OwnMainModule               = 'OwnMainModule'
+ForIndexPrefix              = 'ForIndexPrefix_Var###'
+ListCompName                = 'ListCompName###'
+ref_type_local              = 'Local'
+ref_type_global             = 'Global'
+Builtins_Module             = 'ontology.builtins'
+Global_VarEnv               = 'Global_VarEnv###FixedName'
+Local_ArgLen                = 'Local_ArgLen###FixedName'
+Function_Call_Arglen        = 'Function_Call_Arglen###FixedName'
 Global_simulation_func_name = 'Global#Code'
 BUILTIN_AND_SYSCALL_LABEL_ADDR = -2
 # keys, values, has_key current not support
@@ -293,11 +295,11 @@ class FuncVisitor_Of_StackSize(ast.NodeVisitor):
         if (self.func_desc.isyscall or self.func_desc.is_builtin) and (self.func_desc.name == "RegisterAppCall" or self.func_desc.name == "DynamicAppCall" or self.func_desc.name == "RegisterAction" or self.func_desc.name == 'state'):
             pass
         else:
-            if node.vararg is not None:
-                self.Print_DoNot_Support(node, "vararg.")
+            if node.kwonlyargs != [] or node.kw_defaults != []:
+                self.Print_DoNot_Support(node, "kwonlyargs or kw_defaults.")
 
-            if node.defaults != []:
-                self.Print_DoNot_Support(node, "defaults.")
+            if node.kwarg != None:
+                self.Print_DoNot_Support(node, "kwarg.")
 
         self.func_desc.arg_num = len(node.args)
         self.arg_num = len(node.args)
@@ -537,27 +539,152 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             self.Print_Error(node, "Compiler Bug. Global can not have argument.")
             assert(False)
 
-        if node.vararg is not None:
-            self.Print_DoNot_Support(node, "vararg.")
+        if node.kwonlyargs != [] or node.kw_defaults != []:
+            self.Print_DoNot_Support(node, "kwonlyargs or kw_defaults.")
 
-        if node.defaults != []:
-            self.Print_DoNot_Support(node, "defaults.")
+        if node.kwarg is not None:
+            self.Print_DoNot_Support(node, "kwarg.")
 
         if self.func_desc.isyscall or self.func_desc.is_builtin:
             self.Print_Error(node, "Compiler Bug. builtins or syscall should not handle arguments. ")
 
-        GlobalArgNode = ast.Name(id=Global_VarEnv, ctx=ast.Load())
+        # set global first
+        GlobalArgNode = ast.Name(id = Global_VarEnv, ctx = ast.Load())
         ast.copy_location(GlobalArgNode, node)
-
         position = self.func_desc.NewLocal(Global_VarEnv, GlobalArgNode)
         self.codegencontext.tokenizer.Emit_StoreLocal(position, GlobalArgNode)
 
+        # set args len passed by caller
+        if not (self.func_desc.name == 'Main' or self.func_desc.name == 'main'):
+            Local_ArgLenposition    = self.func_desc.NewLocal(Local_ArgLen, node)
+            self.codegencontext.tokenizer.Emit_StoreLocal(Local_ArgLenposition, node)
+
+        # alloc args position. and check redefined.
         for arg in node.args:
-            position = self.func_desc.NewLocal(arg.arg, arg)
+            self.func_desc.NewLocal(arg.arg, arg)
+
+        if node.vararg != None:
+            vararg_position = self.func_desc.NewLocal(node.vararg.arg, node.vararg)
+
+        # calculate basic num.
+        AllArg_len              = len(node.args)
+        DefaultArg_len          = len(node.defaults)
+        NecessaryArg_len        = AllArg_len - DefaultArg_len
+        DefaultArg_startindex   = NecessaryArg_len
+        default_label_list      = {}
+        assert(NecessaryArg_len >= 0)
+        assert(DefaultArg_len <= AllArg_len)
+
+        # set NecessaryArg first. compile will change args less than NecessaryArg_len
+        iter_len = 0
+        while iter_len < NecessaryArg_len:
+            arg = node.args[iter_len]
+            position = self.func_desc.Read_LocalStackPosition(arg.arg, arg)
+            assert(position != None)
+            self.codegencontext.tokenizer.Emit_StoreLocal(position, arg)
+            iter_len += 1
+
+        # Main function can only have NecessaryArg.
+        if self.func_desc.name == 'Main' or self.func_desc.name == 'main':
+            if node.vararg != None or AllArg_len != NecessaryArg_len or DefaultArg_len != 0:
+                self.Print_Error(node, "Function \"Main\" can not have default arg or vararg.")
+            return
+
+        assert(iter_len == NecessaryArg_len)
+
+        # alloc the function body_label. set the address last at the argument avm code.
+        body_label                  = self.codegencontext.NewLabel()
+        body_label_bytes            = body_label.to_bytes(2, 'little', signed=True)
+
+        # blow code check the arg len passed by caller if the passed arglen equal iter_len. start from NecessaryArg_len.
+        iter_len = NecessaryArg_len
+        while iter_len < AllArg_len:
+            # alloc the label 
+            nextif          = self.codegencontext.NewLabel()
+            nextif_bytes    = nextif.to_bytes(2, 'little', signed=True)
+            self.codegencontext.tokenizer.Emit_LoadLocal(Local_ArgLenposition, node)
+            self.codegencontext.tokenizer.Emit_Integer(iter_len, node)
+            self.codegencontext.tokenizer.Emit_Token(VMOp.NUMEQUAL, node)
+            self.codegencontext.tokenizer.Emit_Token(VMOp.JMPIFNOT, node, nextif_bytes)
+            
+            # if true. will asume the passed arg have iter_len
+            set_defaults_bypassed_num   = iter_len - NecessaryArg_len # must start from 0
+            start_default_arg_index     = NecessaryArg_len
+            default_label               = self.codegencontext.NewLabel()
+            ii                          = set_defaults_bypassed_num
+            default_label_list[set_defaults_bypassed_num]  = default_label
+            default_label_bytes         = default_label.to_bytes(2, 'little', signed=True)
+
+            # set all default args passed by caller. ii indicated the number default arg set by caller. if all arg NecessaryArg. ii will be 0.
+            while ii > 0:
+                arg = node.args[start_default_arg_index]
+                position = self.func_desc.Read_LocalStackPosition(arg.arg, arg)
+                assert(position != None)
+                self.codegencontext.tokenizer.Emit_StoreLocal(position, arg)
+                ii -= 1
+                start_default_arg_index += 1
+
+            self.codegencontext.tokenizer.Emit_Token(VMOp.JMP, node, default_label_bytes)
+            self.codegencontext.SetLabel(nextif, self.codegencontext.pc + 1)
+            iter_len += 1
+
+        # generate the if len == AllArg_len code.
+        set_defaults_bypassed_num   = AllArg_len - NecessaryArg_len # must start from 0
+        start_default_arg_index     = NecessaryArg_len
+        ii                          = set_defaults_bypassed_num
+        vararg_empty_label          = self.codegencontext.NewLabel()
+        vararg_empty_label_bytes    = vararg_empty_label.to_bytes(2, 'little', signed=True)
+        assert(iter_len == AllArg_len)
+        assert(set_defaults_bypassed_num == DefaultArg_len)
+
+        while ii > 0:
+            arg = node.args[start_default_arg_index]
+            position = self.func_desc.Read_LocalStackPosition(arg.arg, arg)
+            assert(position != None)
+            self.codegencontext.tokenizer.Emit_StoreLocal(position, arg)
+            ii -= 1
+            start_default_arg_index += 1
+
+        if node.vararg != None:
+            vararg_less_label           = self.codegencontext.NewLabel()
+            vararg_less_label_bytes     = vararg_less_label.to_bytes(2, 'little', signed=True)
+            self.codegencontext.tokenizer.Emit_LoadLocal(Local_ArgLenposition, node.vararg)
+            self.codegencontext.tokenizer.Emit_Integer(iter_len, node.vararg)
+            self.codegencontext.tokenizer.Emit_Token(VMOp.SUB, node.vararg)
+            self.codegencontext.tokenizer.Emit_Token(VMOp.DUP, node.vararg)
+            self.codegencontext.tokenizer.Emit_Token(VMOp.PUSH0, node.vararg)
+            self.codegencontext.tokenizer.Emit_Token(VMOp.GT, node.vararg)
+            self.codegencontext.tokenizer.Emit_Token(VMOp.JMPIFNOT, node.vararg, vararg_less_label_bytes)
+            self.codegencontext.tokenizer.Emit_Token(VMOp.PACK, node.vararg)
+            self.codegencontext.tokenizer.Emit_StoreLocal(vararg_position, node.vararg)
+            self.codegencontext.tokenizer.Emit_Token(VMOp.JMP, node.vararg, body_label_bytes)
+
+            self.codegencontext.SetLabel(vararg_less_label, self.codegencontext.pc + 1)
+            self.codegencontext.tokenizer.Emit_Token(VMOp.DROP, node.vararg)
+
+        self.codegencontext.tokenizer.Emit_Token(VMOp.JMP, node, vararg_empty_label_bytes)
+
+        # make new label. and set all defaults.
+        start_default_arg_index     = NecessaryArg_len
+        for i in range(DefaultArg_len):
+            default_label = default_label_list[i]
+            default_expr = node.defaults[i]
+            self.codegencontext.SetLabel(default_label, self.codegencontext.pc + 1)
+            self.visit(default_expr)
+            arg = node.args[start_default_arg_index + i]
+            position = self.func_desc.Read_LocalStackPosition(arg.arg, arg)
+            assert(position != None)
             self.codegencontext.tokenizer.Emit_StoreLocal(position, arg)
 
-        # self.Convert_Global()
-        # self.codegencontext.tokenizer.global_converting = False
+        # make empty vararg. set last default_label to current address.
+        assert(len(default_label_list) == DefaultArg_len)
+        self.codegencontext.SetLabel(vararg_empty_label, self.codegencontext.pc + 1)
+        if node.vararg != None:
+            self.codegencontext.tokenizer.Emit_Token(VMOp.PUSH0, node.vararg)
+            self.codegencontext.tokenizer.Emit_Token(VMOp.NEWARRAY, node.vararg)
+            self.codegencontext.tokenizer.Emit_StoreLocal(vararg_position, node.vararg)
+
+        self.codegencontext.SetLabel(body_label, self.codegencontext.pc + 1)
 
     def Convert_Global(self):
         if self.func_desc.blong_module_name != OwnMainModule:
@@ -1043,9 +1170,16 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         for arg in reversed(node.args):
             self.visit(arg)
 
+        # all Attrubute all is builtin currently
         vmtoken = self.codegencontext.tokenizer.Emit_Builtins(func_name, node)
         if vmtoken is None:
             self.Print_DoNot_Support(node, "builtin '%s'." % (func_name))
+
+    # only used in function call depackage.
+    def visit_Starred(self, node):
+        assert(type(node.ctx).__name__ == 'Load')
+        self.visit(node.value)
+        self.codegencontext.tokenizer.Emit_Token(VMOp.UNPACK, node)
 
     def visit_Call(self, node):
         self.current_node = node
@@ -1056,6 +1190,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         if type(node.func).__name__ != 'Name' or type(node.func.ctx).__name__ != 'Load':
             self.Print_DoNot_Support(node, type(node.func).__name__ + "type func call.")
 
+        # not support keywords
         if node.keywords != []:
             self.Print_DoNot_Support(node, "Call function with keywords.")
 
@@ -1078,10 +1213,33 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             if (func_desc.isyscall or func_desc.is_builtin) and (func_desc.name == "DynamicAppCall" or func_desc.name == 'state'):
                 pass
             else:
-                if func_desc.arg_num != len(node.args):
-                    self.Print_Error(node, "Function '%s' requires exactly '%d' arguments but you passed '%d' args" % (funcname, func_desc.arg_num, len(node.args)))
-            for arg in reversed(node.args):
-                self.visit(arg)
+                if  func_desc.arg_num != len(node.args):
+                    #self.Print_Error(node, "Function '%s' Need '%d' args. but you passed '%d' args" %(funcname, func_desc.arg_num,len(node.args)))
+                    pass
+
+            # only support normal defaults args. note registere function is syscall.
+            # can not use TOALTSTACK as usually. because if some var access it's var. will pick it from altstack. will goes run.
+            # so use TOALTSTACK is dangers. use Emit_StoreLocal instead.
+            if not (func_desc.is_builtin or func_desc.isyscall):
+                arg_len_position = self.func_desc.Get_LocalStackPosition(Function_Call_Arglen)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.PUSH0, node)
+                self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
+                for arg in reversed(node.args):
+                    self.visit(arg)
+                    if type(arg).__name__ == 'Starred':
+                        pass
+                    else:
+                        self.codegencontext.tokenizer.Emit_Token(VMOp.PUSH1, node)
+
+                    self.codegencontext.tokenizer.Emit_LoadLocal(arg_len_position, node)
+                    self.codegencontext.tokenizer.Emit_Token(VMOp.ADD, node)
+                    self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
+
+                # pass the arg number to callee.
+                self.codegencontext.tokenizer.Emit_LoadLocal(arg_len_position, node)
+            else:
+                for arg in reversed(node.args):
+                    self.visit(arg)
 
         if not (func_desc.is_builtin or func_desc.isyscall):
             call_target_label = func_desc.label
@@ -1148,6 +1306,11 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             vmtoken.syscall_name = syscall_print
 
             return
+
+        assert(not (func_desc.isyscall or func_desc.is_builtin or func_desc.is_register_call))
+
+        #arg_len = len(node.args)
+        #self.codegencontext.tokenizer.Emit_Integer(arg_len, node)
 
         if not self.is_for_global:
             global_postion = self.func_desc.Read_LocalStackPosition(Global_VarEnv)
@@ -1702,9 +1865,9 @@ class FuncDescription:
 
     def Calculate_StackSize(self):
         if self.is_global:
-            self.stack_size = 0
+            self.stack_size         = 1  # Function_Call_Arglen. Global do not have other 3 FixedName args.
         else:
-            self.stack_size = 1  # Global_VarEnv
+            self.stack_size         = 4  # Global_VarEnv, Local_ArgLen, vararg, Function_Call_Arglen.  note main function only have Global_VarEnv.
 
         visitor_stacksize = FuncVisitor_Of_StackSize(self, self.is_global)
         visitor_stacksize.visit(self.func_ast)
