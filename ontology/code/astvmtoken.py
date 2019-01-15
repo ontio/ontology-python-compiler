@@ -211,7 +211,7 @@ class AstVMTokenizer(object):
             length = len(syscall_name)
             ba = bytearray([length]) + bytearray(syscall_name)
             vmtoken = self.Emit_Token(VMOp.SYSCALL, node, data=ba)
-            vmtoken.syscall_name =sys_name 
+            vmtoken.syscall_name = sys_name
             return vmtoken
 
         return None
