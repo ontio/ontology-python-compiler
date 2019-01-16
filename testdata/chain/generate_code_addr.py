@@ -1,10 +1,12 @@
-OntCversion = '2.0.0'
 from ontology.interop.Ontology.Contract import Migrate
 from ontology.interop.System.Runtime import Notify
 from ontology.interop.System.Storage import Put, GetContext, Get
 
+OntCversion = '2.0.0'
+
 KEY = "KEY"
 NAME = "getaddr000"
+
 
 def Main(operation, args):
     if operation == "codeaddr":
@@ -18,6 +20,7 @@ def Main(operation, args):
         return get()
     if operation == "name":
         return NAME
+
 
 def codeaddr(code):
     """
@@ -40,8 +43,10 @@ def codeaddr(code):
 
     return True
 
+
 def get():
     return Get(GetContext(), KEY)
+
 
 def put():
     Put(GetContext(), KEY, 897)
