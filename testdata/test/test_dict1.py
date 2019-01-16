@@ -1,7 +1,7 @@
 OntCversion = '2.0.0'
 
-def Main():
 
+def Main():
     d = {}
 
     d['a'] = 4
@@ -10,4 +10,3 @@ def Main():
     d['mydict'] = {}
     assert(d['a'] == 4)
     assert(d[13] == 3)
-

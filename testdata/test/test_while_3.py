@@ -1,5 +1,6 @@
 OntCversion = '2.0.0'
 
+
 def Main():
     i = 0
     while i < 10:
@@ -15,7 +16,7 @@ def Main():
     x = 0
     while i < 10:
         if i == 8:
-            pass 
+            pass
         i += 1
     else:
         x = 9

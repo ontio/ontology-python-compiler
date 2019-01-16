@@ -1,7 +1,8 @@
 OntCversion = '2.0.0'
 
+
 def main():
-    a = [0,1,2,3,4]
+    a = [0, 1, 2, 3, 4]
     a.reverse()
     assert(a[0] == 4)
     assert(a[1] == 3)
@@ -19,6 +20,7 @@ def main():
     assert(a[2] == 2)
     assert(a[3] == 3)
     assert(a[4] == 4)
+
 
 def printlist(l):
     for i in l:

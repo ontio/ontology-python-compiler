@@ -1,6 +1,7 @@
 OntCversion = '2.0.0'
 from ontology.libont import hexstring2bytes, bytearray_reverse
 
+
 def Main():
     a = "145c69fdc3c648f0846e8c366e6578564f047f1c"
     b = hexstring2bytes(a)

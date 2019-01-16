@@ -1,4 +1,6 @@
 OntCversion = '2.0.0'
+
+
 def Main():
     strx = "hello steven"
     a = 2
@@ -7,7 +9,7 @@ def Main():
     d = 8
     e = 8
     x = 0
-    if a <  b < c < d >= e:
+    if a < b < c < d >= e:
         x = 99
         print(strx)
 
@@ -15,4 +17,3 @@ def Main():
     print(x)
     assert(x == 99)
     assert(y == 16)
-

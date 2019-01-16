@@ -3,6 +3,7 @@ a = 'hello'
 b = 'world'
 c = 'c'
 
+
 def Main():
     x = getdict()
     assert(x[a] == 1)
@@ -12,7 +13,7 @@ def Main():
     print(x[b])
     print(x['c'])
 
-def getdict():
 
-    dic = {a:1, b:2, 'c':3}
+def getdict():
+    dic = {a: 1, b: 2, 'c': 3}
     return dic

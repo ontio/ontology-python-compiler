@@ -1,5 +1,6 @@
 OntCversion = '2.0.0'
-#!/usr/bin/env python3
+# !/usr/bin/env python3
+
 
 def Main():
     i = 0
@@ -20,7 +21,7 @@ def Main():
                     k = k + 3
                     continue
                 k = k + 1
-            j =j +  1
+            j = j + 1
 
         i = i + j + k
 
@@ -49,7 +50,7 @@ def Main():
             for y in items2:  # 4
                 print("2 level")
 
-                count = count +  1
+                count = count + 1
                 if count > 20:
                     print("for 2 level break")
                     break
@@ -59,7 +60,7 @@ def Main():
                     if count > 5:
                         print("for 3 level continue")
                         continue
-                    count = count +  1
+                    count = count + 1
 
                 count = count + 2
 
@@ -69,5 +70,5 @@ def Main():
 
         i = i + count + s
 
-    print(i) # i = 8343
+    print(i)  # i = 8343
     assert(i == 8343)

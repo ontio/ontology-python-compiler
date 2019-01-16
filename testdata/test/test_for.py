@@ -1,10 +1,11 @@
 OntCversion = '2.0.0'
-#!/usr/bin/env python3
+# !/usr/bin/env python3
+
 
 def main():
     a = range(0, 20)
     b = range(0, 20)
-    c = range(0,10)
+    c = range(0, 10)
 
     k = 0
     m = 0
@@ -31,16 +32,18 @@ def main():
         k += 1
 
         if i == 15:
-            print("1 for break in");break
+            print("1 for break in")
+            break
 
         if i == 10:
-            print("1 for continue in");continue
+            print("1 for continue in")
+            continue
 
         for n in c:
             if n == 5:
                 x = 100
                 k += x
-                print("3 for break in");
+                print("3 for break in")
                 break
             k += 1
 

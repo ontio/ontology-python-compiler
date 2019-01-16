@@ -1,11 +1,9 @@
 OntCversion = '2.0.0'
 
+
 def Main():
-
     a = 3
-
     b = 2
-
     m = 12
 
     if not a == b:   # this currently works
@@ -15,7 +13,6 @@ def Main():
     assert(m == 21)
 
     if a != b:
-
         print("numbers 2 and 3 are not equal")
         m = 82
 
@@ -25,13 +22,11 @@ def Main():
     k = 'hello'
 
     if j != k:
-
         print("string j is not equal to string k")
         m = 1
 
     else:
         m = 2
-
         print("string j is equal to string k")
     assert(m == 2)
 
@@ -44,6 +39,5 @@ def Main():
 
     else:
         m = 4
-
         print("bytearrays m and m2 are equal")
     assert(m == 3)

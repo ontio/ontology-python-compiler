@@ -1,6 +1,7 @@
 OntCversion = '2.0.0'
-def Main():
 
+
+def Main():
     j = 10
 
     d = {
@@ -18,6 +19,6 @@ def Main():
     assert(k == 10)
     print(k)
 
-def mymethod(a, b):
 
+def mymethod(a, b):
     return a + b

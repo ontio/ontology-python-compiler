@@ -1,5 +1,6 @@
 OntCversion = '2.0.0'
 
+
 def Main():
     for i in test():
         if i == 4:
@@ -32,7 +33,7 @@ def Main():
         if i == 4:
             pass
         while i < 4:
-            if i ==3:
+            if i == 3:
                 pass
             i += 1
         else:
@@ -49,7 +50,7 @@ def Main():
         if i == 4:
             pass
         while i < 4:
-            if i ==3:
+            if i == 3:
                 pass
             i += 1
         else:
@@ -62,5 +63,6 @@ def Main():
 
     assert(x == 8)
 
+
 def test():
-    return [1,2,3,4,5]
+    return [1, 2, 3, 4, 5]
