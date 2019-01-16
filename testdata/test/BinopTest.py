@@ -1,6 +1,7 @@
 OntCversion = '2.0.0'
 # tested
 
+
 def Main():
     a = 9
     b = 7
@@ -18,7 +19,7 @@ def Main():
     c = a >> 2
     print('>>')
     print(c)
-    assert(c == 2) 
+    assert(c == 2)
 
     c = b >> 1
     print('>>')
@@ -30,7 +31,7 @@ def Main():
     print(c)
     assert(c == 14)
 
-    c = a^b
+    c = a ^ b
     print('^')
     print(c)
     assert(c == 14)
@@ -40,11 +41,11 @@ def Main():
     print(c)
     assert(c == 2)
 
-    #c = - a // 2
+    # c = - a // 2
     # FloorDiv
-    #print('//')
-    #print(c)
-    #assert(c == -5)
+    # print('//')
+    # print(c)
+    # assert(c == -5)
 
     c = a / 2
     print('/')
