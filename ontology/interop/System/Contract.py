@@ -5,7 +5,8 @@ def GetStorageContext(contract):
     pass
 
 
-def Destroy():
+def Destroy(contract):
     """
+    :param contract:
     """
     pass
