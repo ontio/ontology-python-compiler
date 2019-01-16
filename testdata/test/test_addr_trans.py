@@ -1,6 +1,5 @@
-from ontology.libont import str, hex, hexstring2address, address2hexstring
-
 OntCversion = '2.0.0'
+from ontology.libont import str, hex, hexstring2address, address2hexstring
 
 
 def Main():

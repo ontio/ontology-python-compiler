@@ -1,6 +1,5 @@
-from ontology.libont import list_remove_elt, elt_in
-
 OntCversion = '2.0.0'
+from ontology.libont import list_remove_elt, elt_in
 
 
 def main():

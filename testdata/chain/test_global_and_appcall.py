@@ -1,8 +1,7 @@
+OntCversion = '2.0.0'
 from ontology.libont import str, hex
 from ontology.interop.System.App import RegisterAppCall, DynamicAppCall
 from ontology.libont import elt_in, hexstring2bytes, bytearray_reverse
-
-OntCversion = '2.0.0'
 
 
 def Main(operation, args):

@@ -1,8 +1,7 @@
+OntCversion = '2.0.0'
 from ontology.interop.Ontology.Contract import Migrate
 from ontology.interop.System.Runtime import Notify
 from ontology.interop.System.Storage import Put, GetContext, Get
-
-OntCversion = '2.0.0'
 
 KEY = "KEY"
 NAME = "testname111"

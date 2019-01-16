@@ -1,6 +1,5 @@
-from ontology.libont import int
-
 OntCversion = '2.0.0'
+from ontology.libont import int
 
 
 def main():

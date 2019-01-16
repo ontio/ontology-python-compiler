@@ -1,10 +1,9 @@
+OntCversion = '2.0.0'
 from ontology.interop.System.Block import GetTransactionByIndex
 from ontology.interop.System.Blockchain import GetTransactionByHash
 from ontology.interop.System.Header import GetBlockHash
 from ontology.interop.System.Transaction import GetTransactionHash
 from ontology.interop.System.Blockchain import GetBlock
-
-OntCversion = '2.0.0'
 
 
 def main(Height):
