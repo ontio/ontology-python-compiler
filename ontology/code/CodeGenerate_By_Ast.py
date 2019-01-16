@@ -177,7 +177,7 @@ class FuncVisitor_Of_AnalyzeReturnValue(ast.NodeVisitor):
         self.visit_returned = False
 
     def Print_DoNot_Support(self, node, message):
-        raise Exception("[Compiler ERROR. File: %s in function: %s Line: %d]. The Neptuen Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+        raise Exception("[Compiler ERROR. File: %s in function: %s Line: %d]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
     def Print_Error(self, node, message):
         raise Exception("[Compiler ERROR. File: %s in function: %s Line: %d]. %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
