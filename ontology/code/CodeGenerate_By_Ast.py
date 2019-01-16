@@ -23,7 +23,7 @@ ListCompName = 'ListCompName###'
 ref_type_local = 'Local'
 ref_type_global = 'Global'
 Builtins_Module = 'ontology.builtins'
-Global_VarEnv = 'Global_VarEnv### fixedName'
+Global_VarEnv = 'Global_VarEnv###FixedName'
 Global_simulation_func_name = 'Global#Code'
 BUILTIN_AND_SYSCALL_LABEL_ADDR = -2
 # keys, values, has_key current not support
