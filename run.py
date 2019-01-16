@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
 from ontology.compiler import Compiler
-import getopt, sys, subprocess, os
+import getopt
+import sys
+import subprocess
+import os
 
 filename = None
 runmode = 0
 deletedebug = False
 
+
 def deletedebugfile(filename, strs):
     d_file = filename.replace('.py', strs)
     if os.path.isfile(d_file):
-        subprocess.call(["rm",d_file])
+        subprocess.call(["rm", d_file])
 
-if __name__ ==  '__main__':
-    opts, args = getopt.getopt(sys.argv[1:],"n:m:d")
+
+if __name__ == '__main__':
+    opts, args = getopt.getopt(sys.argv[1:], "n:m:d")
     for op, value in opts:
         if op == "-n":
             filename = value
@@ -21,7 +26,7 @@ if __name__ ==  '__main__':
         if op == "-d":
             deletedebug = True
 
-    if filename == None:
+    if filename is None:
         print("Filename do not set!!!")
         exit()
 
