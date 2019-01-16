@@ -3,9 +3,10 @@ import os
 import binascii
 import importlib
 import json
+import sys
 
 from ontology.util import Digest
-from ontology.code.astvmtoken import *
+from ontology.code.astvmtoken import AstVMTokenizer
 from ontology.interop import VMOp
 from binascii import a2b_hex
 from ontology import __version__
@@ -22,7 +23,7 @@ ListCompName = 'ListCompName###'
 ref_type_local = 'Local'
 ref_type_global = 'Global'
 Builtins_Module = 'ontology.builtins'
-Global_VarEnv = 'Global_VarEnv###FixedName'
+Global_VarEnv = 'Global_VarEnv### fixedName'
 Global_simulation_func_name = 'Global#Code'
 BUILTIN_AND_SYSCALL_LABEL_ADDR = -2
 # keys, values, has_key current not support
@@ -1357,9 +1358,9 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
     def visit_NameConstant(self, node):
         self.current_node = node
-        if node.value == True:
+        if node.value:
             self.codegencontext.tokenizer.Emit_Integer(1, node)
-        elif node.value == False:
+        elif not node.value:
             self.codegencontext.tokenizer.Emit_Integer(0, node)
         elif node.value is None:
             str_bytes = 'N'.encode('utf-8')
@@ -1379,11 +1380,11 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         if type(node.value).__name__ == 'Call':
             self.generic_visit(node)
             if type(node.value.func).__name__ == 'Name':
-                funcname    = node.value.func.id
-                func_desc   = self.codegencontext.funcscope[funcname]
+                funcname = node.value.func.id
+                func_desc = self.codegencontext.funcscope[funcname]
                 # handle normal func first
                 if not (func_desc.is_builtin or func_desc.isyscall):
-                    if func_desc.have_return_value :
+                    if func_desc.have_return_value:
                         self.codegencontext.tokenizer.Emit_Token(VMOp.DROP, node)
                 # here hypothesis all buildins and syscall other than conditon will return a value.
                 elif not (funcname in WITHOUT_RETURN_BUILTINSYSCALL or funcname in self.codegencontext.register_action.keys()):
@@ -1402,7 +1403,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             if type(node.value).__name__ == 'Pass':
                 self.generic_visit(node)
             elif type(node.value).__name__ == 'Str':
-                #self.generic_visit(node)
+                # self.generic_visit(node)
                 pass
             else:
                 self.generic_visit(node)
@@ -1413,8 +1414,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         assert(False)
 
     def visit_ListComp(self, node):
-
-        self.current_node   = node
+        self.current_node = node
         # construct load list
         array_name = ListCompName + str(self.func_desc.list_comp_position)
         array_position = self.func_desc.Get_LocalStackPosition(array_name)
@@ -1424,77 +1424,77 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.Emit_StoreLocal(array_position, node)
 
         # construct load array
-        array_load      = ast.Name()
-        array_load.id   = array_name
-        array_load.ctx   = ast.Load()
+        array_load = ast.Name()
+        array_load.id = array_name
+        array_load.ctx = ast.Load()
         self.func_desc.list_comp_position += 1
 
         # construct Attrubute.
-        call_attr       = ast.Attribute(value = array_load, attr = 'append', ctx = ast.Load(), lineno = node.lineno, col_offset = node.col_offset)
+        call_attr = ast.Attribute(value=array_load, attr='append', ctx=ast.Load(), lineno=node.lineno, col_offset=node.col_offset)
 
         # construct append(element)
-        node_call       = ast.Call()
-        call_args       = [node.elt]
-        node_call.func  = call_attr
-        node_call.args  = call_args
+        node_call = ast.Call()
+        call_args = [node.elt]
+        node_call.func = call_attr
+        node_call.args = call_args
         node_call.keywords = []
         node_call.starargs = None
-        node_call.kwargs   = None
-        node_call.lineno   = node.lineno
+        node_call.kwargs = None
+        node_call.lineno = node.lineno
         node_call.col_offset = node.col_offset
 
         node_for_prev = None
 
         for generator in reversed(node.generators):
             if len(generator.ifs) != 0:
-                bodyif      = ast.If()
+                bodyif = ast.If()
             else:
-                bodyif      = None
+                bodyif = None
 
             if len(generator.ifs) > 1:
-                bodyiftest              = ast.BoolOp()
-                bodyiftest.lineno       = generator.ifs[0].lineno
-                bodyiftest.col_offset   = generator.ifs[0].col_offset
-                bodyiftest.op           = ast.And()
-                bodyiftest.values       = []
+                bodyiftest = ast.BoolOp()
+                bodyiftest.lineno = generator.ifs[0].lineno
+                bodyiftest.col_offset = generator.ifs[0].col_offset
+                bodyiftest.op = ast.And()
+                bodyiftest.values = []
                 for test in generator.ifs:
                     bodyiftest.values.append(test)
                 if node_for_prev is None:
-                    #bodyif.body         = [array_load, node_call]
-                    bodyif.body         = [node_call]
+                    # bodyif.body         = [array_load, node_call]
+                    bodyif.body = [node_call]
                 else:
-                    bodyif.body         = [node_for_prev]
-                bodyif.test             = bodyiftest
-                bodyif.orelse           = []
-                bodyif.lineno           = generator.ifs[0].lineno
-                bodyif.col_offset       = generator.ifs[0].col_offset
+                    bodyif.body = [node_for_prev]
+                bodyif.test = bodyiftest
+                bodyif.orelse = []
+                bodyif.lineno = generator.ifs[0].lineno
+                bodyif.col_offset = generator.ifs[0].col_offset
             elif len(generator.ifs) == 1:
-                bodyif.test             = generator.ifs[0]
-                bodyif.orelse           = []
-                bodyif.lineno           = generator.ifs[0].lineno
-                bodyif.col_offset       = generator.ifs[0].col_offset
+                bodyif.test = generator.ifs[0]
+                bodyif.orelse = []
+                bodyif.lineno = generator.ifs[0].lineno
+                bodyif.col_offset = generator.ifs[0].col_offset
                 if node_for_prev is None:
-                    #bodyif.body         = [array_load, node_call]
-                    bodyif.body         = [node_call]
+                    # bodyif.body         = [array_load, node_call]
+                    bodyif.body = [node_call]
                 else:
-                    bodyif.body         = [node_for_prev]
+                    bodyif.body = [node_for_prev]
             else:
                 assert(bodyif is None)
 
-            node_for            = ast.For()
-            node_for.target     = generator.target
-            node_for.iter       = generator.iter
-            node_for.orelse     = []
-            node_for.lineno     = node.lineno
+            node_for = ast.For()
+            node_for.target = generator.target
+            node_for.iter = generator.iter
+            node_for.orelse = []
+            node_for.lineno = node.lineno
             node_for.col_offset = node.col_offset
             if bodyif is not None:
-                node_for.body   = [bodyif]
+                node_for.body = [bodyif]
             else:
                 if node_for_prev is None:
-                    #node_for.body   = [array_load, node_call]
-                    node_for.body   = [node_call]
+                    # node_for.body   = [array_load, node_call]
+                    node_for.body = [node_call]
                 else:
-                    node_for.body   = [node_for_prev]
+                    node_for.body = [node_for_prev]
 
             node_for_prev = node_for
 
@@ -1510,10 +1510,10 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_Raise(self, node):
         if hasattr(node, 'exc'):
             exc = node.exc
-            #if type(exc).__name__ == 'Call' and type(exc.func).__name__ == 'Name' and type(exc.func.ctx).__name__ == 'Load' and exc.func.id == 'Exception' and exc.keywords == [] and len(exc.args) == 1 and type(exc.args[0]).__name__ == 'Str':
-            if type(exc).__name__ == 'Call' and type(exc.func).__name__ == 'Name' and type(exc.func.ctx).__name__ == 'Load' and exc.func.id == 'Exception' :
+            # if type(exc).__name__ == 'Call' and type(exc.func).__name__ == 'Name' and type(exc.func.ctx).__name__ == 'Load' and exc.func.id == 'Exception' and exc.keywords == [] and len(exc.args) == 1 and type(exc.args[0]).__name__ == 'Str':
+            if type(exc).__name__ == 'Call' and type(exc.func).__name__ == 'Name' and type(exc.func.ctx).__name__ == 'Load' and exc.func.id == 'Exception':
                 self.visit(exc)
-                #self.codegencontext.tokenizer.Emit_Builtins('Exception', node.exc)
+                # self.codegencontext.tokenizer.Emit_Builtins('Exception', node.exc)
             else:
                 self.Print_Error(node, "Only Support 'Raise Exception(str_message)'.")
         else:
@@ -1568,7 +1568,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
     def visit_DictComp(self, node):
 
-        self.current_node   = node
+        self.current_node = node
         # construct map value
         map_name = ListCompName + str(self.func_desc.list_comp_position)
         map_position = self.func_desc.Get_LocalStackPosition(map_name)
@@ -1577,62 +1577,62 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.Emit_StoreLocal(map_position, node)
 
         # construct Map load Name
-        map_load        = ast.Name()
-        map_load.id     = map_name
-        map_load.ctx    = ast.Load()
+        map_load = ast.Name()
+        map_load.id = map_name
+        map_load.ctx = ast.Load()
         self.func_desc.list_comp_position += 1
 
-        add_Key_node = ast.Assign(targets=[ast.Subscript(value=map_load,  slice=ast.Index(value=node.key), ctx=ast.Store(), lineno = node.lineno, col_offset = node.col_offset)], value=node.value, lineno = node.lineno, col_offset = node.col_offset)
+        add_Key_node = ast.Assign(targets=[ast.Subscript(value=map_load,  slice=ast.Index(value=node.key), ctx=ast.Store(), lineno=node.lineno, col_offset=node.col_offset)], value=node.value, lineno=node.lineno, col_offset=node.col_offset)
 
         node_for_prev = None
 
         for generator in reversed(node.generators):
             if len(generator.ifs) != 0:
-                bodyif      = ast.If()
+                bodyif = ast.If()
             else:
-                bodyif      = None
+                bodyif = None
 
             if len(generator.ifs) > 1:
-                bodyiftest              = ast.BoolOp()
-                bodyiftest.lineno       = generator.ifs[0].lineno
-                bodyiftest.col_offset   = generator.ifs[0].col_offset
-                bodyiftest.op           = ast.And()
-                bodyiftest.values       = []
+                bodyiftest = ast.BoolOp()
+                bodyiftest.lineno = generator.ifs[0].lineno
+                bodyiftest.col_offset = generator.ifs[0].col_offset
+                bodyiftest.op = ast.And()
+                bodyiftest.values = []
                 for test in generator.ifs:
                     bodyiftest.values.append(test)
                 if node_for_prev is None:
-                    bodyif.body         = [add_Key_node]
+                    bodyif.body = [add_Key_node]
                 else:
-                    bodyif.body         = [node_for_prev]
-                bodyif.test             = bodyiftest
-                bodyif.orelse           = []
-                bodyif.lineno           = generator.ifs[0].lineno
+                    bodyif.body = [node_for_prev]
+                bodyif.test = bodyiftest
+                bodyif.orelse = []
+                bodyif.lineno = generator.ifs[0].lineno
                 bodyif.col_offset = generator.ifs[0].col_offset
             elif len(generator.ifs) == 1:
-                bodyif.test             = generator.ifs[0]
-                bodyif.orelse           = []
-                bodyif.lineno           = generator.ifs[0].lineno
-                bodyif.col_offset       = generator.ifs[0].col_offset
+                bodyif.test = generator.ifs[0]
+                bodyif.orelse = []
+                bodyif.lineno = generator.ifs[0].lineno
+                bodyif.col_offset = generator.ifs[0].col_offset
                 if node_for_prev is None:
-                    bodyif.body         = [add_Key_node]
+                    bodyif.body = [add_Key_node]
                 else:
-                    bodyif.body         = [node_for_prev]
+                    bodyif.body = [node_for_prev]
             else:
                 assert(bodyif is None)
 
-            node_for            = ast.For()
-            node_for.target     = generator.target
-            node_for.iter       = generator.iter
-            node_for.orelse     = []
-            node_for.lineno     = node.lineno
+            node_for = ast.For()
+            node_for.target = generator.target
+            node_for.iter = generator.iter
+            node_for.orelse = []
+            node_for.lineno = node.lineno
             node_for.col_offset = node.col_offset
             if bodyif is not None:
-                node_for.body   = [bodyif]
+                node_for.body = [bodyif]
             else:
                 if node_for_prev is None:
-                    node_for.body   = [add_Key_node]
+                    node_for.body = [add_Key_node]
                 else:
-                    node_for.body   = [node_for_prev]
+                    node_for.body = [node_for_prev]
 
             node_for_prev = node_for
 
@@ -1643,11 +1643,10 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
     def visit_IfExp(self, node):
-
-        orelse_label    = self.codegencontext.NewLabel()
-        orelse_positon  = orelse_label.to_bytes(2, 'little', signed=True)
-        end_label       = self.codegencontext.NewLabel()
-        end_position    = end_label.to_bytes(2, 'little', signed=True)
+        orelse_label = self.codegencontext.NewLabel()
+        orelse_positon = orelse_label.to_bytes(2, 'little', signed=True)
+        end_label = self.codegencontext.NewLabel()
+        end_position = end_label.to_bytes(2, 'little', signed=True)
 
         self.visit(node.test)
         self.codegencontext.tokenizer.Emit_Token(VMOp.JMPIFNOT, node, orelse_positon)
@@ -1663,54 +1662,55 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
     def visit_Delete(self, node):
         self.Print_DoNot_Support(node, "'" + type(node).__name__ + "'")
 
+
 class FuncDescription:
-    def __init__(self, name, label, node, isyscall, filepath, module_name, is_builtin, is_global = None, global_map = None):
-        self.name               = name
-        self.filepath           = filepath
-        self.is_global          = is_global
-        self.for_position       = 0
+    def __init__(self, name, label, node, isyscall, filepath, module_name, is_builtin, is_global=None, global_map=None):
+        self.name = name
+        self.filepath = filepath
+        self.is_global = is_global
+        self.for_position = 0
         self.list_comp_position = 0
-        self.blong_module_name  = module_name
-        self.local_num          = 0
-        self.local_map          = {}
-        self.stack_size         = 0
-        self.func_ast           = node
-        self.global_map         = global_map
-        self.ref_type           = {}
+        self.blong_module_name = module_name
+        self.local_num = 0
+        self.local_map = {}
+        self.stack_size = 0
+        self.func_ast = node
+        self.global_map = global_map
+        self.ref_type = {}
 
         if is_global:
             assert(global_map is None)
-            self.name           = Global_simulation_func_name
+            self.name = Global_simulation_func_name
             self.first_global_node = node
 
-            #self.global_postion = 0
-            #self.global_map     = {}
+            # self.global_postion = 0
+            # self.global_map     = {}
         else:
-            self.label          = label
+            self.label = label
             if node:
                 self.src_lineno = node.lineno
-            self.is_register_call   = False
-            self.have_return_value  = False
-            self.arg_num        = 0
+            self.is_register_call = False
+            self.have_return_value = False
+            self.arg_num = 0
             assert(module_name is not None)
-            #if self.isyscall:
-            self.isyscall       = isyscall
-            self.is_builtin     = is_builtin
+            # if self.isyscall:
+            self.isyscall = isyscall
+            self.is_builtin = is_builtin
 
             # note. when self.is_builtin or self.isyscall assert. this value have no meanning
-            assert((self.isyscall and self.is_builtin) == False)
+            assert(not (self.isyscall and self.is_builtin))
 
     def Calculate_StackSize(self):
         if self.is_global:
-            self.stack_size         = 0
+            self.stack_size = 0
         else:
-            self.stack_size         = 1 # Global_VarEnv
+            self.stack_size = 1  # Global_VarEnv
 
-        visitor_stacksize       = FuncVisitor_Of_StackSize(self, self.is_global)
+        visitor_stacksize = FuncVisitor_Of_StackSize(self, self.is_global)
         visitor_stacksize.visit(self.func_ast)
-        self.stack_size         += visitor_stacksize.stack_size
-        #self.arg_num            = visitor_stacksize.arg_num
-        #print("Function %s. stack_size %d  self.arg_num %d" % (self.name, self.stack_size, self.arg_num))
+        self.stack_size += visitor_stacksize.stack_size
+        # self.arg_num            = visitor_stacksize.arg_num
+        # print("Function %s. stack_size %d  self.arg_num %d" % (self.name, self.stack_size, self.arg_num))
 
     def Check_VarRefLocal(self, name):
         if not (name in self.ref_type):
@@ -1722,7 +1722,7 @@ class FuncDescription:
             assert(False)
         return self.ref_type[name] == ref_type_global
 
-    def NewLocal(self, name, node = None):
+    def NewLocal(self, name, node=None):
         if name in self.local_map.keys():
             Print_Error_global(self.filepath, node, "Variable '%s' already defined." % (name))
 
@@ -1738,14 +1738,14 @@ class FuncDescription:
         self.ref_type[name] = ref_type_local
         return self.local_num - 1
 
-    def Get_LocalStackPosition(self, name, node = None):
+    def Get_LocalStackPosition(self, name, node=None):
         position = self.Read_LocalStackPosition(name, node)
         if position is not None:
             return position
         else:
             return self.NewLocal(name, node)
 
-    def Read_LocalStackPosition(self, name, node = None):
+    def Read_LocalStackPosition(self, name, node=None):
         if name in self.local_map.keys():
             if (name in self.ref_type) and (self.ref_type[name] == ref_type_global):
                 if node is not None:
@@ -1759,7 +1759,7 @@ class FuncDescription:
             return None
 
     # code can both have global and local var with same name. but in function only can be local or global.
-    def Read_Global_Position(self, name, node = None):
+    def Read_Global_Position(self, name, node=None):
         if self.global_map is None:
             return None
         else:
@@ -1774,26 +1774,27 @@ class FuncDescription:
             else:
                 return None
 
+
 class CodeGenContext:
     def __init__(self, SrcPath):
-        source                  = open(SrcPath, 'rb')
-        SrcCode                 = source.read()
-        self.tokenizer          = AstVMTokenizer()
-        self.funcscope          = {}
-        self.labels             = []
-        self.current_func_node  = None
-        self.main_astree        = ast.parse(SrcCode)
-        self.main_file_path     = SrcPath
-        self.global_num         = 0
-        self.file_hash          = None
-        self.register_appcall   = {}
-        self.register_action    = {}
+        source = open(SrcPath, 'rb')
+        SrcCode = source.read()
+        self.tokenizer = AstVMTokenizer()
+        self.funcscope = {}
+        self.labels = []
+        self.current_func_node = None
+        self.main_astree = ast.parse(SrcCode)
+        self.main_file_path = SrcPath
+        self.global_num = 0
+        self.file_hash = None
+        self.register_appcall = {}
+        self.register_action = {}
         self.global_simulation_func = None
         global warning_file_path
-        warning_file_path       = self.Generate_new_name(SrcPath, '.py', '.warning')
+        warning_file_path = self.Generate_new_name(SrcPath, '.py', '.warning')
         with open(warning_file_path, 'w+') as out_file:
             out_file.write("")
-        #print(ast.dump(self.main_astree))
+        # print(ast.dump(self.main_astree))
 
     def LinkProcess(self):
         all_token = self.tokenizer.vm_tokens.items()
@@ -1804,14 +1805,14 @@ class CodeGenContext:
             assert(prev_addr < addr)
 
             if vmtoken.vm_op in link_op:
-                target_label    = int.from_bytes(vmtoken.data, byteorder = 'little')
-                target_addr     = self.labels[target_label]
+                target_label = int.from_bytes(vmtoken.data, byteorder='little')
+                target_addr = self.labels[target_label]
                 assert(target_addr != -1)
-                vmtoken.target  = target_addr
-                offset          = target_addr - vmtoken.addr
-                vmtoken.data    = offset.to_bytes(2, 'little', signed=True)
+                vmtoken.target = target_addr
+                offset = target_addr - vmtoken.addr
+                vmtoken.data = offset.to_bytes(2, 'little', signed=True)
 
-        prev_addr   = addr
+        prev_addr = addr
         self.write_code()
         return
 
@@ -1820,11 +1821,12 @@ class CodeGenContext:
         link_op = [VMOp.JMP, VMOp.JMPIF, VMOp.JMPIFNOT, VMOp.CALL]
         prev_addr = -1
         prev_lineno = -1
+        prev_col = -1
 
         print("{:<30} {:<10} {:<5} {:<10} {:<20} {:<20} {:<20}".format("FuncName", "Lineno", "Col", "Offset", "OpCode", "JumpTarget", "TargetOff"))
         for addr, vmtoken in all_token:
             vmop_name = VMOp.to_name(vmtoken.out_op)
-            if (type(vmop_name) == type(None)):
+            if vmop_name is None:
                 vmop_name = 'PUSHBYTES' + str(vmtoken.out_op)
 
             assert(vmtoken.addr == addr)
@@ -1832,9 +1834,9 @@ class CodeGenContext:
 
             if vmtoken.vm_op in link_op:
                 assert(vmtoken.node.lineno)
-                offset          = int.from_bytes(vmtoken.data, byteorder = 'little', signed=True)
-                target_addr     =  offset + addr
-                print("{:<30} {:<10} {:<5} {:<10} {:<20} {:<20} {:<20}".format(vmtoken.cur_func.name,vmtoken.node.lineno, vmtoken.node.col_offset, vmtoken.addr, vmop_name, target_addr, offset))
+                offset = int.from_bytes(vmtoken.data, byteorder='little', signed=True)
+                target_addr = offset + addr
+                print("{:<30} {:<10} {:<5} {:<10} {:<20} {:<20} {:<20}".format(vmtoken.cur_func.name, vmtoken.node.lineno, vmtoken.node.col_offset, vmtoken.addr, vmop_name, target_addr, offset))
             elif vmtoken.vm_op is VMOp.SYSCALL:
                 assert(vmtoken.node.lineno)
                 print("{:<30} {:<10} {:<5} {:<10} {:<20} {:<20}".format(vmtoken.cur_func.name, vmtoken.node.lineno, vmtoken.node.col_offset, vmtoken.addr, vmop_name, vmtoken.syscall_name))
@@ -1842,21 +1844,21 @@ class CodeGenContext:
                 if hasattr(vmtoken.node, 'col_offset'):
                     assert(hasattr(vmtoken.node, 'lineno'))
                     node_line = vmtoken.node.lineno
-                    node_col  = vmtoken.node.col_offset
+                    node_col = vmtoken.node.col_offset
                 else:
                     node_line = prev_lineno
-                    node_col  = prev_col
+                    node_col = prev_col
 
                 print("{:<30} {:<10} {:<5} {:<10} {:<20}".format(vmtoken.cur_func.name, node_line, node_col, vmtoken.addr, vmop_name))
             prev_lineno = node_line
-            prev_col    = node_col
-            prev_addr   = addr
+            prev_col = node_col
+            prev_addr = addr
 
     def Generate_Debug_Json(self, output_path, data):
-        hashstr = Digest.hash160(msg=data, is_hex=True) # str
-        a2bhashstr = bytearray(a2b_hex(hashstr)) # str ==> bytes ==>bytearray
+        hashstr = Digest.hash160(msg=data, is_hex=True)  # str
+        a2bhashstr = bytearray(a2b_hex(hashstr))  # str ==> bytes ==>bytearray
         a2bhashstr.reverse()
-        file_hash = a2bhashstr.hex() # bytearray ==> str
+        file_hash = a2bhashstr.hex()  # bytearray ==> str
         self.file_hash = file_hash
 
         avm_name = os.path.splitext(os.path.basename(output_path))[0]
@@ -1865,11 +1867,10 @@ class CodeGenContext:
         JsonMap['compiler'] = {'name': 'Ontology-Python-Compile', 'version': __version__}
         files = {}
         JsonMap['files'] = files
-        prev_addr = -1
         prev_lineno = -1
-        next_line_start = -1
         asmap = []
         start_addr = 0
+        assert_end_off = 0
 
         all_token = self.tokenizer.vm_tokens.items()
         for addr, vmtoken in all_token:
@@ -1889,8 +1890,8 @@ class CodeGenContext:
                 node_line = prev_lineno
 
             if node_line != prev_lineno:
-                assert_start_off    = start_addr
-                start_addr          = addr
+                assert_start_off = start_addr
+                start_addr = addr
                 if prev_lineno > 0:
                     asmap.append({'start': assert_start_off, 'end': assert_end_off, 'file': cur_file_id, 'method': cur_func, 'file_line_no': prev_lineno})
 
@@ -1909,7 +1910,7 @@ class CodeGenContext:
         write_path = '%s/%s' % (path, newfilename)
 
         self.write_file_with_str(json_data, write_path)
-        #self.Generate_Function_Local_Map(fullpath)
+        # self.Generate_Function_Local_Map(fullpath)
 
     def Generate_Function_Local_Map(self, path, main_func_desc):
         FunctionsVarMap = []
@@ -1937,14 +1938,14 @@ class CodeGenContext:
         step1.visit(self.main_astree)
         ABI_result["functions"] = step1.AbiFunclist
 
-        savedfile = self.Generate_new_name(self.main_file_path,'.py', '.abi.json')
+        savedfile = self.Generate_new_name(self.main_file_path, '.py', '.abi.json')
         json_data = json.dumps(ABI_result, indent=4)
         self.write_file_with_str(json_data, savedfile)
 
     def Generate_new_name(self, path, replacestr, new_extend):
         fullpath = os.path.realpath(path)
         path, filename = os.path.split(fullpath)
-        newfilename = filename.replace(replacestr,new_extend)
+        newfilename = filename.replace(replacestr, new_extend)
         mapfilename = '%s/%s' % (path, newfilename)
         return mapfilename
 
@@ -1996,7 +1997,7 @@ class CodeGenContext:
         fixed_line_visitor = generic_modify_node()
         fixed_line_visitor.visit(self.main_astree)
 
-        self.global_simulation_func = FuncDescription(name = Global_simulation_func_name, label = None, node = self.main_astree, isyscall = None, filepath = self.main_file_path, module_name = OwnMainModule, is_builtin = None,is_global = True)
+        self.global_simulation_func = FuncDescription(name=Global_simulation_func_name, label=None, node=self.main_astree, isyscall=None, filepath=self.main_file_path, module_name=OwnMainModule, is_builtin=None, is_global=True)
 
         self.global_simulation_func.Calculate_StackSize()
 
@@ -2016,7 +2017,7 @@ class CodeGenContext:
 
         for func_desc in self.funcscope.values():
             if (not (func_desc.isyscall or func_desc.is_builtin)) and func_desc.blong_module_name == OwnMainModule:
-                func_desc.global_map         = self.global_simulation_func.local_map
+                func_desc.global_map = self.global_simulation_func.local_map
 
     def StartCodeGenerate(self):
         """
@@ -2058,14 +2059,14 @@ class CodeGenContext:
 
         self.Set_GlobalMap_For_User_Func()
 
-        #self.Print_FuncScope()
+        # self.Print_FuncScope()
 
         # Convert Main.
         if main_func_node is None:
             raise Exception("No Entry function defined. Please define a 'Main' function")
 
         self.current_func_node = main_func_node
-        main_desc = FuncDescription('Main', None, main_func_node,False, self.main_file_path, OwnMainModule, False, False, self.global_simulation_func.local_map)
+        main_desc = FuncDescription('Main', None, main_func_node, False, self.main_file_path, OwnMainModule, False, False, self.global_simulation_func.local_map)
         main_desc.Calculate_StackSize()
         self.ConvertFuncDecl(main_desc)
 
@@ -2077,7 +2078,7 @@ class CodeGenContext:
 
         self.LinkProcess()
 
-        #self.Dump_Asm()
+        # self.Dump_Asm()
         self.Generate_Function_Local_Map(self.main_file_path, main_desc)
         self.Generate_Abi_list(main_func_node)
 
@@ -2087,17 +2088,17 @@ class CodeGenContext:
 
     # Convert Func
     def ConvertFuncDecl(self, func_desc):
-        #assert(func_desc.func_ast is not None)
-        #ast.fix_missing_locations(func_desc.func_ast)
-        #func_desc.Calculate_StackSize(self.global_num)
+        # assert(func_desc.func_ast is not None)
+        # ast.fix_missing_locations(func_desc.func_ast)
+        # func_desc.Calculate_StackSize(self.global_num)
 
         # build dynamic stack first
-        #self.tokenizer.build_function_stack(func_desc.stack_size, func_desc.func_ast)
+        # self.tokenizer.build_function_stack(func_desc.stack_size, func_desc.func_ast)
 
         # load the argument which passed by caller into stackscope
         CodeGenVisitor = Visitor_Of_FunCodeGen(self, func_desc)
         CodeGenVisitor.visit(func_desc.func_ast)
-        #self.tokenizer.dump_all_vm_token()
+        # self.tokenizer.dump_all_vm_token()
 
     # bring all import func into funscope. Include compile builtinl
     def ResolveFuncDecl(self, visited_module, list_func_imported=None):
@@ -2112,7 +2113,7 @@ class CodeGenContext:
         return main_func_node
 
     def Calculate_GlobalSzie(self):
-        visitor_global  = Visitor_Of_Global(self)
+        visitor_global = Visitor_Of_Global(self)
         visitor_global.visit(self.main_astree)
         self.global_num = visitor_global.global_num
 
@@ -2129,21 +2130,21 @@ class CodeGenContext:
         return self.tokenizer._address - 1
 
     def NewFunc(self, node, isyscall, filepath, module_name, is_builtin):
-        name    = node.name
+        name = node.name
         funcast = node
-        label   = self.NewLabel()
-        #if not (isyscall or is_builtin):
+        label = self.NewLabel()
+        # if not (isyscall or is_builtin):
         #    newfunc = FuncDescription(name,label, funcast, isyscall, filepath, module_name, is_builtin, False, self.global_simulation_func.local_map)
-        #else:
+        # else:
         #    newfunc = FuncDescription(name,label, funcast, isyscall, filepath, module_name, is_builtin)
-        newfunc = FuncDescription(name,label, funcast, isyscall, filepath, module_name, is_builtin)
+        newfunc = FuncDescription(name, label, funcast, isyscall, filepath, module_name, is_builtin)
 
         if name in self.funcscope.keys():
             oldfunc = self.funcscope[name]
-            #if ((not (oldfunc.isyscall or oldfunc.is_builtin)) and name != 'range') and (oldfunc.func_ast.lineno != newfunc.func_ast.lineno or oldfunc.blong_module_name != newfunc.blong_module_name):
+            # if ((not (oldfunc.isyscall or oldfunc.is_builtin)) and name != 'range') and (oldfunc.func_ast.lineno != newfunc.func_ast.lineno or oldfunc.blong_module_name != newfunc.blong_module_name):
             if oldfunc.func_ast.lineno != newfunc.func_ast.lineno or oldfunc.blong_module_name != newfunc.blong_module_name:
                 assert(oldfunc.name == newfunc.name)
-                raise Exception("[ERROR: file %s. line %d]. Function '%s' defined before at file %s line %d." % (filepath, node.lineno, name, oldfunc.filepath, oldfunc.src_lineno ))
+                raise Exception("[ERROR: file %s. line %d]. Function '%s' defined before at file %s line %d." % (filepath, node.lineno, name, oldfunc.filepath, oldfunc.src_lineno))
 
             return
 
@@ -2153,6 +2154,7 @@ class CodeGenContext:
         if funcname not in self.funcscope.keys():
             raise Exception("[ERROR: file %s. line %d]. Function '%s' do not defined or imported." % (filepath, node.lineno, funcname))
         return self.funcscope[funcname]
+
 
 def CodeGenerate(SrcPath):
     codegencontext = CodeGenContext(SrcPath)

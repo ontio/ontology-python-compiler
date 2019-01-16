@@ -2,6 +2,7 @@ from collections import OrderedDict
 from ontology.interop import VMOp
 from ontology.interop.BigInteger import BigInteger
 
+
 class AstVMToken(object):
     @property
     def out_op(self):
@@ -10,17 +11,18 @@ class AstVMToken(object):
         elif type(self.vm_op) is bytes:
             return ord(self.vm_op)
         else:
-            raise Exception('[Error: filepath: %s. Line %d ] Invalid op: %s. used float? ' % (self.cur_func.filepath, self.node.lineno , str(self.vm_op)))
+            raise Exception('[Error: filepath: %s. Line %d ] Invalid op: %s. used float? ' % (self.cur_func.filepath, self.node.lineno, str(self.vm_op)))
 
     def __init__(self, vm_op, node, addr, cur_func, is_global, data=None):
-        self.vm_op              = vm_op
-        self.addr               = addr
-        self.data               = data
+        self.vm_op = vm_op
+        self.addr = addr
+        self.data = data
         # For Debugger
-        self.syscall_name       = None
-        self.node               = node
-        self.cur_func           = cur_func
-        self.is_global          = is_global
+        self.syscall_name = None
+        self.node = node
+        self.cur_func = cur_func
+        self.is_global = is_global
+
 
 class AstVMTokenizer(object):
     def __init__(self):
@@ -28,19 +30,19 @@ class AstVMTokenizer(object):
         self.vm_tokens = OrderedDict()
         # For Debugger
         self.current_func = None
-        self.global_converting  = False
+        self.global_converting = False
 
     def dump_all_vm_token(self):
         for addr in self.vm_tokens.keys():
             vm_token = self.vm_tokens[addr]
             vmop_name = VMOp.to_name(self.vm_tokens[addr].out_op)
-            if (type(vmop_name) == type(None)):
+            if vmop_name is None:
                 vmop_name = 'PUSHBYTES' + str(self.vm_tokens[addr].out_op)
 
-            #print("{:<10} {:<10}".format(addr, vmop_name))
+            # print("{:<10} {:<10}".format(addr, vmop_name))
             print("{:<10} {:<10} {:<10} {:<10}".format(vm_token.cur_func.name, vm_token.node.lineno, addr, vmop_name))
 
-    def build_function_stack(self, stack_size , node):
+    def build_function_stack(self, stack_size, node):
         self.Emit_Integer(stack_size, node)
         self.Emit_Token(VMOp.NEWARRAY, node)
         self.Emit_Token(VMOp.TOALTSTACK, node)
@@ -91,14 +93,14 @@ class AstVMTokenizer(object):
         return self.Emit_Token(code, node, byts)
 
     def Emit_PickGlobal(self, global_postion, node):
-        assert(global_postion != None and global_postion >= 0)
+        assert(global_postion is not None and global_postion >= 0)
         self.Emit_Token(VMOp.DUPFROMALTSTACK, node)
         self.Emit_Integer(global_postion, node)
         self.Emit_Token(VMOp.PICKITEM, node)
 
-    def Emit_LoadGlobal(self, position, global_postion ,node):
-        assert(position != None and position >= 0)
-        assert(global_postion != None and global_postion >= 0)
+    def Emit_LoadGlobal(self, position, global_postion, node):
+        assert(position is not None and position >= 0)
+        assert(global_postion is not None and global_postion >= 0)
         self.Emit_Token(VMOp.DUPFROMALTSTACK, node)
         self.Emit_Integer(global_postion, node)
         self.Emit_Token(VMOp.PICKITEM, node)
@@ -106,8 +108,8 @@ class AstVMTokenizer(object):
         self.Emit_Token(VMOp.PICKITEM, node)
 
     def Emit_StoreGlobal(self, position, global_postion, node):
-        assert(position != None and position >= 0)
-        assert(global_postion != None and global_postion >= 0)
+        assert(position is not None and position >= 0)
+        assert(global_postion is not None and global_postion >= 0)
         self.Emit_Token(VMOp.DUPFROMALTSTACK, node)
         self.Emit_Integer(global_postion, node)
         self.Emit_Token(VMOp.PICKITEM, node)
@@ -117,13 +119,13 @@ class AstVMTokenizer(object):
         self.Emit_Token(VMOp.SETITEM, node)
 
     def Emit_LoadLocal(self, position, node):
-        assert(position != None and position >= 0)
+        assert(position is not None and position >= 0)
         self.Emit_Token(VMOp.DUPFROMALTSTACK, node)
         self.Emit_Integer(position, node)
         self.Emit_Token(VMOp.PICKITEM, node)
 
     def Emit_StoreLocal(self, position, node):
-        assert(position != None and position >= 0)
+        assert(position is not None and position >= 0)
         self.Emit_Token(VMOp.DUPFROMALTSTACK, node)
         self.Emit_Integer(position, node)
         self.Emit_Integer(2, node)
@@ -204,8 +206,8 @@ class AstVMTokenizer(object):
         elif op == 'list':
             return self.Emit_Token(VMOp.NEWARRAY, node)
         elif op == 'print':
-            sys_name =  'System.Runtime.Log'
-            syscall_name =sys_name.encode('utf-8')
+            sys_name = 'System.Runtime.Log'
+            syscall_name = sys_name.encode('utf-8')
 
         if syscall_name:
             length = len(syscall_name)
