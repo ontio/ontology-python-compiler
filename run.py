@@ -27,7 +27,7 @@ if __name__ == '__main__':
             deletedebug = True
 
     if filename is None:
-        print("Filename do not set!!!")
+        print("Error: Filename is not set")
         exit()
 
     if runmode == 1:
