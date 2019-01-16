@@ -1,4 +1,6 @@
 from ontology.builtins import len
+
+
 def match(s, p):
     if p == "":
         return s == ""
