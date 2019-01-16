@@ -1,4 +1,4 @@
-#def keys(dictionary):
+# def keys(dictionary):
 #    """
 #     k = keys(mydict)
 #
@@ -7,7 +7,7 @@
 #    pass
 #
 #
-#def values(dictionary):
+# def values(dictionary):
 #    """
 #     v = values(mydict)
 #
@@ -16,7 +16,7 @@
 #    pass
 #
 #
-#def has_key(dictionary, key):
+# def has_key(dictionary, key):
 #    """
 #     val = has_key(mydict, 'b')
 #
@@ -24,9 +24,8 @@
 #     """
 #    pass
 
-# This is not necessary.  you can use mystring[start:end]
-# Actually, it is currently necessary, as mystring[start:end] is not working as expected
 
+# This is currently necessary, as mystring[start:end] is not working as expected
 def substr(source, start_index, count):
     """
     substr(source, start_index, count) -> list object
@@ -116,6 +115,7 @@ def breakpoint():
     """
     pass
 
+
 def print(msg):
     """
     :param msg:
@@ -123,51 +123,66 @@ def print(msg):
     """
     pass
 
+
 def len(list_v):
     """
     :param list_v:
     """
     pass
 
+
 def abs(data):
     pass
+
 
 def min(x1, x2):
     pass
 
+
 def max(x1, x2):
     pass
+
 
 def concat(str1, str2):
     pass
 
+
 def reversed(array):
     pass
+
 
 def list(length):
     pass
 
+
 def Exception(message):
     pass
+
 
 def bytearray(Bytes):
     pass
 
+
 def bytes(str0):
     pass
+
 
 def state(*args):
     pass
 
+
 def ord(char):
     pass
+
 
 # attr func
 def append(arg):
     pass
 
+
 def remove(arg):
     pass
+
 
 def reverse():
     pass
