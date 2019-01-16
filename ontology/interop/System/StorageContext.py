@@ -1,5 +1,4 @@
 def AsReadOnly(context):
     """
-
     """
     pass

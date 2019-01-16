@@ -1,8 +1,5 @@
-
-
 def CheckWitness(hash_or_pubkey):
     """
-
     :param hash_or_pubkey:
     """
     pass
@@ -10,7 +7,6 @@ def CheckWitness(hash_or_pubkey):
 
 def Log(message):
     """
-
     :param message:
     """
     pass
@@ -18,21 +14,22 @@ def Log(message):
 
 def Notify(arg):
     """
-
     :param arg:
     """
     pass
 
+
 def GetTime():
     """
-    returns timestamp of most recent block
-
+    Returns the timestamp of the most recent block
     """
     pass
+
 
 def Serialize(item):
     """
     Serializes an item into a bytearray
+    :param item:
     """
     pass
 
@@ -40,5 +37,6 @@ def Serialize(item):
 def Deserialize(item):
     """
     Deserializes an item from a bytearray
+    :param item:
     """
     pass
