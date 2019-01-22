@@ -1,6 +1,7 @@
 OntCversion = '2.0.0'
 from ontology.libont import str, hex
 
+
 def Main():
     a = 12345678987654321
     s_a = str(a)

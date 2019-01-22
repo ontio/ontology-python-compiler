@@ -1,6 +1,5 @@
 def GetScript(contract):
     """
-
     :param contract:
     """
     pass
@@ -10,7 +9,7 @@ def Create(script, need_storage, name, version, author, email, description):
     """
     :param script:
     :param need_storage:
-    :param name
+    :param name:
     :param version:
     :param author:
     :param email:
@@ -23,7 +22,7 @@ def Migrate(script, need_storage, name, version, author, email, description):
     """
     :param script:
     :param need_storage:
-    :param name
+    :param name:
     :param version:
     :param author:
     :param email:

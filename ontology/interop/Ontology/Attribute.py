@@ -1,6 +1,5 @@
 def GetUsage(transaction_attr):
     """
-
     :param transaction_attr:
     """
     pass
@@ -8,7 +7,6 @@ def GetUsage(transaction_attr):
 
 def GetData(transaction_attr):
     """
-
     :param transaction_attr:
     """
     pass

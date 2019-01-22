@@ -1,10 +1,9 @@
-
 class BigInteger(int):
 
     @staticmethod
     def FromBytes(data, signed=False):
         """
-        Convert a bytearray into a BigInteger object
+        Converts a bytearray into a BigInteger object
 
         :param data: a bytearray representing an integer
         :type data: bytearray
@@ -14,7 +13,6 @@ class BigInteger(int):
 
         :return: a BigInteger object
         :rtype: ``ontology.blockchain.vm.BigInteger``
-
         """
         return BigInteger(int.from_bytes(data, 'little', signed=signed))
 
@@ -27,35 +25,32 @@ class BigInteger(int):
 
         :return: whether the two items are equal
         :rtype: bool
-
         """
         return super(BigInteger, self).__eq__(other)
 
     def ToByteArray(self, signed=True):
         """
-
-        converts a big integer object into a bytearray
+        Converts a big integer object into a bytearray
 
         :param signed: whether or not it should be signed
         :type signed: bool
 
         :return: a bytearray of representing the BigInteger
         :rtype: bytearray
-
         """
 
         if self < 0:
             try:
                 return self.to_bytes(1 + ((self.bit_length() + 7) // 8), byteorder='little', signed=True)
             except Exception as e:
-                print("coludnt convert negative number %s " % e)
+                print("Could not convert a negative number %s " % e)
                 return False
         try:
             return self.to_bytes((self.bit_length() + 7) // 8, byteorder='little', signed=signed)
         except OverflowError:
             return self.to_bytes(1 + ((self.bit_length() + 7) // 8), byteorder='little', signed=signed)
         except Exception:
-            print("COULD NOT CONVERT %s to byte array" % self)
+            print("Could not convert %s to a bytearray" % self)
 
     def __abs__(self, *args, **kwargs):  # real signature unknown
         return BigInteger(super(BigInteger, self).__abs__(*args, **kwargs))

@@ -1,33 +1,30 @@
 def GetVersion(header):
     """
-
-    gets the version of the header
-
+    Returns the version of the header
+    :param header:
     """
     pass
 
 
 def GetMerkleRoot(header):
     """
-
-    gets the merkle root of the transactions contained in the block
-
+    Returns the merkle root of the transactions contained in the block
+    :param header:
     """
     pass
 
+
 def GetConsensusData(header):
     """
-
-    gets the address of the consensus
-
+    Returns the address of the consensus
+    :param header:
     """
     pass
 
 
 def GetNextConsensus(header):
     """
-
-    gets the address where the next consensus will occur
-
+    Returns the address where the next consensus will occur
+    :param header:
     """
     pass

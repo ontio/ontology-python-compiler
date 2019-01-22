@@ -1,7 +1,5 @@
 import sys
 import importlib
-import binascii
-
 
 #  Constants
 PUSH0 = b'\x00'  # An empty array of bytes is pushed onto the stack.
@@ -30,7 +28,6 @@ PUSH14 = b'\x5E'  # The number 14 is pushed onto the stack.
 PUSH15 = b'\x5F'  # The number 15 is pushed onto the stack.
 PUSH16 = b'\x60'  # The number 16 is pushed onto the stack.
 
-
 #  Flow control
 NOP = b'\x61'  # Does nothing.
 JMP = b'\x62'
@@ -41,7 +38,6 @@ RET = b'\x66'
 APPCALL = b'\x67'
 SYSCALL = b'\x68'
 TAILCALL = b'\x69'
-
 
 #  Stack
 DUPFROMALTSTACK = b'\x6A'
@@ -61,14 +57,12 @@ ROT = b'\x7B'  # The top three items on the stack are rotated to the left.
 SWAP = b'\x7C'  # The top two items on the stack are swapped.
 TUCK = b'\x7D'  # The item at the top of the stack is copied and inserted before the second-to-top item.
 
-
 #  Splice
 CAT = b'\x7E'  # Concatenates two strings.
 SUBSTR = b'\x7F'  # Returns a section of a string.
 LEFT = b'\x80'  # Keeps only characters left of the specified point in a string.
 RIGHT = b'\x81'  # Keeps only characters right of the specified point in a string.
 SIZE = b'\x82'  # Returns the length of the input string.
-
 
 #  Bitwise logic
 INVERT = b'\x83'  # Flips all of the bits in the input.
@@ -118,7 +112,6 @@ CHECKSIG = b'\xAC'
 VERIFY = b'\xAD'
 CHECKMULTISIG = b'\xAE'
 
-
 #  Array
 ARRAYSIZE = b'\xC0'
 PACK = b'\xC1'
@@ -139,7 +132,6 @@ VALUES = b'\xCD'
 THROW = b'\xF0'
 THROWIFNOT = b'\xF1'
 
-
 # the following is a convienience method
 # for a human readable version of the ops
 
@@ -149,7 +141,6 @@ items = dir(sys.modules[__name__])
 
 def to_name(op):
     """
-
     :param op:
     :return:
     """

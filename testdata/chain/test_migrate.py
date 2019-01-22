@@ -6,6 +6,7 @@ from ontology.interop.System.Storage import Put, GetContext, Get
 KEY = "KEY"
 NAME = "testname111"
 
+
 def Main(operation, args):
     if operation == "MigrateContract":
         if len(args) != 1:
@@ -19,19 +20,22 @@ def Main(operation, args):
     if operation == "name":
         return NAME
 
+
 def MigrateContract(code):
     """
     Note that the existing contract will be replaced by the newly migrated contract
     :param code: your avm code
     :return:
     """
-    sucess = Migrate(code, True, "name", "version", "author", "email", "description")
+    success = Migrate(code, True, "name", "version", "author", "email", "description")
     print("Migrate successfully")
     Notify(["Migrate successfully"])
     return True
 
+
 def get():
     return Get(GetContext(), KEY)
+
 
 def put():
     Put(GetContext(), KEY, 897)

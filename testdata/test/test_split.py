@@ -1,6 +1,7 @@
 OntCversion = '2.0.0'
 from ontology.libont import split
 
+
 def Main():
     s = "@abcd@efg@hijklmn@op@q@rst@uvwxy@z@"
     res = split(s, '@')

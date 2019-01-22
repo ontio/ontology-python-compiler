@@ -1,4 +1,6 @@
 OntCversion = '2.0.0'
+
+
 def Main():
     a = 0
     b = []
@@ -88,9 +90,11 @@ def Main():
     x = 4 or (9 and 0 or 5) and 6 and 0 or 1
     assert(x == 4)
 
+
 def test_append_true(l):
     l.append(2)
     return True
+
 
 def test_append_false(l):
     l.append(3)

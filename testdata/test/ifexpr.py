@@ -1,5 +1,6 @@
 OntCversion = '2.0.0'
-#!/usr/bin/env python3
+# !/usr/bin/env python3
+
 
 def main():
     a = 7
@@ -37,8 +38,10 @@ def main():
     print(c)
     assert(c == transfer(b))
 
+
 def add(x):
     return x*x + 10
+
 
 def transfer(x):
     return x*x + x/2 + 10

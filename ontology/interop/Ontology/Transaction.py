@@ -1,6 +1,5 @@
 def GetType(transaction):
     """
-
     :param transaction:
     """
     pass
@@ -8,7 +7,6 @@ def GetType(transaction):
 
 def GetAttributes(transaction):
     """
-
     :param transaction:
     """
     pass

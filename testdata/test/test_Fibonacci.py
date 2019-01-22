@@ -1,8 +1,8 @@
 OntCversion = '2.0.0'
+
+
 def Main():
     """
-
-    :param fibnumber:
     :return:
     """
     fibnumber = 20
@@ -10,9 +10,9 @@ def Main():
     assert(fibresult == 6765)
     print(fibresult)
 
+
 def fibR(n):
     """
-
     :param n:
     :return:
     """

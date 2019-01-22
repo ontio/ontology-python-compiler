@@ -1,15 +1,12 @@
-
-
 def GetHeight():
     """
-
+    Returns the block height
     """
     pass
 
 
 def GetHeader(height_or_hash):
     """
-
     :param height_or_hash:
     """
     pass
@@ -17,7 +14,6 @@ def GetHeader(height_or_hash):
 
 def GetBlock(height_or_hash):
     """
-
     :param height_or_hash:
     """
     pass
@@ -25,7 +21,6 @@ def GetBlock(height_or_hash):
 
 def GetTransactionByHash(hash):
     """
-
     :param hash:
     """
     pass
@@ -33,13 +28,13 @@ def GetTransactionByHash(hash):
 
 def GetContract(script_hash):
     """
-
     :param script_hash:
     """
     pass
 
+
 def GetTransactionHeight(hash):
     """
-    :para hash:   
+    :param hash:
     """
     pass

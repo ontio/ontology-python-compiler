@@ -1,19 +1,22 @@
 import binascii
+
+
 class NotifyAction():
     def __init__(self, action_name, args):
-        self.action_name    = action_name
-        self.args           = args
+        self.action_name = action_name
+        self.args = args
         assert(type(args[0]).__name__ == 'Str')
-        self.event_name     = args[0].s
+        self.event_name = args[0].s
+
 
 class RegisterAppCall():
-    def __init__(self, func_name ,arguments):
-        self.func_name      = func_name
-        self.arguments      = arguments
+    def __init__(self, func_name, arguments):
+        self.func_name = func_name
+        self.arguments = arguments
         if type(arguments[0]).__name__ == 'Str':
-            self.script_hash    = arguments[0].s
+            self.script_hash = arguments[0].s
         elif type(arguments[0]).__name__ == 'Bytes':
-            self.script_hash    = arguments[0].s
+            self.script_hash = arguments[0].s
         else:
             print("RegisterAppCall only support Str or Bytes type addr")
             exit()

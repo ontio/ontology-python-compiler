@@ -1,5 +1,6 @@
 OntCversion = '2.0.0'
-#!/usr/bin/env python3
+# !/usr/bin/env python3
+
 
 def Main():
     i = 0
@@ -18,7 +19,7 @@ def Main():
                 if k == 11:
                     break
                 k = k + 1
-            j =j +  1
+            j = j + 1
 
         i = i + j + k
 
@@ -32,5 +33,5 @@ def Main():
 
         i = i + h
 
-    print(i) # i = 93
+    print(i)  # i = 93
     assert(i == 93)

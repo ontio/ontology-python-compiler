@@ -1,9 +1,10 @@
 OntCversion = '2.0.0'
 from ontology.libont import str, hex
 from ontology.interop.System.App import RegisterAppCall, DynamicAppCall
-from ontology.interop.Ontology.Runtime import Base58ToAddress
 from ontology.libont import elt_in, hexstring2bytes, bytearray_reverse
 
+
+# Test
 a = 12345678987654321
 s_a = str(a)
 assert(s_a == '12345678987654321')
@@ -82,14 +83,14 @@ assert(s_a == '0x1234567890abcdef0123456789abcdef0123456789abcdef0123456789abcde
 NAME = "AppCall000"
 
 x0 = 6
-y0 = [9,8,7,6]
-a0 = ["wo",2,3,4,5]
-z0 = {a0[1]:'hello', a0[2]:'world', a0[3]:x0, a0[4]:y0}
+y0 = [9, 8, 7, 6]
+a0 = ["wo", 2, 3, 4, 5]
+z0 = {a0[1]: 'hello', a0[2]: 'world', a0[3]: x0, a0[4]: y0}
 # map in map
-b0 = {a0[1]:'hello', a0[2]:'world', a0[3]:x0, a0[4]:y0, a0[0]: z0}
+b0 = {a0[1]: 'hello', a0[2]: 'world', a0[3]: x0, a0[4]: y0, a0[0]: z0}
 
 a = makedict()
-b = {i:j for i in range(1, 5) for j in range(5,8)}
+b = {i: j for i in range(1, 5) for j in range(5, 8)}
 CalculatorContract = RegisterAppCall('1a6f62cc0ff3d9ae32b0b924aeda2056a9fdfccb', 'operation', 'args')
 x = 20
 
@@ -106,10 +107,11 @@ else:
 
 assert(q == 3)
 
-if x0 > 2 and y0[3] < y0[0] or y0[1] <2:
+if x0 > 2 and y0[3] < y0[0] or y0[1] < 2:
     pass
 else:
     assert(False)
+
 
 def Main(operation, args):
     global z0
@@ -148,29 +150,36 @@ def Main(operation, args):
         print("getname")
         return NAME
 
+
 def makedict():
-    return {0:makedict2(), 1:'middle', 2:makedict3()}
+    return {0: makedict2(), 1: 'middle', 2: makedict3()}
+
 
 def makedict2():
-    return {0:arg0(), 1:arg1(), 2:arg2()}
+    return {0: arg0(), 1: arg1(), 2: arg2()}
+
 
 def makedict3():
-    return {0:arg2(), 1:arg1(), 2:arg0()}
+    return {0: arg2(), 1: arg1(), 2: arg0()}
+
 
 def arg0():
     return '0'
 
+
 def arg1():
     return '1'
 
+
 def arg2():
     return '2'
+
 
 def checkglobal():
     global a, b0
     assert(b[1] == 90)
     assert(a[0][0] == '00')
-    assert(a[1]    == 'middle')
+    assert(a[1] == 'middle')
     assert(a[2][0] == '2')
     assert(a[2][1] == '1')
     assert(a[2][2] == '0')

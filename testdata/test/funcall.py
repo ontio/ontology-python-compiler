@@ -1,12 +1,11 @@
 OntCversion = '2.0.0'
-#from ontology.interop.System.Runtime import *
-from ontology.interop.System.Runtime import Log
+
 
 def Require(condition):
-    #ontology.interop.System.Runtime.Log("hello steven")
     if not condition:
         Revert()
     return True
+
 
 def Add(a, b):
     """
@@ -16,6 +15,7 @@ def Add(a, b):
     Require(c >= a)
     return c
 
+
 def Sub(a, b):
     """
     Substracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
@@ -23,8 +23,9 @@ def Sub(a, b):
     :param b: operand b
     :return: a - b if a - b > 0 or revert the transaction.
     """
-    Require(a>=b)
+    Require(a >= b)
     return a-b
+
 
 def Mul(a, b):
     """
@@ -38,6 +39,7 @@ def Mul(a, b):
     c = a * b
     tt = Require(c / a == b)
     return c
+
 
 def Div(a, b):
     """
@@ -58,6 +60,7 @@ def Revert():
     """
     Exception("wrong")
 
+
 def new_Revert():
     """
     Revert the transaction. The opcodes of this function is `09f7f6f5f4f3f2f1f000f0`,
@@ -66,14 +69,16 @@ def new_Revert():
     """
     raise Exception("wrong")
 
-#def Main(operation, args):
+
+# def Main(operation, args):
 def Main():
     calculate1()
     print("calculate1 done")
-    #testlistremove()
+    # testlistremove()
     print("testlistremove done")
 
-    #return False
+    # return False
+
 
 def calculate1():
     a = 1
@@ -88,11 +93,12 @@ def calculate1():
     throw_if_null(tmp4 == 3)
 
     # a + b * d /c - b, res is wrong, wrong when this function is invoked
-    res = Add(a,Sub(Mul(b, Div(d, c)),b))
-    res = Add(a,Sub(Mul(b, tmp1),b))
+    res = Add(a, Sub(Mul(b, Div(d, c)), b))
+    res = Add(a, Sub(Mul(b, tmp1), b))
     throw_if_null(res == 3)
 
-def testlistremove(): # do not support list remove. only support map
-    m = {"name":"steven", "age":31, "company":"onchain", "sex":"male"}
+
+def testlistremove():  # do not support list remove. only support map
+    m = {"name": "steven", "age": 31, "company": "onchain", "sex": "male"}
     m.remove("company")
     throw_if_null(m["name"] == "steven")

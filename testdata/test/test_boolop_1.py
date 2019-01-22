@@ -1,197 +1,199 @@
 OntCversion = '2.0.0'
+
+
 def Main():
-    l = []
+    lst = []
     a = 4
-    b = 3
+    b = 0
     c = 5
     d = 8
     e = 8
-    x = 0
 
     a = 0
-    if a and append_elt_false(l, c) and append_elt_false(l, d) and append_elt_true(l, e):
-        x = 1
+    if a and append_elt_false(lst, c) and append_elt_false(lst, d) and append_elt_true(lst, e):
+        b = 1
 
-    assert(x == 0)
-    assert(len(l) == 0)
+    assert(b == 0)
+    assert(len(lst) == 0)
 
     a = 1
-    l = []
-    if a and append_elt_false(l, c) and append_elt_false(l, d) and append_elt_true(l, e):
-        x = 2
-    assert(x == 0)
-    assert(len(l) == 1)
-    assert(l[0] == c)
-
-
-    a = 1
-    l = []
-    if a and append_elt_true(l, c) and append_elt_false(l, d) and append_elt_true(l, e):
-        x = 3
-    assert(x == 0)
-    assert(len(l) == 2)
-    assert(l[0] == c)
-    assert(l[1] == d)
+    lst = []
+    if a and append_elt_false(lst, c) and append_elt_false(lst, d) and append_elt_true(lst, e):
+        b = 2
+    assert(b == 0)
+    assert(len(lst) == 1)
+    assert(lst[0] == c)
 
     a = 1
-    l = []
-    if a and append_elt_true(l, c) and append_elt_true(l, d) and append_elt_false(l, e):
-        x = 4
-    assert(x == 0)
-    assert(len(l) == 3)
-    assert(l[0] == c)
-    assert(l[1] == d)
-    assert(l[2] == e)
+    lst = []
+    if a and append_elt_true(lst, c) and append_elt_false(lst, d) and append_elt_true(lst, e):
+        b = 3
+    assert(b == 0)
+    assert(len(lst) == 2)
+    assert(lst[0] == c)
+    assert(lst[1] == d)
 
     a = 1
-    l = []
-    if a and append_elt_true(l, c) and append_elt_true(l, d) and append_elt_true(l, e):
-        x = 5
-    assert(x == 5)
-    assert(len(l) == 3)
-    assert(l[0] == c)
-    assert(l[1] == d)
-    assert(l[2] == e)
+    lst = []
+    if a and append_elt_true(lst, c) and append_elt_true(lst, d) and append_elt_false(lst, e):
+        b = 4
+    assert(b == 0)
+    assert(len(lst) == 3)
+    assert(lst[0] == c)
+    assert(lst[1] == d)
+    assert(lst[2] == e)
 
     a = 1
-    l = []
-    x = 0
-    if a or append_elt_true(l, c) or append_elt_true(l, d) or append_elt_true(l, e):
-        x = 6
-    assert(x == 6)
-    assert(len(l) == 0)
-
-    a = 0
-    l = []
-    x = 0
-    if a or append_elt_true(l, c) or append_elt_true(l, d) or append_elt_true(l, e):
-        x = 7
-    assert(x == 7)
-    assert(len(l) == 1)
-    assert(l[0] == c)
-
-    a = 0
-    l = []
-    x = 0
-    if a or append_elt_false(l, c) or append_elt_true(l, d) or append_elt_true(l, e):
-        x = 8
-    assert(x == 8)
-    assert(len(l) == 2)
-    assert(l[0] == c)
-    assert(l[1] == d)
-
-    a = 0
-    l = []
-    x = 0
-    if a or append_elt_false(l, c) or append_elt_false(l, d) or append_elt_true(l, e):
-        x = 9
-    assert(x == 9)
-    assert(len(l) == 3)
-    assert(l[0] == c)
-    assert(l[1] == d)
-    assert(l[2] == e)
-
-    a = 0
-    l = []
-    x = 0
-    if a or append_elt_false(l, c) or append_elt_false(l, d) or append_elt_false(l, e):
-        x = 10
-    assert(x == 0)
-    assert(len(l) == 3)
-    assert(l[0] == c)
-    assert(l[1] == d)
-    assert(l[2] == e)
-
-    a = 0
-    l = []
-    x = 0
-    if a or append_elt_false(l, c) or append_elt_false(l, d) and append_elt_true(l, e):
-        x = 10
-    assert(x == 0)
-    assert(len(l) == 2)
-    assert(l[0] == c)
-    assert(l[1] == d)
+    lst = []
+    if a and append_elt_true(lst, c) and append_elt_true(lst, d) and append_elt_true(lst, e):
+        b = 5
+    assert(b == 5)
+    assert(len(lst) == 3)
+    assert(lst[0] == c)
+    assert(lst[1] == d)
+    assert(lst[2] == e)
 
     a = 1
-    l = []
-    x = 0
-    if a or append_elt_false(l, c) or append_elt_false(l, d) and append_elt_true(l, e):
-        x = 10
-    assert(x == 10)
-    assert(len(l) == 0)
+    lst = []
+    b = 0
+    if a or append_elt_true(lst, c) or append_elt_true(lst, d) or append_elt_true(lst, e):
+        b = 6
+    assert(b == 6)
+    assert(len(lst) == 0)
+
+    a = 0
+    lst = []
+    b = 0
+    if a or append_elt_true(lst, c) or append_elt_true(lst, d) or append_elt_true(lst, e):
+        b = 7
+    assert(b == 7)
+    assert(len(lst) == 1)
+    assert(lst[0] == c)
+
+    a = 0
+    lst = []
+    b = 0
+    if a or append_elt_false(lst, c) or append_elt_true(lst, d) or append_elt_true(lst, e):
+        b = 8
+    assert(b == 8)
+    assert(len(lst) == 2)
+    assert(lst[0] == c)
+    assert(lst[1] == d)
+
+    a = 0
+    lst = []
+    b = 0
+    if a or append_elt_false(lst, c) or append_elt_false(lst, d) or append_elt_true(lst, e):
+        b = 9
+    assert(b == 9)
+    assert(len(lst) == 3)
+    assert(lst[0] == c)
+    assert(lst[1] == d)
+    assert(lst[2] == e)
+
+    a = 0
+    lst = []
+    b = 0
+    if a or append_elt_false(lst, c) or append_elt_false(lst, d) or append_elt_false(lst, e):
+        b = 10
+    assert(b == 0)
+    assert(len(lst) == 3)
+    assert(lst[0] == c)
+    assert(lst[1] == d)
+    assert(lst[2] == e)
+
+    a = 0
+    lst = []
+    b = 0
+    if a or append_elt_false(lst, c) or append_elt_false(lst, d) and append_elt_true(lst, e):
+        b = 10
+    assert(b == 0)
+    assert(len(lst) == 2)
+    assert(lst[0] == c)
+    assert(lst[1] == d)
 
     a = 1
-    l = []
-    x = 0
-    if (a or append_elt_false(l, c) or append_elt_false(l, d)) and append_elt_false(l, e):
-        x = 10
-    assert(x == 0)
-    assert(len(l) == 1)
-    assert(l[0] == e)
+    lst = []
+    b = 0
+    if a or append_elt_false(lst, c) or append_elt_false(lst, d) and append_elt_true(lst, e):
+        b = 10
+    assert(b == 10)
+    assert(len(lst) == 0)
+
+    a = 1
+    lst = []
+    b = 0
+    if (a or append_elt_false(lst, c) or append_elt_false(lst, d)) and append_elt_false(lst, e):
+        b = 10
+    assert(b == 0)
+    assert(len(lst) == 1)
+    assert(lst[0] == e)
 
     a = 0
-    l = []
-    x = 0
-    if (a or (append_elt_false(l, c) or append_elt_true(l, d))) and append_elt_false(l, e):
-        x = 10
-    assert(x == 0)
-    assert(len(l) == 3)
-    assert(l[0] == c)
-    assert(l[1] == d)
-    assert(l[2] == e)
+    lst = []
+    b = 0
+    if (a or (append_elt_false(lst, c) or append_elt_true(lst, d))) and append_elt_false(lst, e):
+        b = 10
+    assert(b == 0)
+    assert(len(lst) == 3)
+    assert(lst[0] == c)
+    assert(lst[1] == d)
+    assert(lst[2] == e)
 
     a = 0
-    l = []
-    x = 0
-    if (a or append_elt_false(l, c)) or (append_elt_false(l, d) and append_elt_false(l, e)):
-        x = 10
-    assert(x == 0)
-    assert(len(l) == 2)
-    assert(l[0] == c)
-    assert(l[1] == d)
+    lst = []
+    b = 0
+    if (a or append_elt_false(lst, c)) or (append_elt_false(lst, d) and append_elt_false(lst, e)):
+        b = 10
+    assert(b == 0)
+    assert(len(lst) == 2)
+    assert(lst[0] == c)
+    assert(lst[1] == d)
 
     a = 0
-    l = []
-    x = 0
-    if (a and append_elt_false(l, c)) or (append_elt_false(l, d) and append_elt_false(l, e)):
-        x = 10
-    assert(x == 0)
-    assert(len(l) == 1)
-    assert(l[0] == d)
+    lst = []
+    b = 0
+    if (a and append_elt_false(lst, c)) or (append_elt_false(lst, d) and append_elt_false(lst, e)):
+        b = 10
+    assert(b == 0)
+    assert(len(lst) == 1)
+    assert(lst[0] == d)
 
     a = 0
-    l = []
-    x = 0
+    lst = []
+    b = 0
     f = 20
     g = 21
     h = 22
-    if (a and append_elt_false(l, c)) or (append_elt_false(l, d) or append_elt_true(l, f)) and (append_elt_false(l, g) and append_elt_false(l, e)) or append_elt_true(l, h):
-        x = 10
-    assert(x == 10)
-    assert(len(l) == 4)
-    assert(l[0] == d)
-    assert(l[1] == f)
-    assert(l[2] == g)
-    assert(l[3] == h)
+    if (a and append_elt_false(lst, c)) or (append_elt_false(lst, d) or append_elt_true(lst, f)) and (append_elt_false(lst, g) and append_elt_false(lst, e)) or append_elt_true(lst, h):
+        b = 10
+    assert(b == 10)
+    assert(len(lst) == 4)
+    assert(lst[0] == d)
+    assert(lst[1] == f)
+    assert(lst[2] == g)
+    assert(lst[3] == h)
 
     a = 0
-    l = []
-    x = 0
+    lst = []
+    b = 0
     f = 20
     g = 21
     h = 22
-    if (a and append_elt_false(l, c)) or (append_elt_false(l, d) or append_elt_true(l, f)) and append_elt_false(l, g) and (append_elt_false(l, e) or append_elt_true(l, h)):
-        x = 10
-    assert(x == 0)
-    assert(len(l) == 3)
-    assert(l[0] == d)
-    assert(l[1] == f)
-    assert(l[2] == g)
+    if (a and append_elt_false(lst, c)) or (append_elt_false(lst, d) or append_elt_true(lst, f)) and append_elt_false(lst, g) and (append_elt_false(lst, e) or append_elt_true(lst, h)):
+        b = 10
+    assert(b == 0)
+    assert(len(lst) == 3)
+    assert(lst[0] == d)
+    assert(lst[1] == f)
+    assert(lst[2] == g)
 
-def append_elt_true(l, e):
-    l.append(e)
+
+def append_elt_true(lst, e):
+    lst.append(e)
     return True
 
-def append_elt_false(l, e):
-    l.append(e)
+
+def append_elt_false(lst, e):
+    lst.append(e)
     return False

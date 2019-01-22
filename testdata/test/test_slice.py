@@ -1,5 +1,7 @@
 OntCversion = '2.0.0'
 s = "12345678"
+
+
 def Main():
     b = s[:]
     c = s[:4]
@@ -14,10 +16,10 @@ def Main():
     assert(e == "456")
     assert(f == '1')
     assert(g == 0)
-    assert(None == 0)
-    assert(None == False)
+    assert(None is 0)
+    assert(None is False)
     # can not compare this. should use is. array can not convert interger
-    assert(not h is [])
+    assert(h is not [])
     print(len(g))
     print(f)
     print(g)
