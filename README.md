@@ -1,17 +1,14 @@
 
 <p align="center">
   <img
-    src="https://github.com/ontio/ontology-python-compiler/blob/master/ontologypic.png"
+    src="ontologypic.png"
     width="125px;">
 </p>
-
 
 <h1 align="center">Neptune</h1>
 <p align="center">
   Python compiler for Ontology
 </p>
-
-
 
 - Free software: LGPL license
   - [Overview](#overview)
@@ -19,7 +16,6 @@
   - [Usage](#usage)
   - [License](#license)
   - [DebugInfo](#DebugInfo)
-
 
 ## Overview
 
