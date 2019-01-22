@@ -37,10 +37,7 @@ def Main():
                 continue
             s = s / h
 
-        i = i + h
-        items = range(3, 100)
-        items2 = ['a', 'b', 'c', 'd']
-        count = 0
+        i = i + h; items = range(3, 100); items2 = ['a', 'b', 'c', 'd']; count = 0
 
         for x in items:  # 3
             print("1 level")

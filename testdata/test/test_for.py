@@ -36,8 +36,7 @@ def main():
             break
 
         if i == 10:
-            print("1 for continue in")
-            continue
+            print("1 for continue in"); continue
 
         for n in c:
             if n == 5:
