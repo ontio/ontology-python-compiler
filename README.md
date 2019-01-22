@@ -19,9 +19,7 @@
 
 ## Overview
 
-`Neptune` is a tool for compiling Python files to the `.avm` format for usage in smart contracts on the [Ontology blockchain](https://github.com/ontio/ontology/).
-
-`Neptune` only supports a subset of the Python language.
+`Neptune` is a tool for compiling Python files to the `.avm` format for usage in smart contracts on the [Ontology blockchain](https://github.com/ontio/ontology/). It currently only supports a subset of the Python language.
 
 #### What does it currently do
 
@@ -54,12 +52,6 @@
 - Added [libont.py](https://github.com/ontio/ontology-python-compiler/blob/master/ontology/libont.py) to support various list functions such as list removal and element in
 - Additional syntax checks
 - More accurate debug messages
-
-#### Contributing
-
-We appreciate your help! New features, tests and documentation are all needed.
-
-Create a new pull request with your changes and be sure to include a description of what is being fixed.
 
 ## Installation
 
@@ -94,10 +86,16 @@ compiler = Compiler.Compile('path/to/your/file.py')
 compiler.DumpAsm()
 ```
 
-### Testing
+#### Testing
 
 You can run the tests using the ```runall.bash``` files located in ```testdata/test``` and ```testdata/chain```.
 You can cleanup the compiled files with the `Makefile` using ```make clean```.
+
+## Contributing
+
+We appreciate your help! New features, tests and documentation are all needed.
+
+Create a new pull request with your changes and be sure to include a description of what is being fixed.
 
 ## License
 
