@@ -1,22 +1,19 @@
-from ontology.builtins import len, range, append, ord, print
-
-
 def _sunday_search(T, P):
     n = len(T)
     m = len(P)
 
-    shift = [m+1 for i in range(0, 256)]
+    shift = [m + 1 for i in range(0, 256)]
     for i in range(0, m):
         shift[ord(P[i])] = m - i
     i = 0
-    while i < n-m+1:
+    while i < n - m + 1:
         for j in range(0, m):
-            if T[j+i] != P[j]:
+            if T[j + i] != P[j]:
                 break
         else:
             return i
-        if i+m < n:
-            i += shift[ord(T[i+m])]
+        if i + m < n:
+            i += shift[ord(T[i + m])]
         else:
             return -1
 
@@ -28,18 +25,18 @@ def _horspool_search(T, P):
     m = len(P)
 
     shift = [m for i in range(0, 256)]
-    for i in range(0, m-1):
+    for i in range(0, m - 1):
         shift[ord(P[i])] = m - i - 1
 
     i = 0
-    while i < n-m+1:
+    while i < n - m + 1:
         for j in range(0, m):
-            if T[j+i] != P[j]:
+            if T[j + i] != P[j]:
                 break
         else:
             return i
 
-        i += shift[(T[i+m-1])]
+        i += shift[(T[i + m - 1])]
     return -1
 
 

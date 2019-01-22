@@ -1,6 +1,3 @@
-from ontology.builtins import len, range, reversed, concat
-
-
 def list_remove_elt(l, elt):
     nl = []
     for i in l:
@@ -17,7 +14,7 @@ def elt_in(l, elt):
     return False
 
 
-def int(arg, scale):
+def int(arg, scale=10):
     from ontology.libont import elt_in
     slen = len(arg)
     n = 1
@@ -29,7 +26,7 @@ def int(arg, scale):
         assert(False)
 
     for i in reversed(range(0, slen)):
-        cur_char = arg[i: i+1]
+        cur_char = arg[i: i + 1]
 
         if i != 0 and cur_char == '-':
             assert(False)
@@ -65,7 +62,7 @@ def AddressFromVmCode(code):
     for i in reversed(range(0, 21)):
         if i < 1:
             break
-        Address = concat(Address, addr[i-1:i])
+        Address = concat(Address, addr[i - 1:i])
 
     return Address
 
@@ -101,7 +98,7 @@ def byte2int(cur_byte):
     return concat(cur_byte, b'\x00')
 
 
-def bytes2hexstring(arg, big):
+def bytes2hexstring(arg, big=False):
     slen = len(arg)
     if big:
         trans_map = {0: '0', 1: '1', 2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9', 0xa: 'A', 0xb: 'B', 0xc: 'C', 0xd: 'D', 0xe: 'E', 0xf: 'F'}
@@ -109,7 +106,7 @@ def bytes2hexstring(arg, big):
         trans_map = {0: '0', 1: '1', 2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9', 0xa: 'a', 0xb: 'b', 0xc: 'c', 0xd: 'd', 0xe: 'e', 0xf: 'f'}
     res = ''
     for i in range(0, slen):
-        cur_byte = arg[i: i+1]
+        cur_byte = arg[i: i + 1]
         cur_byte = concat(cur_byte, b'\x00')
         t = (cur_byte & 0xf0) >> 4  # >> has higher priority then & operator
         res = concat(res, trans_map[t])
@@ -140,7 +137,7 @@ def hexstring2bytes(arg):
     str_res = ''
     num = 0
     for i in range(0, slen):
-        cur_char = arg[i: i+1]
+        cur_char = arg[i: i + 1]
 
         if i % 2 == 0:
             if elt_in(elt_p0, cur_char):
@@ -183,7 +180,7 @@ def bytearray_reverse(arg):
     slen = len(arg)
     res = None
     for i in reversed(range(0, slen)):
-        cur_byte = arg[i: i+1]
+        cur_byte = arg[i: i + 1]
         res = concat(res, cur_byte)
     return res
 
@@ -193,7 +190,7 @@ def split(str_t, c):
     len_t = len(str_t)
     t = None
     for i in range(0, len_t):
-        x = str_t[i: i+1]
+        x = str_t[i: i + 1]
         if x != c:
             t = concat(t, x)
         else:
@@ -205,3 +202,23 @@ def split(str_t, c):
     if t is not None:
         res.append(t)
     return res
+
+
+def join(c, lst):
+    prefix = ''
+    for i in range(len(lst)):
+        if i == 0:
+            prefix = concat(prefix, lst[i])
+        else:
+            prefix = concat(prefix, c)
+            prefix = concat(prefix, lst[i])
+
+    return prefix
+
+
+def mulconcat(*arg):
+    s = ''
+    for st in arg:
+        s = concat(s, st)
+
+    return s

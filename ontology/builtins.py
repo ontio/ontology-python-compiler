@@ -1,31 +1,3 @@
-# def keys(dictionary):
-#    """
-#     k = keys(mydict)
-#
-#     pushes a list of a dictionary keys onto the stack
-#     """
-#    pass
-#
-#
-# def values(dictionary):
-#    """
-#     v = values(mydict)
-#
-#     pushes a list of a dictionary values onto the stack
-#     """
-#    pass
-#
-#
-# def has_key(dictionary, key):
-#    """
-#     val = has_key(mydict, 'b')
-#
-#     pushes a boolean of wether a dictionary has a key onto the stack
-#     """
-#    pass
-
-
-# This is currently necessary, as mystring[start:end] is not working as expected
 def substr(source, start_index, count):
     """
     substr(source, start_index, count) -> list object
@@ -44,22 +16,30 @@ def take(source, count):
     pass
 
 
-def range(start, stop):
-    length = stop - start
+def range(*arg):
+    if len(arg) == 1:
+        start = 0
+        stop = arg[0]
+        step = 1
+    elif len(arg) == 2:
+        start = arg[0]
+        stop = arg[1]
+        step = 1
+        pass
+    elif len(arg) == 3:
+        start = arg[0]
+        stop = arg[1]
+        step = arg[2]
+    else:
+        assert(False)
 
-    out = list(length)
+    lst = []
+    iteri = start
+    while iteri < stop:
+        lst.append(iteri)
+        iteri += step
 
-    index = 0
-
-    orig_start = start
-
-    while start < stop:
-        val = index + orig_start
-        out[index] = val
-        index = index + 1
-        start = orig_start + index
-
-    return out
+    return lst
 
 
 def sha1(data):
