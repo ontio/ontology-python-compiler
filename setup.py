@@ -68,12 +68,6 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
 
-
-    install_requires=[
-        'coz-bytecode==0.5.1',
-        'astor'
-    ],
-
     python_requires='>=3.6',
 
     # List additional groups of dependencies here (e.g. development
