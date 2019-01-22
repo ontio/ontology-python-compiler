@@ -4,87 +4,6 @@ from ontology.interop.System.App import RegisterAppCall, DynamicAppCall
 from ontology.libont import elt_in, hexstring2bytes, bytearray_reverse
 
 
-def Main(operation, args):
-    global z0
-    z0 = 999
-    b0[a0[4]][0] = 30
-    b0[a0[0]][a0[4]][1] = 20
-
-    x = 'local'
-    assert(b[1] == 7)
-    assert(b[2] == 7)
-    assert(b[3] == 7)
-    assert(b[4] == 7)
-    b[1] = 90
-    global a
-    a[0][0] = '00'
-    assert(x == 'local')
-
-    checkglobal()
-    assert(b[1] == 'checkglobal')
-    assert(a == 9)
-    print(a)
-    print(b[1])
-    assert(b0 == 8888)
-    assert(y0[2] == 88)
-
-    if elt_in(['add', 'sub', 'mul'], operation):
-        print("StaticAppCall")
-        return CalculatorContract(operation, args)
-    elif operation[0:1] == 'd':
-        address = bytearray_reverse(hexstring2bytes('1a6f62cc0ff3d9ae32b0b924aeda2056a9fdfccb'))
-        print("DynamicAppCall")
-        operation = operation[1:]
-        print(operation)
-        return DynamicAppCall(address, operation, args)
-    elif operation == 'name':
-        print("getname")
-        return NAME
-
-
-def makedict():
-    return {0: makedict2(), 1: 'middle', 2: makedict3()}
-
-
-def makedict2():
-    return {0: arg0(), 1: arg1(), 2: arg2()}
-
-
-def makedict3():
-    return {0: arg2(), 1: arg1(), 2: arg0()}
-
-
-def arg0():
-    return '0'
-
-
-def arg1():
-    return '1'
-
-
-def arg2():
-    return '2'
-
-
-def checkglobal():
-    global a, b0
-    assert(b[1] == 90)
-    assert(a[0][0] == '00')
-    assert(a[1] == 'middle')
-    assert(a[2][0] == '2')
-    assert(a[2][1] == '1')
-    assert(a[2][2] == '0')
-    assert(s_a == '1234567890abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
-    b[1] = 'checkglobal'
-    a = 9
-    assert(z0 == 999)
-    assert(y0[0] == 30)
-    assert(y0[1] == 20)
-    b0[a0[0]][a0[4]][2] = 88
-    b0 = 8888
-    print(y0[0])
-
-
 # Test
 a = 12345678987654321
 s_a = str(a)
@@ -192,3 +111,84 @@ if x0 > 2 and y0[3] < y0[0] or y0[1] < 2:
     pass
 else:
     assert(False)
+
+
+def Main(operation, args):
+    global z0
+    z0 = 999
+    b0[a0[4]][0] = 30
+    b0[a0[0]][a0[4]][1] = 20
+
+    x = 'local'
+    assert(b[1] == 7)
+    assert(b[2] == 7)
+    assert(b[3] == 7)
+    assert(b[4] == 7)
+    b[1] = 90
+    global a
+    a[0][0] = '00'
+    assert(x == 'local')
+
+    checkglobal()
+    assert(b[1] == 'checkglobal')
+    assert(a == 9)
+    print(a)
+    print(b[1])
+    assert(b0 == 8888)
+    assert(y0[2] == 88)
+
+    if elt_in(['add', 'sub', 'mul'], operation):
+        print("StaticAppCall")
+        return CalculatorContract(operation, args)
+    elif operation[0:1] == 'd':
+        address = bytearray_reverse(hexstring2bytes('1a6f62cc0ff3d9ae32b0b924aeda2056a9fdfccb'))
+        print("DynamicAppCall")
+        operation = operation[1:]
+        print(operation)
+        return DynamicAppCall(address, operation, args)
+    elif operation == 'name':
+        print("getname")
+        return NAME
+
+
+def makedict():
+    return {0: makedict2(), 1: 'middle', 2: makedict3()}
+
+
+def makedict2():
+    return {0: arg0(), 1: arg1(), 2: arg2()}
+
+
+def makedict3():
+    return {0: arg2(), 1: arg1(), 2: arg0()}
+
+
+def arg0():
+    return '0'
+
+
+def arg1():
+    return '1'
+
+
+def arg2():
+    return '2'
+
+
+def checkglobal():
+    global a, b0
+    assert(b[1] == 90)
+    assert(a[0][0] == '00')
+    assert(a[1] == 'middle')
+    assert(a[2][0] == '2')
+    assert(a[2][1] == '1')
+    assert(a[2][2] == '0')
+    assert(s_a == '1234567890abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+    b[1] = 'checkglobal'
+    a = 9
+    assert(z0 == 999)
+    assert(y0[0] == 30)
+    assert(y0[1] == 20)
+    b0[a0[0]][a0[4]][2] = 88
+    b0 = 8888
+    print(y0[0])
