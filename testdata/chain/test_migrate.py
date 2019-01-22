@@ -28,10 +28,9 @@ def MigrateContract(code):
     :return:
     """
     success = Migrate(code, True, "name", "version", "author", "email", "description")
-    if success:
-        print("Migrate successfully")
-        Notify(["Migrate successfully"])
-    return success
+    print("Migrate successfully")
+    Notify(["Migrate successfully"])
+    return True
 
 
 def get():
