@@ -38,7 +38,7 @@
 - Ability to write numerous expressions per line.  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_while2.py)
 - `global` keyword, works the same as [global](https://www.programiz.com/python-programming/global-keyword) in the standard python library. Allows functions to share variables.  [example0.](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/chain/test_global_and_appcall.py)  [example1](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_global.py)
 - Cascade bool operation.  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_boolop_origin.py)
-- `+= *= /= -= etc. any augasigned operation.` [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/IterTest5.py)
+- `+= *= /= -=` etc. any augasigned operation. [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/IterTest5.py)
 - [Chained comparisons.](https://www.geeksforgeeks.org/chaining-comparison-operators-python/)  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_compare_1.py)
 - [Chained assignment.](https://stackoverflow.com/questions/7601823/how-do-chained-assignments-work)
 - Maps nested within maps.  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_dict.py)
