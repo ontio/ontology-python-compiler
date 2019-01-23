@@ -11,7 +11,7 @@ class AstVMToken(object):
         elif type(self.vm_op) is bytes:
             return ord(self.vm_op)
         else:
-            raise Exception('[Error: filepath: %s. Line %d ] Invalid op: %s. used float? ' % (self.cur_func.filepath, self.node.lineno, str(self.vm_op)))
+            raise Exception('[Error: filepath: %s. Line %d ] Invalid op: %s - You cannot use floating point numbers' % (self.cur_func.filepath, self.node.lineno, str(self.vm_op)))
 
     def __init__(self, vm_op, node, addr, cur_func, is_global, data=None):
         self.vm_op = vm_op
