@@ -2330,8 +2330,8 @@ class CodeGenContext:
             oldfunc = self.funcscope[name]
             # if ((not (oldfunc.isyscall or oldfunc.is_builtin)) and name != 'range') and (oldfunc.func_ast.lineno != newfunc.func_ast.lineno or oldfunc.blong_module_name != newfunc.blong_module_name):
             # for the compatibility of boa.xxx.yyy and ontoloy.xxx.yyy
-            old_blong_module_name = re.sub('^ontology\.|^boa\.','',oldfunc.blong_module_name)
-            new_blong_module_name = re.sub('^ontology\.|^boa\.','',newfunc.blong_module_name)
+            old_blong_module_name = re.sub('^ontology\.|^boa\.', '', oldfunc.blong_module_name)
+            new_blong_module_name = re.sub('^ontology\.|^boa\.', '', newfunc.blong_module_name)
 
             if oldfunc.func_ast.lineno != newfunc.func_ast.lineno or old_blong_module_name != new_blong_module_name:
                 assert(oldfunc.name == newfunc.name)
