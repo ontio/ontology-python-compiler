@@ -47,6 +47,7 @@
 - `range(len), range(start, stop), range(start, stop, step)`
 - [Function default argument](https://stackoverflow.com/questions/13195989/default-values-for-function-parameters-in-python)
 - [Function variable argument](https://stackoverflow.com/questions/919680/can-a-variable-number-of-arguments-be-passed-to-a-function)
+- [Pass Starred argument](https://stackoverflow.com/questions/12555627/python-3-starred-expression-to-unpack-a-list)
 - List comprehension
 - Dict comprehension.
 - Conditional operation
