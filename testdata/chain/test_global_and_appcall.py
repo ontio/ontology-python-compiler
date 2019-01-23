@@ -91,7 +91,7 @@ b0 = {a0[1]: 'hello', a0[2]: 'world', a0[3]: x0, a0[4]: y0, a0[0]: z0}
 
 a = makedict()
 b = {i: j for i in range(1, 5) for j in range(5, 8)}
-CalculatorContract = RegisterAppCall('1a6f62cc0ff3d9ae32b0b924aeda2056a9fdfccb', 'operation', 'args')
+CalculatorContract = RegisterAppCall('91125f47bd4823324de4897b64e0c2b3b503dfed', 'operation', 'args')
 x = 20
 
 q = 0
@@ -141,7 +141,7 @@ def Main(operation, args):
         print("StaticAppCall")
         return CalculatorContract(operation, args)
     elif operation[0:1] == 'd':
-        address = bytearray_reverse(hexstring2bytes('1a6f62cc0ff3d9ae32b0b924aeda2056a9fdfccb'))
+        address = bytearray_reverse(hexstring2bytes('91125f47bd4823324de4897b64e0c2b3b503dfed'))
         print("DynamicAppCall")
         operation = operation[1:]
         print(operation)
@@ -183,7 +183,7 @@ def checkglobal():
     assert(a[2][0] == '2')
     assert(a[2][1] == '1')
     assert(a[2][2] == '0')
-    assert(s_a == '1234567890abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
+    assert(s_a == '0x1234567890abcdef0123456789abcdef0123456789abcdef0123456789abcdef')
     b[1] = 'checkglobal'
     a = 9
     assert(z0 == 999)

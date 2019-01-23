@@ -9,7 +9,7 @@ def Main():
     res_b = hexstring2bytes(res)
     assert(res_b == a)
 
-    res = bytes2hexstring(a, 0)
+    res = bytes2hexstring(a)
     assert(res == '01efabcd2345fffeefeddcbaa9f9e99a9f9e998e00010210111aa1fff1f0f0')
     res_b = hexstring2bytes(res)
     assert(res_b == a)

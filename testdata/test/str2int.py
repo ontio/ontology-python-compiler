@@ -4,10 +4,10 @@ from ontology.libont import int
 
 def main():
     a = '-012345'
-    b = int(a, 10)
+    b = int(a)
     assert(b == -12345)
     a = '12345'
-    b = int(a, 10)
+    b = int(a)
     print(b)
     assert(b == 12345)
 
