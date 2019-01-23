@@ -44,6 +44,9 @@
 - `for`, `while`, `break` and `continue`
 - `if x in y` statements
 - `loop else` statements
+- `range(len), range(start, stop), range(start, stop, step)`
+- [Function default argument](https://stackoverflow.com/questions/13195989/default-values-for-function-parameters-in-python)
+- [Function variable argument](https://stackoverflow.com/questions/919680/can-a-variable-number-of-arguments-be-passed-to-a-function)
 - List comprehension
 - Dict comprehension.
 - Conditional operation
