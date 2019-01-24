@@ -57,10 +57,10 @@ class Address(object):
     def b58decode(address):
         data = base58.b58decode(address)
         if len(data) != 25:
-            raise Exception("ERROR:Wrong data len")
+            raise Exception("Error: Decoded data length is incorrect")
         if data[0] != int.from_bytes(Address.__COIN_VERSION, "little"):
-            raise Exception("ERROR: Adrress VERSION wrong")
+            raise Exception("Error: The address version is incorrect")
         checksum = Digest.hash256(data[0:21])
         if data[21:25] != checksum[0:4]:
-            raise Exception("ERROR: checksum ERROR")
+            raise Exception("Error: Checksum error")
         return Address(data[1:21])

@@ -35,27 +35,27 @@
 #### What's new compared to neo-boa
 
 - Basic abstract syntax trees
-- Ability to write numerous expressions per line.  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_while2.py)
-- `global` keyword, works the same as [global](https://www.programiz.com/python-programming/global-keyword) in the standard python library. Allows functions to share variables.  [example0.](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/chain/test_global_and_appcall.py)  [example1](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_global.py)
-- Cascade bool operation.  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_boolop_origin.py)
-- `+= *= /= -=` etc. any augasigned operation. [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/IterTest5.py)
-- [Chained comparisons.](https://www.geeksforgeeks.org/chaining-comparison-operators-python/)  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_compare_1.py)
-- [Chained assignment.](https://stackoverflow.com/questions/7601823/how-do-chained-assignments-work)
-- Maps nested within maps.  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_dict.py)
-- `if expression` statements.  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/ifexpr.py)
-- `for`, `while`, `break` and `continue`.  [example0.](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_for_1.py)  [example1](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_while2.py)
-- `if x in y` statements.  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_in.py)
-- `loop else` statements.  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_for_1.py)
-- `range(len), range(start, stop), range(start, stop, step)`.  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_range.py)
-- [Function default argument.](https://stackoverflow.com/questions/13195989/default-values-for-function-parameters-in-python)  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_default_vararg.py)
-- [Function variable argument.](https://stackoverflow.com/questions/919680/can-a-variable-number-of-arguments-be-passed-to-a-function)  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_default_vararg.py)
-- [Pass Starred argument for function call.](https://stackoverflow.com/questions/12555627/python-3-starred-expression-to-unpack-a-list)  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_default_vararg.py)
-- List comprehension.  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_list_com.py)
-- Dict comprehension.  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_dict_com2.py)
+- Ability to write numerous expressions per line. [(See Example)](testdata/test/test_while2.py)
+- `global` keyword, works the same as [global](https://www.programiz.com/python-programming/global-keyword) in the standard python library. Allows functions to share variables. [(See Example #1)](testdata/chain/test_global_and_appcall.py) [(See Example #2)](testdata/test/test_global.py)
+- Cascade bool operation. [(See Example)](testdata/test/test_boolop_origin.py)
+- Augmented assignment operators such as `+= *= /= -=` [(See Example)](testdata/test/IterTest5.py)
+- [Chained comparisons](https://www.geeksforgeeks.org/chaining-comparison-operators-python/) [(See Example)](testdata/test/test_compare_1.py)
+- [Chained assignment](https://stackoverflow.com/questions/7601823/how-do-chained-assignments-work)
+- Maps nested within maps. [(See Example)](testdata/test/test_dict.py)
+- `if expression` statements. [(See Example)](testdata/test/ifexpr.py)
+- `for`, `while`, `break` and `continue`. [(See Example #1)](testdata/test/test_for_1.py) [(See Example #2)](testdata/test/test_while2.py)
+- `if x in y` statements. [(See Example)](testdata/test/test_in.py)
+- `loop else` statements. [(See Example)](testdata/test/test_for_1.py)
+- `range(len), range(start, stop), range(start, stop, step)`. [(See Example)](testdata/test/test_range.py)
+- [Function default argument](https://stackoverflow.com/questions/13195989/default-values-for-function-parameters-in-python) [(See Example)](testdata/test/test_default_vararg.py)
+- [Function variable argument](https://stackoverflow.com/questions/919680/can-a-variable-number-of-arguments-be-passed-to-a-function) [(See Example)](testdata/test/test_default_vararg.py)
+- [Pass Starred argument for function call](https://stackoverflow.com/questions/12555627/python-3-starred-expression-to-unpack-a-list) [(See Example)](testdata/test/test_default_vararg.py)
+- List comprehension. [(See Example)](testdata/test/test_list_com.py)
+- Dict comprehension. [(See Example)](testdata/test/test_dict_com2.py)
 - Conditional operation
-- Assert.  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_split.py)
-- [String slicing.](https://www.digitalocean.com/community/tutorials/how-to-index-and-slice-strings-in-python-3)  [example](https://github.com/ontio/ontology-python-compiler/blob/master/testdata/test/test_slice.py)
-- Added [libont.py](https://github.com/ontio/ontology-python-compiler/blob/master/ontology/libont.py) to support various list functions such as list removal and element in
+- Assert. [(See Example)](testdata/test/test_split.py)
+- [String slicing](https://www.digitalocean.com/community/tutorials/how-to-index-and-slice-strings-in-python-3) [(See Example)](testdata/test/test_slice.py)
+- Added [libont.py](ontology/libont.py) to support various list functions such as list removal and element in
 - Additional syntax checks
 - More accurate debug messages
 
