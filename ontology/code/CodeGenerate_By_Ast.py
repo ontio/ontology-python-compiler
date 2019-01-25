@@ -2103,6 +2103,7 @@ class CodeGenContext:
         FunctionsVarMap = []
         savedfile = self.Generate_new_name(path, '.py', '.Func.Map')
 
+        FunctionsVarMap.append({"Method": self.global_simulation_func.name, "VarMap": self.global_simulation_func.local_map})
         FunctionsVarMap.append({"Method": main_func_desc.name, "VarMap": main_func_desc.local_map})
 
         for name, func_desc in self.funcscope.items():
