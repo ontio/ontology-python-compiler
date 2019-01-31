@@ -81,7 +81,12 @@ def str_scale(arg_int, scale):
     if scale != 10 and scale != 16:
         assert(False)
 
+    negtive = False
     arg_int += 0
+    if arg_int < 0:
+        negtive = True
+        arg_int = abs(arg_int)
+
     res = ''
     trans_map = {0: '0', 1: '1', 2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9', 0xa: 'a', 0xb: 'b', 0xc: 'c', 0xd: 'd', 0xe: 'e', 0xf: 'f'}
     iter_t = arg_int
@@ -90,6 +95,9 @@ def str_scale(arg_int, scale):
         t = iter_t % scale
         res = concat(trans_map[t], res)
         iter_t /= scale
+
+    if negtive is True:
+        res = concat('-', res)
 
     return res
 
