@@ -1,3 +1,7 @@
+# This is not necessary.  you can use mystring[start:end]
+# Actually, it is currently necessary, as mystring[start:end] is not working as expected
+
+
 def substr(source, start_index, count):
     """
     substr(source, start_index, count) -> list object
@@ -159,4 +163,27 @@ def remove(arg):
 
 
 def reverse():
+    pass
+
+
+def keys():
+    """
+    pushes a list of a dictionary keys onto the stack
+    """
+    pass
+
+
+def values():
+    """
+    pushes a list of a dictionary values onto the stack
+    """
+    pass
+
+
+def has_key(key):
+    """
+     val = has_key(mydict, 'b')
+
+     pushes a boolean of wether a dictionary has a key onto the stack
+     """
     pass

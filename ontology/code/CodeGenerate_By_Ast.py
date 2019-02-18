@@ -35,7 +35,7 @@ ONE_LINE_EXPR_SUPPORT_AST_TYPE = ['Pass', 'Str']
 # xxx. Migrate have return value acctually.
 WITHOUT_RETURN_BUILTINSYSCALL = ['print', 'Log', 'throw_if_null', 'breakpoint', 'Notify', 'Put', 'Destroy', 'Delete', 'Exception']
 # all these three List_Attr_func assumed no return value.
-List_Attr_func = ['append', 'remove', 'reverse']
+List_Attr_func = ['append', 'remove', 'reverse', 'has_key', 'values', 'keys']
 warning_file_path = None
 
 
