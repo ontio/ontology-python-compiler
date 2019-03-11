@@ -2080,7 +2080,15 @@ class CodeGenContext:
                 assert_start_off = start_addr
                 start_addr = addr
                 if prev_lineno > 0:
-                    asmap.append({'start': assert_start_off, 'end': assert_end_off, 'file': cur_file_id, 'method': cur_func, 'file_line_no': prev_lineno})
+                    lineno = prev_lineno
+                    if isinstance(vmtoken.node, ast.FunctionDef):
+                        lineno = node_line
+                        assert_start_off = start_addr
+                        assert_end_off = addr
+                    asmap.append({'start': assert_start_off, 'end': assert_end_off, 'file': cur_file_id, 'method': cur_func, 'file_line_no': lineno})
+            elif isinstance(vmtoken.node, ast.Return) and vmtoken.out_op == int.from_bytes(VMOp.RET, 'little'):
+                asmap.append({'start': start_addr, 'end': addr, 'file': cur_file_id, 'method': cur_func, 'file_line_no': node_line})
+                start_addr = addr
 
             assert_end_off = addr
             prev_lineno = node_line
