@@ -2058,12 +2058,15 @@ class CodeGenContext:
         asmap = []
         start_addr = 0
         assert_end_off = 0
+        prev_method = None
 
         all_token = self.tokenizer.vm_tokens.items()
         for addr, vmtoken in all_token:
             # assert the file first.
             cur_file = vmtoken.cur_func.filepath
             cur_func = vmtoken.cur_func.name
+            if prev_method == None:
+                prev_method = cur_func
             if cur_file not in files.keys():
                 cur_file_id = len(files.values()) + 1
                 files[cur_file] = cur_file_id
@@ -2080,10 +2083,11 @@ class CodeGenContext:
                 assert_start_off = start_addr
                 start_addr = addr
                 if prev_lineno > 0:
-                    asmap.append({'start': assert_start_off, 'end': assert_end_off, 'file': cur_file_id, 'method': cur_func, 'file_line_no': prev_lineno})
+                    asmap.append({'start': assert_start_off, 'end': assert_end_off, 'file': cur_file_id, 'method': prev_method, 'file_line_no': prev_lineno})
 
             assert_end_off = addr
             prev_lineno = node_line
+            prev_method = cur_func
 
         asmap.append({'start': assert_start_off, 'end': assert_end_off, 'file': cur_file_id, 'method': cur_func, 'file_line_no': prev_lineno})
 
