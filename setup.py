@@ -14,7 +14,7 @@ here = path.abspath(path.dirname(__file__))
 
 
 setup(
-    name='ontology-python-compile',
+    name='ontology-python-compiler',
 
     version='1.0.0',
 
