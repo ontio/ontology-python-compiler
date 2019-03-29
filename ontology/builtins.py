@@ -78,14 +78,6 @@ def verify_signature(pubkey, signature, message):
     """
     pass
 
-def verify_multisignature(data , pks_list, m , signs):
-    """
-    :param pubkey:
-    :param signature:
-    :param message:
-    """
-    pass
-
 def throw_if_null(item):
     pass
 

@@ -17,3 +17,10 @@ def GetCurrentBlockHash():
     Returns the current block hash
     """
     pass
+
+
+def VerifyMutiSig(data, pks_list, m, signs):
+    """
+    returns result of verify
+    """
+    pass
