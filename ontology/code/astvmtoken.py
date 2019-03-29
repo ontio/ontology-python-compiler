@@ -186,6 +186,8 @@ class AstVMTokenizer(object):
             return self.Emit_Token(VMOp.HASH256, node)
         elif op == 'verify_signature':
             return self.Emit_Token(VMOp.VERIFY, node)
+        elif op == 'verify_multisignature':
+            return self.Emit_Token(VMOp.CHECKMULTISIG, node)
         elif op == 'reverse':
             # no value returned. only used in attr call
             return self.Emit_Token(VMOp.REVERSE, node)
