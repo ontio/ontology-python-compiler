@@ -109,6 +109,36 @@ def byte2int(cur_byte):
     return concat(cur_byte, b'\x00')
 
 
+def upper(s):
+    res = ''
+    delt = 'A' - 'a'
+    # lower = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+    # upper = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+    for i in range(len(s)):
+        if 'a' <= s[i] <= 'z':
+            t = s[i] + delt
+            t = concat(t, b'\x00')
+            res = concat(res, t[0])
+        else:
+            res = concat(res, s[i])
+
+    return res
+
+
+def lower(s):
+    res = ''
+    delt = 'a' - 'A'
+    for i in range(len(s)):
+        if 'A' <= s[i] <= 'Z':
+            t = s[i] + delt
+            t = concat(t, b'\x00')
+            res = concat(res, t[0])
+        else:
+            res = concat(res, s[i])
+
+    return res
+
+
 def bytes2hexstring(arg, big=False):
     slen = len(arg)
     if big:
