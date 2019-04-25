@@ -956,13 +956,14 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         raise Exception("[Compiler ERROR. File: %s. in function: %s.]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, "FloorDiv"))
 
     def visit_BoolOp(self, node):
-        assert(len(node.values) >= 2)
+        len_t = len(node.values)
+        assert(len_t >= 2)
         End_target_label = self.codegencontext.NewLabel()
         End_target_postion = End_target_label.to_bytes(2, 'little', signed=True)
 
-        for i in range(len(node.values)):
+        for i in range(len_t):
             self.visit(node.values[i])
-            if i != (len(node.values) - 1):
+            if i != (len_t - 1):
                 if (type(node.op).__name__ == 'Or'):
                     self.codegencontext.tokenizer.Emit_Token(VMOp.DUP, node)
                     self.codegencontext.tokenizer.Emit_Token(VMOp.JMPIF, node, End_target_postion)
@@ -1121,12 +1122,13 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.Emit_Token(VMOp.SUB, node)
 
     def visit_Dict(self, node):
+        len_t = len(node.keys)
         self.current_node = node
         self.codegencontext.tokenizer.Emit_Token(VMOp.NEWMAP, node)
 
-        assert(len(node.keys) == len(node.values))
+        assert(len_t == len(node.values))
 
-        for i in range(len(node.keys)):
+        for i in range(len_t):
             self.codegencontext.tokenizer.Emit_Token(VMOp.DUP, node)
             self.visit(node.values[i])
             self.codegencontext.tokenizer.Emit_Token(VMOp.SWAP, node)
@@ -1270,7 +1272,8 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                 self.codegencontext.tokenizer.Emit_Integer(len(node.args), node)
                 self.codegencontext.tokenizer.Emit_Token(VMOp.NEWSTRUCT, node)
                 self.codegencontext.tokenizer.Emit_Token(VMOp.TOALTSTACK, node)
-                for index in range(len(node.args)):
+                len_t = len(node.args)
+                for index in range(len_t):
                     self.codegencontext.tokenizer.Emit_StoreLocal(index, node.args[index])
                 self.codegencontext.tokenizer.Emit_Token(VMOp.FROMALTSTACK, node)
                 return
