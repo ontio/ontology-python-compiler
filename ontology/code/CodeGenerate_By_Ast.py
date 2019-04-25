@@ -2340,7 +2340,7 @@ class CodeGenContext:
 
             if oldfunc.func_ast.lineno != newfunc.func_ast.lineno or old_blong_module_name != new_blong_module_name:
                 assert(oldfunc.name == newfunc.name)
-                raise Exception("[ERROR: file %s. line %d]. Function '%s' defined before at file %s line %d." % (filepath, node.lineno, name, oldfunc.filepath, oldfunc.src_lineno))
+                raise Exception("[ERROR: file %s. line %d]. Function '%s' is defined already at file %s line %d." % (filepath, node.lineno, name, oldfunc.filepath, oldfunc.src_lineno))
 
             return
 
@@ -2348,7 +2348,7 @@ class CodeGenContext:
 
     def Get_FuncDesc(self, funcname, node, filepath):
         if funcname not in self.funcscope.keys():
-            raise Exception("[ERROR: file %s. line %d]. Function '%s' do not defined or imported." % (filepath, node.lineno, funcname))
+            raise Exception("[ERROR: file %s. line %d]. Function '%s' is not defined or imported." % (filepath, node.lineno, funcname))
         return self.funcscope[funcname]
 
 
