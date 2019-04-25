@@ -45,24 +45,24 @@ def print_location():
 
 
 def Print_DoNot_Support(func_desc, node, message):
-    raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. The Neptune Compiler does not support %s" % (func_desc.filepath, func_desc.name, node.lineno, message))
+    raise Exception("[Compiler Error. File: %s. in function: %s. Line: %d]. The Neptune Compiler does not support %s" % (func_desc.filepath, func_desc.name, node.lineno, message))
 
 
 def Print_Error(func_desc, node, message):
-    raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. %s" % (func_desc.filepath, func_desc.name, node.lineno, message))
+    raise Exception("[Compiler Error. File: %s. in function: %s. Line: %d]. %s" % (func_desc.filepath, func_desc.name, node.lineno, message))
 
 
 def Print_Not_Support(filepath, node, message):
-    raise Exception("[Compiler ERROR. File: %s. Line: %d]. The Neptune Compiler does not support %s" % (filepath, node.lineno, message))
+    raise Exception("[Compiler Error. File: %s. Line: %d]. The Neptune Compiler does not support %s" % (filepath, node.lineno, message))
 
 
 def Print_Error_global(filepath, node, message):
-    raise Exception("[Compiler ERROR. File: %s. Line: %d]. %s" % (filepath, node.lineno, message))
+    raise Exception("[Compiler Error. File: %s. Line: %d]. %s" % (filepath, node.lineno, message))
 
 
 def Print_Warning_global(filepath, node, message):
     assert(warning_file_path is not None)
-    message_w = "[Compiler WARNING. File: %s. Line: %d.] %s" % (filepath, node.lineno, message)
+    message_w = "[Compiler Warning. File: %s. Line: %d.] %s" % (filepath, node.lineno, message)
     print(message_w)
     with open(warning_file_path, 'a+') as out_file:
         out_file.write(message_w)
@@ -180,10 +180,10 @@ class FuncVisitor_Of_AnalyzeReturnValue(ast.NodeVisitor):
         self.visit_returned = False
 
     def Print_DoNot_Support(self, node, message):
-        raise Exception("[Compiler ERROR. File: %s in function: %s Line: %d]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+        raise Exception("[Compiler Error. File: %s in function: %s Line: %d]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
     def Print_Error(self, node, message):
-        raise Exception("[Compiler ERROR. File: %s in function: %s Line: %d]. %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+        raise Exception("[Compiler Error. File: %s in function: %s Line: %d]. %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
     def visit_FunctionDef(self, node):
         self.current_node = node
@@ -256,12 +256,12 @@ class FuncVisitor_Of_StackSize(ast.NodeVisitor):
 
     def Print_DoNot_Support(self, node, message):
         if hasattr(node, 'lineno'):
-            raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+            raise Exception("[Compiler Error. File: %s. in function: %s. Line: %d]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
         else:
-            raise Exception("[Compiler ERROR. File: %s. in function: %s. ]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, message))
+            raise Exception("[Compiler Error. File: %s. in function: %s. ]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, message))
 
     def Print_Error(self, node, message):
-        raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+        raise Exception("[Compiler Error. File: %s. in function: %s. Line: %d]. %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
     def visit_FunctionDef(self, node):
         if self.is_global:
@@ -489,10 +489,10 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.Print_DoNot_Support(node, "Class def.")
 
     def Print_DoNot_Support(self, node, message):
-        raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+        raise Exception("[Compiler Error. File: %s. in function: %s. Line: %d]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
     def Print_Error(self, node, message):
-        raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+        raise Exception("[Compiler Error. File: %s. in function: %s. Line: %d]. %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
     def visit_Module(self, node):
         self.current_node = node
@@ -953,7 +953,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.Emit_Token(VMOp.AND, node)
 
     def visit_FloorDiv(self, node):
-        raise Exception("[Compiler ERROR. File: %s. in function: %s.]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, "FloorDiv"))
+        raise Exception("[Compiler Error. File: %s. in function: %s.]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, "FloorDiv"))
 
     def visit_BoolOp(self, node):
         assert(len(node.values) >= 2)
@@ -2340,7 +2340,7 @@ class CodeGenContext:
 
             if oldfunc.func_ast.lineno != newfunc.func_ast.lineno or old_blong_module_name != new_blong_module_name:
                 assert(oldfunc.name == newfunc.name)
-                raise Exception("[ERROR: file %s. line %d]. Function '%s' defined before at file %s line %d." % (filepath, node.lineno, name, oldfunc.filepath, oldfunc.src_lineno))
+                raise Exception("[Error: file %s. line %d]. Function '%s' defined before at file %s line %d." % (filepath, node.lineno, name, oldfunc.filepath, oldfunc.src_lineno))
 
             return
 
@@ -2348,7 +2348,7 @@ class CodeGenContext:
 
     def Get_FuncDesc(self, funcname, node, filepath):
         if funcname not in self.funcscope.keys():
-            raise Exception("[ERROR: file %s. line %d]. Function '%s' do not defined or imported." % (filepath, node.lineno, funcname))
+            raise Exception("[Error: file %s. line %d]. Function '%s' do not defined or imported." % (filepath, node.lineno, funcname))
         return self.funcscope[funcname]
 
 
