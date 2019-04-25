@@ -511,7 +511,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             return
 
         if self.already_visited:
-            self.Print_DoNot_Support("Function define in function.")
+            self.Print_DoNot_Support(node, "Function define in function.")
 
         self.already_visited = True
 
