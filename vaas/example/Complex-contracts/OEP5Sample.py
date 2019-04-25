@@ -136,7 +136,7 @@ def transfer(toAcct, tokenID):
     if CheckWitness(tokenOwner) == False:
         return False
     if len(toAcct) != 20:
-        raise Exception('address length error!')
+        raise Exception('Address length error!')
 
     ownerKey = concatkey(OWNER_OF_TOKEN_PREFIX, tokenID)
     balanceKey = concatkey(OWNER_BALANCE_PREFIX, tokenOwner)
@@ -182,7 +182,7 @@ def approve(toAcct, tokenID):
     if CheckWitness(tokenOwner) == False:
         return False
     if len(toAcct) != 20:
-        raise Exception('address length error!')
+        raise Exception('Address length error!')
     # Should not be authorized to yourself
     VaasAssert(tokenOwner != toAcct)
     Put(GetContext(), concatkey(APPROVE_PREFIX, tokenID), toAcct)
