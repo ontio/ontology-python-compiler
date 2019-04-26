@@ -160,3 +160,11 @@ def remove(arg):
 
 def reverse():
     pass
+
+
+def has_key(map, key):
+    """
+    :param map:
+    :param key:
+    """
+    pass
