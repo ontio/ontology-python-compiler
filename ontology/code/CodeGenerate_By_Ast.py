@@ -30,7 +30,6 @@ Function_Call_Arglen = 'Function_Call_Arglen###FixedName'
 Global_simulation_func_name = 'Global#Code'
 BUILTIN_AND_SYSCALL_LABEL_ADDR = -2
 DCALL_TARGET_BYTES = 6
-# keys, values, has_key current not support
 # buildins_list           = ['state', 'bytes', 'bytearray', 'ToScriptHash', 'print', 'list', 'len', 'abs', 'min', 'max', 'concat', 'take', 'substr', 'keys', 'values', 'has_key', 'sha1', 'sha256', 'hash160', 'hash256', 'verify_signature', 'reverse', 'append', 'remove', 'Exception', 'throw_if_null', 'breakpoint']
 ONE_LINE_EXPR_SUPPORT_AST_TYPE = ['Pass', 'Str']
 # xxx. Migrate have return value acctually.
