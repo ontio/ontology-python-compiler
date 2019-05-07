@@ -1,7 +1,3 @@
-# This is not necessary.  you can use mystring[start:end]
-# Actually, it is currently necessary, as mystring[start:end] is not working as expected
-
-
 def substr(source, start_index, count):
     """
     substr(source, start_index, count) -> list object
