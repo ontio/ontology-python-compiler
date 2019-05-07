@@ -31,3 +31,13 @@ def Main():
     assert(values[3] == '33333')
     assert(values[4] == '44444')
     assert(values[5] == '55555')
+
+    # key '', 0 are the same. due to the ontology blockchain
+    map1 = {'': "blank", 0: "00000"}
+
+    keys1 = map1.keys()
+    values1 = map1.values()
+    assert(len(keys1) == 1)
+    assert(len(values1) == 1)
+    assert('' == 0)
+    assert(values1[keys1[0]] == "00000")
