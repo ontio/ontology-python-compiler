@@ -141,7 +141,7 @@ def balanceOf(account):
     :return: the token balance of account
     """
     if len(account) != 20:
-        raise Exception("address length error")
+        raise Exception("Address length error")
     return Get(ctx,concat(BALANCE_PREFIX,account))
 
 
@@ -154,7 +154,7 @@ def transfer(from_acct,to_acct,amount):
     :return: True means success, False or raising exception means failure.
     """
     if len(to_acct) != 20 or len(from_acct) != 20:
-        raise Exception("address length error")
+        raise Exception("Address length error")
     if CheckWitness(from_acct) == False:
         raise Exception("CheckWitness error")
 
@@ -201,7 +201,7 @@ def approve(owner,spender,amount):
     :return: True means success, False or raising exception means failure.
     """
     if len(spender) != 20 or len(owner) != 20:
-        raise Exception("address length error")
+        raise Exception("Address length error")
     if CheckWitness(owner) == False:
         return False
     if amount > balanceOf(owner):
@@ -228,7 +228,7 @@ def transferFrom(spender,from_acct,to_acct,amount):
     :return:
     """
     if len(spender) != 20 or len(from_acct) != 20 or len(to_acct) != 20:
-        raise Exception("address length error")
+        raise Exception("Address length error")
     if CheckWitness(spender) == False:
         return False
 

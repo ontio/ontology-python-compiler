@@ -45,24 +45,24 @@ def print_location():
 
 
 def Print_DoNot_Support(func_desc, node, message):
-    raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. The Neptune Compiler does not support %s" % (func_desc.filepath, func_desc.name, node.lineno, message))
+    raise Exception("[Compiler Error. File: %s. in function: %s. Line: %d]. The Neptune Compiler does not support %s" % (func_desc.filepath, func_desc.name, node.lineno, message))
 
 
 def Print_Error(func_desc, node, message):
-    raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. %s" % (func_desc.filepath, func_desc.name, node.lineno, message))
+    raise Exception("[Compiler Error. File: %s. in function: %s. Line: %d]. %s" % (func_desc.filepath, func_desc.name, node.lineno, message))
 
 
 def Print_Not_Support(filepath, node, message):
-    raise Exception("[Compiler ERROR. File: %s. Line: %d]. The Neptune Compiler does not support %s" % (filepath, node.lineno, message))
+    raise Exception("[Compiler Error. File: %s. Line: %d]. The Neptune Compiler does not support %s" % (filepath, node.lineno, message))
 
 
 def Print_Error_global(filepath, node, message):
-    raise Exception("[Compiler ERROR. File: %s. Line: %d]. %s" % (filepath, node.lineno, message))
+    raise Exception("[Compiler Error. File: %s. Line: %d]. %s" % (filepath, node.lineno, message))
 
 
 def Print_Warning_global(filepath, node, message):
     assert(warning_file_path is not None)
-    message_w = "[Compiler WARNING. File: %s. Line: %d.] %s" % (filepath, node.lineno, message)
+    message_w = "[Compiler Warning. File: %s. Line: %d.] %s" % (filepath, node.lineno, message)
     print(message_w)
     with open(warning_file_path, 'a+') as out_file:
         out_file.write(message_w)
@@ -180,10 +180,10 @@ class FuncVisitor_Of_AnalyzeReturnValue(ast.NodeVisitor):
         self.visit_returned = False
 
     def Print_DoNot_Support(self, node, message):
-        raise Exception("[Compiler ERROR. File: %s in function: %s Line: %d]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+        raise Exception("[Compiler Error. File: %s in function: %s Line: %d]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
     def Print_Error(self, node, message):
-        raise Exception("[Compiler ERROR. File: %s in function: %s Line: %d]. %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+        raise Exception("[Compiler Error. File: %s in function: %s Line: %d]. %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
     def visit_FunctionDef(self, node):
         self.current_node = node
@@ -256,12 +256,12 @@ class FuncVisitor_Of_StackSize(ast.NodeVisitor):
 
     def Print_DoNot_Support(self, node, message):
         if hasattr(node, 'lineno'):
-            raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+            raise Exception("[Compiler Error. File: %s. in function: %s. Line: %d]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
         else:
-            raise Exception("[Compiler ERROR. File: %s. in function: %s. ]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, message))
+            raise Exception("[Compiler Error. File: %s. in function: %s. ]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, message))
 
     def Print_Error(self, node, message):
-        raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+        raise Exception("[Compiler Error. File: %s. in function: %s. Line: %d]. %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
     def visit_FunctionDef(self, node):
         if self.is_global:
@@ -489,10 +489,10 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.Print_DoNot_Support(node, "Class def.")
 
     def Print_DoNot_Support(self, node, message):
-        raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+        raise Exception("[Compiler Error. File: %s. in function: %s. Line: %d]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
     def Print_Error(self, node, message):
-        raise Exception("[Compiler ERROR. File: %s. in function: %s. Line: %d]. %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
+        raise Exception("[Compiler Error. File: %s. in function: %s. Line: %d]. %s" % (self.func_desc.filepath, self.func_desc.name, node.lineno, message))
 
     def visit_Module(self, node):
         self.current_node = node
@@ -511,7 +511,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             return
 
         if self.already_visited:
-            self.Print_DoNot_Support("Function define in function.")
+            self.Print_DoNot_Support(node, "Function define in function.")
 
         self.already_visited = True
 
@@ -953,16 +953,17 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.Emit_Token(VMOp.AND, node)
 
     def visit_FloorDiv(self, node):
-        raise Exception("[Compiler ERROR. File: %s. in function: %s.]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, "FloorDiv"))
+        raise Exception("[Compiler Error. File: %s. in function: %s.]. The Neptune Compiler does not support %s" % (self.func_desc.filepath, self.func_desc.name, "FloorDiv"))
 
     def visit_BoolOp(self, node):
-        assert(len(node.values) >= 2)
+        len_t = len(node.values)
+        assert(len_t >= 2)
         End_target_label = self.codegencontext.NewLabel()
         End_target_postion = End_target_label.to_bytes(2, 'little', signed=True)
 
-        for i in range(len(node.values)):
+        for i in range(len_t):
             self.visit(node.values[i])
-            if i != (len(node.values) - 1):
+            if i != (len_t - 1):
                 if (type(node.op).__name__ == 'Or'):
                     self.codegencontext.tokenizer.Emit_Token(VMOp.DUP, node)
                     self.codegencontext.tokenizer.Emit_Token(VMOp.JMPIF, node, End_target_postion)
@@ -1121,12 +1122,13 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.Emit_Token(VMOp.SUB, node)
 
     def visit_Dict(self, node):
+        len_t = len(node.keys)
         self.current_node = node
         self.codegencontext.tokenizer.Emit_Token(VMOp.NEWMAP, node)
 
-        assert(len(node.keys) == len(node.values))
+        assert(len_t == len(node.values))
 
-        for i in range(len(node.keys)):
+        for i in range(len_t):
             self.codegencontext.tokenizer.Emit_Token(VMOp.DUP, node)
             self.visit(node.values[i])
             self.codegencontext.tokenizer.Emit_Token(VMOp.SWAP, node)
@@ -1270,7 +1272,8 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                 self.codegencontext.tokenizer.Emit_Integer(len(node.args), node)
                 self.codegencontext.tokenizer.Emit_Token(VMOp.NEWSTRUCT, node)
                 self.codegencontext.tokenizer.Emit_Token(VMOp.TOALTSTACK, node)
-                for index in range(len(node.args)):
+                len_t = len(node.args)
+                for index in range(len_t):
                     self.codegencontext.tokenizer.Emit_StoreLocal(index, node.args[index])
                 self.codegencontext.tokenizer.Emit_Token(VMOp.FROMALTSTACK, node)
                 return

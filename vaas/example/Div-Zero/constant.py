@@ -7,7 +7,7 @@ from ontology.interop.Ontology.Native import Invoke
 from ontology.builtins import *
 from ontology.interop.System.App import DynamicAppCall
 from ontology.interop.Ontology.Contract import Migrate
-from ontology.interop.Ontology.Runtime import GetRandomHash
+from ontology.interop.Ontology.Runtime import GetCurrentBlockHash
 ############################################core start #################################################
 def Main(opration, args):
     if opration == "div":

@@ -114,7 +114,8 @@ def upper(s):
     delt = 'A' - 'a'
     # lower = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
     # upper = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
-    for i in range(len(s)):
+    len_t = len(s)
+    for i in range(len_t):
         if 'a' <= s[i] <= 'z':
             t = s[i] + delt
             t = concat(t, b'\x00')
@@ -128,7 +129,8 @@ def upper(s):
 def lower(s):
     res = ''
     delt = 'a' - 'A'
-    for i in range(len(s)):
+    len_t = len(s)
+    for i in range(len_t):
         if 'A' <= s[i] <= 'Z':
             t = s[i] + delt
             t = concat(t, b'\x00')
@@ -230,7 +232,7 @@ def split(str_t, c):
     res = []
     len_t = len(str_t)
     t = None
-    for i in range(0, len_t):
+    for i in range(len_t):
         x = str_t[i: i + 1]
         if x != c:
             t = concat(t, x)
@@ -247,7 +249,8 @@ def split(str_t, c):
 
 def join(c, lst):
     prefix = ''
-    for i in range(len(lst)):
+    len_t = len(lst)
+    for i in range(len_t):
         if i == 0:
             prefix = concat(prefix, lst[i])
         else:

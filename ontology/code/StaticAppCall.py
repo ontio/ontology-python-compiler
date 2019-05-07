@@ -21,7 +21,7 @@ class RegisterAppCall():
             print("RegisterAppCall only support Str or Bytes type addr")
             exit()
 
-        if type(self.script_hash) is str:
+        if isinstance(self.script_hash, str):
             if len(self.script_hash) != 40:
                 raise Exception("Invalid script hash! length of string must be 40")
         elif type(self.script_hash) in [bytes, bytearray]:
@@ -37,12 +37,12 @@ class RegisterAppCall():
     @staticmethod
     def to_script_hash_data(item):
         b_array = None
-        if type(item) is str:
+        if isinstance(item, str):
             bstring = item.encode('utf-8')
             b_array = bytearray(binascii.unhexlify(bstring))
-        elif type(item) is bytearray:
+        elif isinstance(item, bytearray):
             pass
-        elif type(item) is bytes:
+        elif isinstance(item, bytes):
             b_array = bytearray(item)
         else:
             raise Exception("Invalid script hash")
