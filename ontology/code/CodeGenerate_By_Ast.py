@@ -1265,7 +1265,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
         if not (func_desc.is_builtin or func_desc.isyscall):
             call_target_label = func_desc.label
-            #call_data = call_target_label.to_bytes(2, 'little', signed=True)
+            # call_data = call_target_label.to_bytes(2, 'little', signed=True)
             call_data = call_target_label.to_bytes(DCALL_TARGET_BYTES, 'little', signed=True)
         elif func_desc.is_builtin:
             if funcname == 'bytearray' or funcname == 'bytes':
@@ -1993,6 +1993,7 @@ class CodeGenContext:
         all_token = self.tokenizer.vm_tokens.items()
         link_op = [VMOp.JMP, VMOp.JMPIF, VMOp.JMPIFNOT, VMOp.CALL, VMOp.DCALL]
         prev_addr = -1
+        prev_vmtoken = None
         for addr, vmtoken in all_token:
             assert(vmtoken.addr == addr)
             assert(prev_addr < addr)
@@ -2082,7 +2083,7 @@ class CodeGenContext:
             # assert the file first.
             cur_file = vmtoken.cur_func.filepath
             cur_func = vmtoken.cur_func.name
-            if prev_method == None:
+            if prev_method is None:
                 prev_method = cur_func
             if cur_file not in files.keys():
                 cur_file_id = len(files.values()) + 1
@@ -2357,7 +2358,7 @@ class CodeGenContext:
 
             if oldfunc.func_ast.lineno != newfunc.func_ast.lineno or old_blong_module_name != new_blong_module_name:
                 assert(oldfunc.name == newfunc.name)
-                raise Exception("[ERROR: file %s. line %d]. Function '%s' is defined already at file %s line %d." % (filepath, node.lineno, name, oldfunc.filepath, oldfunc.src_lineno))
+                raise Exception("[Error: file %s. line %d]. Function '%s' is defined already at file %s line %d." % (filepath, node.lineno, name, oldfunc.filepath, oldfunc.src_lineno))
 
             return
 
@@ -2365,7 +2366,7 @@ class CodeGenContext:
 
     def Get_FuncDesc(self, funcname, node, filepath):
         if funcname not in self.funcscope.keys():
-            raise Exception("[ERROR: file %s. line %d]. Function '%s' is not defined or imported." % (filepath, node.lineno, funcname))
+            raise Exception("[Error: file %s. line %d]. Function '%s' is not defined or imported." % (filepath, node.lineno, funcname))
         return self.funcscope[funcname]
 
 
