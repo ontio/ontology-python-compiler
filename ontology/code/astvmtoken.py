@@ -6,9 +6,9 @@ from ontology.interop.BigInteger import BigInteger
 class AstVMToken(object):
     @property
     def out_op(self):
-        if type(self.vm_op) is int:
+        if isinstance(self.vm_op, int):
             return self.vm_op
-        elif type(self.vm_op) is bytes:
+        elif isinstance(self.vm_op, bytes):
             return ord(self.vm_op)
         else:
             raise Exception('[Error: filepath: %s. Line %d ] Invalid op: %s - You cannot use floating point numbers' % (self.cur_func.filepath, self.node.lineno, str(self.vm_op)))
