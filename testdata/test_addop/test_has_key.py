@@ -1,18 +1,17 @@
 OntCversion = '2.0.0'
-from ontology.builtins import has_key, print, range, len, keys, values
-from ontology.libont import elt_in
+
 
 def Main():
-    map0 = {'1':'11111', '2':'22222', '3':'33333', '4':'44444', '5':'55555', 0:6666}
+    map0 = {'1': '11111', '2': '22222', '3': '33333', '4': '44444', '5': '55555', 0: 6666}
     keys = ['1', '2', '3', '4', '5', 0]
     values = ['11111', '22222', '33333', '44444', '55555', 66666]
-    map1 = {keys[i]:values[j] for i in range(0,len(keys)) for j in range(0, len(values)) if j == i}
-    map1keys    = map1.keys()
-    map1values  = map1.values()
+    map1 = {keys[i]: values[j] for i in range(0, len(keys)) for j in range(0, len(values)) if j == i}
+    map1keys = map1.keys()
+    map1values = map1.values()
     assert(len(map1keys) == len(keys))
     assert(len(map1values) == len(values))
-    for i in range(0, len(keys)):
-        assert(elt_in(keys, map1keys[i]))
+    for i in range(len(keys)):
+        assert(map1keys[i] in keys)
 
     assert(map1keys[0] == keys[5])
     assert(map1keys[1] == keys[0])
@@ -34,12 +33,12 @@ def Main():
     else:
         assert(False)
 
-    if  map0.has_key(0):
+    if map0.has_key(0):
         print("has key interger 0")
     else:
         assert(False)
 
-    if  map0.has_key('1'):
+    if map0.has_key('1'):
         print("has key interger 1")
     else:
         assert(False)

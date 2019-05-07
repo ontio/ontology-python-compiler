@@ -1,8 +1,8 @@
 OntCversion = '2.0.0'
-from ontology.builtins import values, keys, print
+
 
 def Main():
-    map0 = {0:[9,8,7], 1:[6,5,4], 2:[3,2,1]}
+    map0 = {0: [9, 8, 7], 1: [6, 5, 4], 2: [3, 2, 1]}
     values = map0.values()
     assert(values[0][1] == 8)
     assert(values[1][1] == 5)

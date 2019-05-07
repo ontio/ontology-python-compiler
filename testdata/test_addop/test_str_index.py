@@ -1,11 +1,14 @@
 OntCversion = '2.0.0'
-from ontology.builtins import print, range, len
+
 
 def Main():
-    map0 = {'1':'11111', '2':'22222', '3':'33333', '4':'44444', '5':'55555'}
+    map0 = {'1': '11111', '2': '22222', '3': '33333', '4': '44444', '5': '55555'}
     str0 = '12345'
-    for i in range(0,len(str0)):
-        print(map0[str0[i]])
+    j = 0
+    for i in str0:
+        print(map0[i])
+        assert(map0[i] == map0[str0[j]])
+        j += 1
 
     assert(map0[str0[0]] == '11111')
     assert(map0[str0[1]] == '22222')

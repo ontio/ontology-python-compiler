@@ -1,24 +1,25 @@
 OntCversion = '2.0.0'
 
+
 def Main():
-    l = [9,8,7,6,5]
-    a = l
+    lst = [9, 8, 7, 6, 5]
+    a = lst
     assert(len(a) == 5)
     print(len(a))
-    for v in l:
+    for v in lst:
         print(v)
 
-    l.remove(0)
-    l.remove(0)
-    l.remove(0)
+    lst.remove(0)
+    lst.remove(0)
+    lst.remove(0)
 
-    assert(l[0] == 6)
-    assert(l[1] == 5)
+    assert(lst[0] == 6)
+    assert(lst[1] == 5)
 
-    l = [0]
-    assert(len(l) == 1)
-    l.remove(0)
-    assert(len(l) == 0)
+    lst = [0]
+    assert(len(lst) == 1)
+    lst.remove(0)
+    assert(len(lst) == 0)
 
     print(len(a))
     assert(len(a) == 2)

@@ -1,8 +1,8 @@
 OntCversion = '2.0.0'
-from ontology.builtins import print, range, len, keys, values
+
 
 def Main():
-    map0 = {'1':'11111', '2':'22222', '3':'33333', '4':'44444', '5':'55555', 0:888}
+    map0 = {'1': '11111', '2': '22222', '3': '33333', '4': '44444', '5': '55555', 0: 888}
 
     keys = map0.keys()
 
