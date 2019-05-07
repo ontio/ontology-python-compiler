@@ -1,3 +1,4 @@
+OntCversion = '2.0.0'
 from ontology.libont import upper, lower
 
 def Main():
