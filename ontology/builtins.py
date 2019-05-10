@@ -1,7 +1,7 @@
 def substr(source, start_index, count):
     """
     substr(source, start_index, count) -> list object
-    Return a subset of a string `source`, starting at `start_index` and
+    Returns a subset of a string `source`, starting at `start_index` and
     of length `count`
     """
     pass
@@ -10,7 +10,7 @@ def substr(source, start_index, count):
 def take(source, count):
     """
     take(source, count) -> list object
-    Return a subset of a string or list `source`, starting
+    Returns a subset of a string or list `source`, starting
     at index 0 and of length `count`
     """
     pass
@@ -163,23 +163,32 @@ def reverse():
 
 
 def keys():
-    """
-    pushes a list of a dictionary keys onto the stack
+    """    
+    Usage:
+    k = dict.keys()
+
+    Returns an array of keys in a dictionary
     """
     pass
 
 
 def values():
     """
-    pushes a list of a dictionary values onto the stack
+    Usage:
+    v = dict.values()
+
+    Returns an array of values in a dictionary
     """
     pass
 
 
 def has_key(key):
     """
-     val = has_key(mydict, 'b')
+    :param key: The key to look up in the dictionary
 
-     pushes a boolean of wether a dictionary has a key onto the stack
-     """
+    Usage:
+    val = dict.has_key(key)
+
+    Returns whether a given `key` exists in `dict`
+    """
     pass
