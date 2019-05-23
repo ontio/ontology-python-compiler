@@ -9,7 +9,7 @@
 |              ontology.interop.Ontology.Header |             GetMerkleRoot |                                             header | get the merkle root of the transactions contained in the block |
 |              ontology.interop.Ontology.Header |          GetConsensusData |                                             header | get the address of the consensus |
 |              ontology.interop.Ontology.Header |          GetNextConsensus |                                             header | get the address where the next consensus will occur |
-|              ontology.interop.Ontology.Native |                    Invoke |                   param,method,contractAddress,ver | nvoke native contract |
+|              ontology.interop.Ontology.Native |                    Invoke |                   param,method,contractAddress,ver | invoke native contract |
 |             ontology.interop.Ontology.Runtime |           Base58ToAddress |                                                arg | transfer base58 address to byte array |
 |             ontology.interop.Ontology.Runtime |           AddressToBase58 |                                                arg | byte array address to base58 |
 |             ontology.interop.Ontology.Runtime | GetCurrentBlockHash |                                                    | get current block hash |
@@ -36,7 +36,6 @@
 |                ontology.interop.System.Header |       GetBlockHash |                                             header | get the hash of header |
 |                ontology.interop.System.Header |               GetPrevHash |                                             header | get the hash of the previous header in the blockchain        |
 |                ontology.interop.System.Header |              GetTimestamp |                                             header | get the timestamp of when the header was created |
-|               ontology.interop.System.Runtime |                GetTrigger |                                                    | get trigger |
 |               ontology.interop.System.Runtime |              CheckWitness |                                     hash_or_pubkey | check the witness of address |
 |               ontology.interop.System.Runtime |                       Log |                                            message | print log on node |
 |               ontology.interop.System.Runtime |                    Notify |                                                arg | add notify to event |
