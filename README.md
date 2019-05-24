@@ -98,9 +98,9 @@ You can run the tests using the ```runall.bash``` file located in ```ontology_te
 
 ## Contributing
 
-We appreciate your help! New features, tests and documentation are all needed.
+Contributors are welcome to the `ontology-python-compiler`. Before beginning, please take a look at our [contributing guidelines](./CONTRIBUTING.md). You can open an issue by [clicking here](https://github.com/ontio/ontology-python-compiler/issues/new).
 
-Create a new pull request with your changes and be sure to include a description of what is being fixed.
+If you have any issues getting setup, open an issue or reach out in the [Ontology Discord](https://discordapp.com/invite/4TQujHj).
 
 ## License
 
