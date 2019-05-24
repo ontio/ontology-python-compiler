@@ -94,8 +94,7 @@ compiler.DumpAsm()
 
 #### Testing
 
-You can run the tests using the ```runall.bash``` files located in ```testdata/test``` and ```testdata/chain```.
-You can cleanup the compiled files with the `Makefile` using ```make clean```.
+You can run the tests using the ```runall.bash``` file located in ```ontology_test```.
 
 ## Contributing
 
