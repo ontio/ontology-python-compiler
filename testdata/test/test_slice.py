@@ -18,8 +18,15 @@ def Main():
     assert(g == 0)
     assert(None is 0)
     assert(None is False)
+    assert('' is 0)
     # can not compare this. should use is. array can not convert interger
     assert(h is not [])
+
+    assert(None == 0)
+    assert(None == False)
+    assert('' == 0)
+    assert("" == 0)
+    assert("" is None)
     print(len(g))
     print(f)
     print(g)
