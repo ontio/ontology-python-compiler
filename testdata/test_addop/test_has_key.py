@@ -48,3 +48,8 @@ def Main():
         assert(map1.has_key(keys[i]))
     assert(not map0.has_key(0xfffffff))
     assert(not map1.has_key(0xfffffff))
+
+    assert(map0.has_key(''))
+    assert(map0.has_key(""))
+    assert(map0.has_key(None))
+    assert(map0.has_key(False))
