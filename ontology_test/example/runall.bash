@@ -14,7 +14,7 @@ function error {
 for f in $(ls *.py)
 do
 	own=$0
-	x=$([[ $f != ${own##*/} ]] && ../run.py -n $f -m 1 -t)
+	x=$([[ $f != ${own##*/} ]] && ../../run.py -n $f -m 1 -t)
 	total=$[$total+1]
 	if [ $x == 1 ]
 	then
@@ -24,7 +24,7 @@ do
 		error "$f"
 	fi
 done
-echo "$correct/$total Tests Passed"
+echo "$correct/$total Files Compiled Successfully"
 if [ $correct == $total ]
 then
 	return 1
