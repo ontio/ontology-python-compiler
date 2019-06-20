@@ -94,7 +94,7 @@ compiler.DumpAsm()
 
 #### Testing
 
-You can run the tests using the ```runall.bash``` file located in ```ontology_test```.
+You can run the tests using the ```runall.bash``` or ```runall-testing.bash``` files located in ```ontology_test```.
 
 ## Contributing
 
