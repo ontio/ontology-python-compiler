@@ -249,6 +249,7 @@ class FuncVisitor_Of_StackSize(ast.NodeVisitor):
         self.current_node = None
         self.arg_num = 0
         self.is_global = is_global
+        self.visit_call_convert = False
 
     def generic_visit(self, node):
         self.current_node = node
@@ -307,6 +308,8 @@ class FuncVisitor_Of_StackSize(ast.NodeVisitor):
         self.arg_num = len(node.args)
         self.stack_size += len(node.args)
 
+        self.generic_visit(node)
+
     def visit_Return(self, node):
         if self.is_global:
             assert(False)
@@ -331,6 +334,13 @@ class FuncVisitor_Of_StackSize(ast.NodeVisitor):
     def visit_DictComp(self, node):
         self.stack_size += 1
         self.generic_visit(node)
+
+    def visit_Call(self, node):
+        if self.visit_call_convert is True:
+            self.stack_size += 1
+        self.visit_call_convert = True
+        self.generic_visit(node)
+        self.visit_call_convert = False
 
 
 class Visitor_Of_Global(ast.NodeVisitor):
@@ -474,6 +484,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         self.codegencontext.tokenizer.global_converting = is_for_global
         self.main_func_node = None
         self.global_declare = []
+        self.visit_call_convert = False
 
     def Get_FuncDesc(self, funcname, node):
         return self.codegencontext.Get_FuncDesc(funcname, node, self.func_desc.filepath)
@@ -1214,7 +1225,11 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         # can not use TOALTSTACK as usually. because if some var access it's var. will pick it from altstack. will goes run.
         # so use TOALTSTACK is dangers. use Emit_StoreLocal instead.
         if not (func_desc.is_builtin or func_desc.isyscall):
-            arg_len_position = self.func_desc.Get_LocalStackPosition(Function_Call_Arglen)
+            if self.visit_call_convert is True:
+                self.func_desc.callincall_position += 1
+            self.visit_call_convert = True
+            arg_len_position = self.func_desc.Get_LocalStackPosition(Function_Call_Arglen + str(self.func_desc.callincall_position))
+
             self.codegencontext.tokenizer.Emit_Token(VMOp.PUSH0, node)
             self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
             for arg in reversed(node.args):
@@ -1230,6 +1245,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
 
             # pass the arg number to callee.
             self.codegencontext.tokenizer.Emit_LoadLocal(arg_len_position, node)
+            self.visit_call_convert = False
         else:
             if funcname in ['concat', 'take', 'has_key', 'substr']:
                 call_args = node.args
@@ -1856,6 +1872,7 @@ class FuncDescription:
         self.filepath = filepath
         self.is_global = is_global
         self.for_position = 0
+        self.callincall_position = 0
         self.list_comp_position = 0
         self.blong_module_name = module_name
         self.local_num = 0
