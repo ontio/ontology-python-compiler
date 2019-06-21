@@ -2,7 +2,7 @@
 
 total=0
 correct=0
-prefix="./"
+prefix="../"
 
 function success {
   printf "\e[32m$1\e[m\n"
@@ -19,7 +19,7 @@ function compiler {
 		for f in $(ls *.py)
 		do
 			own=$0
-			[[ $f != ${own##*/} ]] && ${prefix}/../../run.py -n $f -m 1 -t
+			[[ $f != ${own##*/} ]] && ${prefix}/../../run.py -n $f -m 1
 			returnstatus=$?
 		
 			((total++))
@@ -35,11 +35,5 @@ function compiler {
 }
 
 compiler
-
-prefix="../"
-for directory in $(ls)
-do
-	[[ -d $directory ]] && { cd $directory; compiler; cd ../; }
-done
 
 [[ $correct == $total ]] && { echo "${correct}/${total} Files Compiled Successfully";exit 0; } || { echo "${correct}/${total} Files Compiled Failed."; exit 1; }
