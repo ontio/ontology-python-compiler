@@ -7,8 +7,9 @@ from ontology.compiler import Compiler
 
 filename = None
 runmode = 0
-deletedebug = False
 testing = False
+exitstatus = 0
+
 
 def deletedebugfile(strs):
     '''
@@ -26,14 +27,12 @@ if __name__ == '__main__':
             filename = value
         if op == "-m":
             runmode = int(value)
-        if op == "-d":
-            deletedebug = True
         if op == "-t":
             testing = True
 
     if filename is None:
         print("Error: Filename is not set")
-        exit()
+        exit(1)
 
     error = False
     message = ""
@@ -41,20 +40,20 @@ if __name__ == '__main__':
         message = "Runmode 1. Compile file " + filename
         try:
             Compiler.Compile(filename)
-        except:
-            error = True
+        except Exception as error:
+            if not testing:
+                print(error)
+            exitstatus = 1
     elif runmode == 0:
         message = "Runmode 0. Dump avm code message of file " + filename
         try:
             compiler = Compiler.Compile(filename)
             compiler.DumpAsm()
-        except:
-            error = True
+        except Exception as error:
+            if not testing:
+                print(error)
+            exitstatus = 1
 
-    if deletedebug:
-        deletedebugfile('.abi.json')
-        deletedebugfile('.debug.json')
-        deletedebugfile('.Func.Map')
     if testing:
         deletedebugfile('.abi.json')
         deletedebugfile('.debug.json')
@@ -62,7 +61,7 @@ if __name__ == '__main__':
         deletedebugfile('.avm')
         deletedebugfile('.avm.str')
         deletedebugfile('.warning')
-        result = 0 if error is True else 1
-        print(result)
     else:
         print(message)
+
+    exit(exitstatus)
