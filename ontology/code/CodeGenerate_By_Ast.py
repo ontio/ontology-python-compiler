@@ -88,6 +88,36 @@ class Visit_FirstGlobalNode(ast.NodeVisitor):
         pass
 
 
+class VisitorOfCleanFunction(ast.NodeVisitor):
+    def __init__(self, curfunc, codegencontext):
+        self.is_global = False
+        self.curfunc = curfunc
+        self.codegencontext = codegencontext
+
+    def visit_Call(self, node):
+        if type(node.func).__name__ == 'Attribute':
+            self.generic_visit(node)
+            return
+
+        funcname = node.func.id
+        func_desc = self.codegencontext.Get_FuncDesc(funcname, node, self.curfunc.filepath)
+        # recursive call
+        if funcname == self.curfunc.name:
+            return
+
+        if not (func_desc.is_builtin or func_desc.isyscall):
+            self.curfunc = func_desc
+            func_desc.is_usage_by_entry_main = True
+            self.generic_visit(func_desc.func_ast)
+
+        # may funcall(funcall(funcall))
+        self.generic_visit(node)
+
+    def visit_FunctionDef(self, node):
+        if self.is_global:
+            return
+
+
 class generic_modify_node(ast.NodeTransformer):
     def generic_visit(self, node):
         if hasattr(node, "lineno"):
@@ -1229,22 +1259,71 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                 self.func_desc.callincall_position += 1
             self.visit_call_convert = True
             arg_len_position = self.func_desc.Get_LocalStackPosition(Function_Call_Arglen + str(self.func_desc.callincall_position))
+            call_args_len = 0
 
-            self.codegencontext.tokenizer.Emit_Token(VMOp.PUSH0, node)
-            self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
             for arg in reversed(node.args):
-                self.visit(arg)
                 if type(arg).__name__ == 'Starred':
                     Passed_StarredArg = True
-                else:
-                    self.codegencontext.tokenizer.Emit_Token(VMOp.PUSH1, node)
 
-                self.codegencontext.tokenizer.Emit_LoadLocal(arg_len_position, node)
-                self.codegencontext.tokenizer.Emit_Token(VMOp.ADD, node)
-                self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
+            if Passed_StarredArg is False:
+                for arg in reversed(node.args):
+                    call_args_len += 1
+                    self.visit(arg)
+
+                self.codegencontext.tokenizer.Emit_Integer(call_args_len, node)
+            else:
+                if len(node.args) == 0:
+                    assert(False)
+                elif len(node.args) == 1:
+                    arg = node.args[0]
+                    if type(arg).__name__ == 'Starred':
+                        assert(Passed_StarredArg == True)
+                        self.visit(arg)
+                    else:
+                        assert(False)
+                elif len(node.args) == 2:
+                    arg0 = node.args[1]  # need reversed.
+                    arg1 = node.args[0]
+                    if type(arg0).__name__ == 'Starred' and type(arg1).__name__ == 'Starred':
+                        self.visit(arg0)
+                        self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
+                        self.visit(arg1)
+                        self.codegencontext.tokenizer.Emit_LoadLocal(arg_len_position, node)
+                        self.codegencontext.tokenizer.Emit_Token(VMOp.ADD, node)
+                    elif type(arg0).__name__ != 'Starred' and type(arg1).__name__ == 'Starred':
+                        self.visit(arg0)
+                        self.visit(arg1)
+                        self.codegencontext.tokenizer.Emit_Token(VMOp.PUSH1, node)
+                        self.codegencontext.tokenizer.Emit_Token(VMOp.ADD, node)
+                    elif type(arg0).__name__ == 'Starred' and type(arg1).__name__ != 'Starred':
+                        self.visit(arg0)
+                        self.codegencontext.tokenizer.Emit_Token(VMOp.PUSH1, node)
+                        self.codegencontext.tokenizer.Emit_Token(VMOp.ADD, node)
+                        self.visit(arg1)
+                        self.codegencontext.tokenizer.Emit_Token(VMOp.SWAP, node)
+                    else:
+                        assert(False)
+                else:
+                    self.codegencontext.tokenizer.Emit_Token(VMOp.PUSH0, node)
+                    self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
+                    for arg in reversed(node.args):
+                        if type(arg).__name__ == 'Starred':
+                            assert(Passed_StarredArg == True)
+                            self.visit(arg)
+                            self.codegencontext.tokenizer.Emit_LoadLocal(arg_len_position, node)
+                            self.codegencontext.tokenizer.Emit_Token(VMOp.ADD, node)
+                            self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
+                        else:
+                            call_args_len += 1
+                            self.visit(arg)
+
+                    self.codegencontext.tokenizer.Emit_Integer(call_args_len, node)
+                    self.codegencontext.tokenizer.Emit_LoadLocal(arg_len_position, node)
+                    self.codegencontext.tokenizer.Emit_Token(VMOp.ADD, node)
+                    # no need store.
+                    # self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
 
             # pass the arg number to callee.
-            self.codegencontext.tokenizer.Emit_LoadLocal(arg_len_position, node)
             self.visit_call_convert = False
         else:
             if funcname in ['concat', 'take', 'has_key', 'substr']:
@@ -1905,6 +1984,7 @@ class FuncDescription:
             # if self.isyscall:
             self.isyscall = isyscall
             self.is_builtin = is_builtin
+            self.is_usage_by_entry_main = False
 
             # note. when self.is_builtin or self.isyscall assert. this value have no meanning
             assert(not (self.isyscall and self.is_builtin))
@@ -2234,6 +2314,10 @@ class CodeGenContext:
 
         self.tokenizer.Emit_Token(VMOp.FROMALTSTACK, CodeGenVisitor.main_func_node)
 
+        visitor = VisitorOfCleanFunction(self.global_simulation_func, self)
+        visitor.is_global = True
+        visitor.visit(self.main_astree)
+
     def Set_GlobalMap_For_User_Func(self):
         """
         set func_desc for OwnMainModule.
@@ -2296,11 +2380,17 @@ class CodeGenContext:
         main_desc.Calculate_StackSize()
         self.ConvertFuncDecl(main_desc)
 
+        visitor = VisitorOfCleanFunction(main_desc, self)
+        visitor.generic_visit(main_func_node)
+
         # Iter the funcscope. Convert all other Func.
         for name, func_desc in self.funcscope.items():
-            if not func_desc.is_register_call:
+            if (not func_desc.is_register_call) and (func_desc.is_usage_by_entry_main is True):
                 self.current_func_node = func_desc.func_ast
                 self.ConvertFuncDecl(func_desc)
+            # else:
+            #     if not (func_desc.is_builtin or func_desc.isyscall):
+            #         Print_Warning_global(self.main_file_path, func_desc.func_ast, "%s not used" %(func_desc.name))
 
         self.LinkProcess()
 
