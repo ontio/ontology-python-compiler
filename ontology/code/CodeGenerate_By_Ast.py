@@ -102,7 +102,7 @@ class VisitorOfCleanFunction(ast.NodeVisitor):
         funcname = node.func.id
         func_desc = self.codegencontext.Get_FuncDesc(funcname, node, self.curfunc.filepath)
         # recursive call
-        if funcname == self.curfunc.name:
+        if funcname == self.curfunc.name or func_desc.is_usage_by_entry_main:
             return
 
         if not (func_desc.is_builtin or func_desc.isyscall):
