@@ -94,6 +94,11 @@ class VisitorOfCleanFunction(ast.NodeVisitor):
         self.curfunc = curfunc
         self.codegencontext = codegencontext
 
+    def visit_Attribute_Call(self, node):
+        # must builtin args
+        for arg in node.args:
+            self.visit(arg)
+
     def visit_Call(self, node):
         if type(node.func).__name__ == 'Attribute':
             self.generic_visit(node)
@@ -101,8 +106,10 @@ class VisitorOfCleanFunction(ast.NodeVisitor):
 
         funcname = node.func.id
         func_desc = self.codegencontext.Get_FuncDesc(funcname, node, self.curfunc.filepath)
+        for arg in node.args:
+            self.visit(arg)
         # recursive call
-        if funcname == self.curfunc.name or func_desc.is_usage_by_entry_main:
+        if func_desc.is_usage_by_entry_main:
             return
 
         if not (func_desc.is_builtin or func_desc.isyscall):
@@ -1277,7 +1284,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                 elif len(node.args) == 1:
                     arg = node.args[0]
                     if type(arg).__name__ == 'Starred':
-                        assert(Passed_StarredArg == True)
+                        assert(Passed_StarredArg is True)
                         self.visit(arg)
                     else:
                         assert(False)
@@ -1308,7 +1315,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                     self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
                     for arg in reversed(node.args):
                         if type(arg).__name__ == 'Starred':
-                            assert(Passed_StarredArg == True)
+                            assert(Passed_StarredArg is True)
                             self.visit(arg)
                             self.codegencontext.tokenizer.Emit_LoadLocal(arg_len_position, node)
                             self.codegencontext.tokenizer.Emit_Token(VMOp.ADD, node)

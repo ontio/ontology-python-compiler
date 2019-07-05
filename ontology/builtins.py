@@ -149,6 +149,10 @@ def ord(char):
     pass
 
 
+def chr(num):
+    pass
+
+
 # attr func
 def append(arg):
     pass

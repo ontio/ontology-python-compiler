@@ -164,6 +164,8 @@ class AstVMTokenizer(object):
             self.Emit_Integer(0, node)
             self.Emit_Token(VMOp.ADD, node)
             return self.Emit_Token(VMOp.NOP, node)
+        elif op == 'chr':
+            return self.Emit_Token(VMOp.NOP, node)
         elif op == 'concat':
             return self.Emit_Token(VMOp.CAT, node)
         elif op == 'take':
