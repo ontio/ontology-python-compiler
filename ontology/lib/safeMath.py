@@ -9,11 +9,11 @@ def Add(a, b):
 
 def Sub(a, b):
     """
-	Substracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
-	:param a: operand a
-	:param b: operand b
-	:return: a - b if a - b > 0 or revert the transaction.
-	"""
+    Substracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
+    :param a: operand a
+    :param b: operand b
+    :return: a - b if a - b > 0 or revert the transaction.
+    """
     assert(a>=b)
     return a-b
 
