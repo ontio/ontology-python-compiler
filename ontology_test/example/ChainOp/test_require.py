@@ -6,6 +6,7 @@ def Main(operation, args):
     if operation == "requireTest":
         Require(len(args) == 1)
         return requireTest(args[0])
+    return False
 
 
 def requireTest(address):
