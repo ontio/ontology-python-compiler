@@ -44,6 +44,62 @@ class Compiler(object):
 
         return compiler
 
+    @staticmethod
+    def Compile_File(path):
+        """
+        :param path: the path of the Python file to compile
+        :return: avm
+
+        The following returns the avm string for the contract.
+
+        .. code-block:: python
+
+            from ontology.compiler import Compiler
+
+            avm = Compiler.Compile_File('path/to/your/file.py')
+        """
+
+        Compiler.Compile(path)
+        words = path.split(".")
+        base = words[0] if len(words) == 2 else path
+        avm_file = base + ".avm.str"
+
+        if os.path.isfile(path):
+            os.remove(base + ".abi.json")
+            os.remove(base + ".avm")
+            os.remove(base + ".debug.json")
+            os.remove(base + ".Func.Map")
+            os.remove(base + ".warning")
+
+        with open(avm_file) as f:
+            content = f.read()
+            os.remove(avm_file)
+            return content
+
+    @staticmethod
+    def Compile_Contract(contract):
+        """
+        :param contract: a string containing an entire contract
+        :return: avm
+
+        The following returns the avm string for the contract.
+
+        .. code-block:: python
+
+            from ontology.compiler import Compiler
+
+            avm = Compiler.Compile_Contract('def Main(): ...')
+        """
+
+        path = "tmp_contract.py"
+        temp = open(path, "w")
+        temp.write(contract)
+        temp.close()
+        avm = Compiler.Compile_File(path)
+        if os.path.isfile(path):
+            os.remove(path)
+        return avm
+
     def DumpAsm(self):
         self.CodeGenerate.Dump_Asm()
 
