@@ -234,16 +234,22 @@ def split(str_t, c):
     t = None
     for i in range(len_t):
         x = str_t[i: i + 1]
-        if x != c:
+        if x == ' ':
+            continue
+        elif x != c:
             t = concat(t, x)
         else:
             if t is not None:
                 res.append(t)
-                t = None
+            else:
+                res.append('')
+            t = None
             continue
 
     if t is not None:
         res.append(t)
+    else:
+        res.append('')
     return res
 
 
