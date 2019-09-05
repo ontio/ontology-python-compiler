@@ -34,6 +34,10 @@ function compiler {
 	}
 }
 
+olddir=$(pwd)
+currentdir=$(dirname $0)
+cd $currentdir
 compiler
+cd $oldir
 
 [[ $correct == $total ]] && { echo "${correct}/${total} Files Compiled Successfully";exit 0; } || { echo "${correct}/${total} Files Compiled Failed."; exit 1; }
