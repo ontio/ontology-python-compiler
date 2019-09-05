@@ -174,7 +174,7 @@ def re_compile(pattern):
 
             if p_char != ']':
                 print('Missing ]')
-                return False
+                return
 
             if need_reverse:
                 xormask()
