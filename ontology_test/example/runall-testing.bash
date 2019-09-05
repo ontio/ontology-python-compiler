@@ -34,6 +34,9 @@ function compiler {
 	}
 }
 
+oldir=$(pwd)
+currentdir=$(dirname $0)
+cd $currentdir
 compiler
 
 prefix="../"
@@ -41,5 +44,6 @@ for directory in $(ls)
 do
 	[[ -d $directory ]] && { cd $directory; compiler; cd ../; }
 done
+cd $oldir
 
 [[ $correct == $total ]] && { echo "${correct}/${total} Files Compiled Successfully";exit 0; } || { echo "${correct}/${total} Files Compiled Failed."; exit 1; }
