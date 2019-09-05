@@ -80,21 +80,39 @@ pip install -r requirements.txt
 
 ## Usage
 
-The compiler may be used like in the following example:
-
+Import the compiler into a file with:
 ```
 from ontology.compiler import Compiler
+```
 
+The compiler can be used in three different ways:
+
+1) Compiling a python file to a new file
+```
 # Compiles the python file and creates an avm in 'path/to/your/file.avm'.
 compiler = Compiler.Compile('path/to/your/file.py')
+```
 
-# dump the instr instream.
+2) Compiling a python file to `.avm`
+```
+# Compiles the python file and returns an avm.
+avm = Compiler.Compile_File('path/to/your/file.py')
+```
+
+3) Compiling a variable to `.avm`
+```
+# Compiles a contract stored in memory and returns an avm.
+avm = Compiler.Compile_Contract('def Main(operation, args): ...')
+```
+
+You can also print out the instr instream:
+```
 compiler.DumpAsm()
 ```
 
 #### Testing
 
-You can run the tests using the ```runall.bash``` or ```runall-testing.bash``` files located in ```ontology_test```.
+You can run the tests using the ```runall.bash``` or ```runall-testing.bash``` files located in ```ontology_test```. You can run the compiler tests using the `compile-avm-test.py` file in the root directory.
 
 ## Contributing
 
