@@ -7,9 +7,10 @@
 
 <h1 align="center">Neptune</h1>
 <p align="center">
-  Python compiler for Ontology[[![Build Status](https://travis-ci.org/carltraveler/ontology-python-compiler.svg?branch=master)](https://travis-ci.com/carltraveler/ontology-python-compiler)]
+  Python compiler for Ontology
 </p>
 
+[![Build Status](https://travis-ci.com/ontio/ontology-python-compiler.svg?branch=master)](https://travis-ci.com/ontio/ontology-python-compiler)
 - Free software: LGPL license
   - [Overview](#overview)
   - [Installation](#installation)
