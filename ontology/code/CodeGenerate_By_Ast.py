@@ -29,6 +29,7 @@ Local_ArgLen = 'Local_ArgLen###FixedName'
 Function_Call_Arglen = 'Function_Call_Arglen###FixedName'
 Global_simulation_func_name = 'Global#Code'
 DynamicAppCall = 'DynamicAppCall'
+DynamicAppCallResult = 'DynamicAppCallResult###FixedName'
 BUILTIN_AND_SYSCALL_LABEL_ADDR = -2
 DCALL_TARGET_BYTES = 6
 # buildins_list           = ['state', 'bytes', 'bytearray', 'ToScriptHash', 'print', 'list', 'len', 'abs', 'min', 'max', 'concat', 'take', 'substr', 'keys', 'values', 'has_key', 'sha1', 'sha256', 'hash160', 'hash256', 'verify_signature', 'reverse', 'append', 'remove', 'Exception', 'throw_if_null', 'breakpoint']
@@ -1390,14 +1391,15 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             action_reset_the_syscall_name = False
             # convert DynamicAppCall first
             if func_desc.name == DynamicAppCall:
+                dyn_result_position = self.func_desc.Get_LocalStackPosition(DynamicAppCallResult)
                 self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
                 self.codegencontext.tokenizer.Emit_Token(VMOp.APPCALL, node, bytearray(20))
                 # so appcall must have return value
-                self.codegencontext.tokenizer.Emit_Token(VMOp.TOALTSTACK, node)
+                self.codegencontext.tokenizer.Emit_StoreLocal(dyn_result_position, node)
                 self.codegencontext.tokenizer.Emit_LoadLocal(arg_len_position, node)
                 self.codegencontext.tokenizer.Emit_Token(VMOp.PACK, node)
                 self.codegencontext.tokenizer.Emit_Token(VMOp.DROP, node)
-                self.codegencontext.tokenizer.Emit_Token(VMOp.FROMALTSTACK, node)
+                self.codegencontext.tokenizer.Emit_LoadLocal(dyn_result_position, node)
                 return
             elif func_desc.name in self.codegencontext.register_appcall.keys():
                 assert(func_desc.is_register_call)
