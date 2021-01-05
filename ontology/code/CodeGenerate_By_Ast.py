@@ -1390,6 +1390,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             action_reset_the_syscall_name = False
             # convert DynamicAppCall first
             if func_desc.name == DynamicAppCall:
+                self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
                 self.codegencontext.tokenizer.Emit_Token(VMOp.APPCALL, node, bytearray(20))
                 # so appcall must have return value
                 self.codegencontext.tokenizer.Emit_Token(VMOp.TOALTSTACK, node)
@@ -1401,6 +1402,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             elif func_desc.name in self.codegencontext.register_appcall.keys():
                 assert(func_desc.is_register_call)
                 call_addr = self.codegencontext.register_appcall[func_desc.name].script_hash_addr
+                self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
                 self.codegencontext.tokenizer.Emit_Token(VMOp.APPCALL, node, call_addr)
                 self.codegencontext.tokenizer.Emit_Token(VMOp.TOALTSTACK, node)
                 self.codegencontext.tokenizer.Emit_LoadLocal(arg_len_position, node)
