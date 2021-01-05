@@ -28,6 +28,7 @@ Global_VarEnv = 'Global_VarEnv###FixedName'
 Local_ArgLen = 'Local_ArgLen###FixedName'
 Function_Call_Arglen = 'Function_Call_Arglen###FixedName'
 Global_simulation_func_name = 'Global#Code'
+DynamicAppCall = 'DynamicAppCall'
 BUILTIN_AND_SYSCALL_LABEL_ADDR = -2
 DCALL_TARGET_BYTES = 6
 # buildins_list           = ['state', 'bytes', 'bytearray', 'ToScriptHash', 'print', 'list', 'len', 'abs', 'min', 'max', 'concat', 'take', 'substr', 'keys', 'values', 'has_key', 'sha1', 'sha256', 'hash160', 'hash256', 'verify_signature', 'reverse', 'append', 'remove', 'Exception', 'throw_if_null', 'breakpoint']
@@ -1261,7 +1262,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         # only support normal defaults args. note registere function is syscall.
         # can not use TOALTSTACK as usually. because if some var access it's var. will pick it from altstack. will goes run.
         # so use TOALTSTACK is dangers. use Emit_StoreLocal instead.
-        if not (func_desc.is_builtin or func_desc.isyscall):
+        if (not (func_desc.is_builtin or func_desc.isyscall) or func_desc.name == DynamicAppCall):
             if self.visit_call_convert is True:
                 self.func_desc.callincall_position += 1
             self.visit_call_convert = True
@@ -1388,13 +1389,24 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             assert(func_desc.isyscall)
             action_reset_the_syscall_name = False
             # convert DynamicAppCall first
-            if func_desc.name == 'DynamicAppCall':
+            if func_desc.name == DynamicAppCall:
                 self.codegencontext.tokenizer.Emit_Token(VMOp.APPCALL, node, bytearray(20))
+                # so appcall must have return value
+                self.codegencontext.tokenizer.Emit_Token(VMOp.TOALTSTACK, node)
+                self.codegencontext.tokenizer.Emit_LoadLocal(arg_len_position, node)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.PACK, node)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.DROP, node)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.FROMALTSTACK, node)
                 return
             elif func_desc.name in self.codegencontext.register_appcall.keys():
                 assert(func_desc.is_register_call)
                 call_addr = self.codegencontext.register_appcall[func_desc.name].script_hash_addr
                 self.codegencontext.tokenizer.Emit_Token(VMOp.APPCALL, node, call_addr)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.TOALTSTACK, node)
+                self.codegencontext.tokenizer.Emit_LoadLocal(arg_len_position, node)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.PACK, node)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.DROP, node)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.FROMALTSTACK, node)
                 return
             elif func_desc.name in self.codegencontext.register_action.keys():
                 assert(func_desc.is_register_call)
