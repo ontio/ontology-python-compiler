@@ -1408,6 +1408,7 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
                 return
             elif func_desc.name in self.codegencontext.register_appcall.keys():
                 assert(func_desc.is_register_call)
+                dyn_result_position = self.func_desc.Get_LocalStackPosition(DynamicAppCallResult)
                 call_addr = self.codegencontext.register_appcall[func_desc.name].script_hash_addr
                 # do not like DynamicAppCall. static Call consume nothing of the eval stack. so arg len need not sub 1.
                 self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
@@ -2021,9 +2022,10 @@ class FuncDescription:
 
     def Calculate_StackSize(self):
         if self.is_global:
-            self.stack_size = 1  # Function_Call_Arglen. Global do not have other 3 FixedName args.
+            #self.stack_size = 1 # for old: Function_Call_Arglen. Global do not have other 3 FixedName args.
+            self.stack_size = 2  # for new: Function_Call_Arglen, DynamicAppCallResult. Global do not have other 4 FixedName args. assume can appcall at global. need test. but it's ok just make stack bigger.
         else:
-            self.stack_size = 4  # Global_VarEnv, Local_ArgLen, vararg, Function_Call_Arglen.  note main function only have Global_VarEnv.
+            self.stack_size = 5  # Global_VarEnv, Local_ArgLen, Function_Call_Arglen, vararg, DynamicAppCallResult. the last two is option if function do not have vararg or appcall. assume have for simple.  note main function only have Global_VarEnv.
 
         visitor_stacksize = FuncVisitor_Of_StackSize(self, self.is_global)
         visitor_stacksize.visit(self.func_ast)
