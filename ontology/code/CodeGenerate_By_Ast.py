@@ -1392,6 +1392,11 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             # convert DynamicAppCall first
             if func_desc.name == DynamicAppCall:
                 dyn_result_position = self.func_desc.Get_LocalStackPosition(DynamicAppCallResult)
+
+                # APPCALL need the call contract address at the top of the eval stack. how ever the address will pop out by APPCALL inst in vm. and leave other args copy to new eval stack.
+                # so the actual arg num is the topstack(arg num) - 1 (the dyn call contract address)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.PUSH1, node)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.SUB, node)
                 self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
                 self.codegencontext.tokenizer.Emit_Token(VMOp.APPCALL, node, bytearray(20))
                 # so appcall must have return value
@@ -1404,13 +1409,15 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             elif func_desc.name in self.codegencontext.register_appcall.keys():
                 assert(func_desc.is_register_call)
                 call_addr = self.codegencontext.register_appcall[func_desc.name].script_hash_addr
+                # do not like DynamicAppCall. static Call consume nothing of the eval stack. so arg len need not sub 1.
                 self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
                 self.codegencontext.tokenizer.Emit_Token(VMOp.APPCALL, node, call_addr)
-                self.codegencontext.tokenizer.Emit_Token(VMOp.TOALTSTACK, node)
+                # so appcall must have return value
+                self.codegencontext.tokenizer.Emit_StoreLocal(dyn_result_position, node)
                 self.codegencontext.tokenizer.Emit_LoadLocal(arg_len_position, node)
                 self.codegencontext.tokenizer.Emit_Token(VMOp.PACK, node)
                 self.codegencontext.tokenizer.Emit_Token(VMOp.DROP, node)
-                self.codegencontext.tokenizer.Emit_Token(VMOp.FROMALTSTACK, node)
+                self.codegencontext.tokenizer.Emit_LoadLocal(dyn_result_position, node)
                 return
             elif func_desc.name in self.codegencontext.register_action.keys():
                 assert(func_desc.is_register_call)
