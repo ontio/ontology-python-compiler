@@ -28,6 +28,8 @@ Global_VarEnv = 'Global_VarEnv###FixedName'
 Local_ArgLen = 'Local_ArgLen###FixedName'
 Function_Call_Arglen = 'Function_Call_Arglen###FixedName'
 Global_simulation_func_name = 'Global#Code'
+DynamicAppCall = 'DynamicAppCall'
+DynamicAppCallResult = 'DynamicAppCallResult###FixedName'
 BUILTIN_AND_SYSCALL_LABEL_ADDR = -2
 DCALL_TARGET_BYTES = 6
 # buildins_list           = ['state', 'bytes', 'bytearray', 'ToScriptHash', 'print', 'list', 'len', 'abs', 'min', 'max', 'concat', 'take', 'substr', 'keys', 'values', 'has_key', 'sha1', 'sha256', 'hash160', 'hash256', 'verify_signature', 'reverse', 'append', 'remove', 'Exception', 'throw_if_null', 'breakpoint']
@@ -1258,10 +1260,11 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
         if func_desc.isyscall and (func_desc.name == "RegisterAppCall" or func_desc.name == "RegisterAction"):
             return
 
+        arg_len_position = -1
         # only support normal defaults args. note registere function is syscall.
         # can not use TOALTSTACK as usually. because if some var access it's var. will pick it from altstack. will goes run.
         # so use TOALTSTACK is dangers. use Emit_StoreLocal instead.
-        if not (func_desc.is_builtin or func_desc.isyscall):
+        if (not (func_desc.is_builtin or func_desc.isyscall) or func_desc.name == DynamicAppCall or func_desc.name in self.codegencontext.register_appcall.keys()):
             if self.visit_call_convert is True:
                 self.func_desc.callincall_position += 1
             self.visit_call_convert = True
@@ -1388,13 +1391,40 @@ class Visitor_Of_FunCodeGen(ast.NodeVisitor):
             assert(func_desc.isyscall)
             action_reset_the_syscall_name = False
             # convert DynamicAppCall first
-            if func_desc.name == 'DynamicAppCall':
+            if func_desc.name == DynamicAppCall:
+                if arg_len_position < 0:
+                    self.Print_Error(node, "Compiler Bug. arg_len_position can not nagtive")
+                dyn_result_position = self.func_desc.Get_LocalStackPosition(DynamicAppCallResult)
+
+                # APPCALL need the call contract address at the top of the eval stack. how ever the address will pop out by APPCALL inst in vm. and leave other args copy to new eval stack.
+                # so the actual arg num is the topstack(arg num) - 1 (the dyn call contract address)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.PUSH1, node)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.SUB, node)
+                self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
                 self.codegencontext.tokenizer.Emit_Token(VMOp.APPCALL, node, bytearray(20))
+                # so appcall must have return value
+                self.codegencontext.tokenizer.Emit_StoreLocal(dyn_result_position, node)
+                self.codegencontext.tokenizer.Emit_LoadLocal(arg_len_position, node)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.PACK, node)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.DROP, node)
+                self.codegencontext.tokenizer.Emit_LoadLocal(dyn_result_position, node)
                 return
             elif func_desc.name in self.codegencontext.register_appcall.keys():
                 assert(func_desc.is_register_call)
+                if arg_len_position < 0:
+                    self.Print_Error(node, "Compiler Bug. arg_len_position can not nagtive")
+
+                dyn_result_position = self.func_desc.Get_LocalStackPosition(DynamicAppCallResult)
                 call_addr = self.codegencontext.register_appcall[func_desc.name].script_hash_addr
+                # do not like DynamicAppCall. static Call consume nothing of the eval stack. so arg len need not sub 1.
+                self.codegencontext.tokenizer.Emit_StoreLocal(arg_len_position, node)
                 self.codegencontext.tokenizer.Emit_Token(VMOp.APPCALL, node, call_addr)
+                # so appcall must have return value
+                self.codegencontext.tokenizer.Emit_StoreLocal(dyn_result_position, node)
+                self.codegencontext.tokenizer.Emit_LoadLocal(arg_len_position, node)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.PACK, node)
+                self.codegencontext.tokenizer.Emit_Token(VMOp.DROP, node)
+                self.codegencontext.tokenizer.Emit_LoadLocal(dyn_result_position, node)
                 return
             elif func_desc.name in self.codegencontext.register_action.keys():
                 assert(func_desc.is_register_call)
@@ -1998,9 +2028,10 @@ class FuncDescription:
 
     def Calculate_StackSize(self):
         if self.is_global:
-            self.stack_size = 1  # Function_Call_Arglen. Global do not have other 3 FixedName args.
+            #self.stack_size = 1 # for old: Function_Call_Arglen. Global do not have other 3 FixedName args.
+            self.stack_size = 2  # for new: Function_Call_Arglen, DynamicAppCallResult. Global do not have other 4 FixedName args. assume can appcall at global. need test. but it's ok just make stack bigger.
         else:
-            self.stack_size = 4  # Global_VarEnv, Local_ArgLen, vararg, Function_Call_Arglen.  note main function only have Global_VarEnv.
+            self.stack_size = 5  # Global_VarEnv, Local_ArgLen, Function_Call_Arglen, vararg, DynamicAppCallResult. the last two is option if function do not have vararg or appcall. assume have for simple.  note main function only have Global_VarEnv.
 
         visitor_stacksize = FuncVisitor_Of_StackSize(self, self.is_global)
         visitor_stacksize.visit(self.func_ast)

@@ -14,3 +14,8 @@ do
 	./ontowasm -b $avm
 done
 cd $oldir
+
+cd ./chaintest/testpy/
+./travis.build.bash
+cd $oldir
+
