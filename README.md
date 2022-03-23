@@ -35,7 +35,7 @@
 
 #### What's new compared to neo-boa
 
-- Basic abstract syntax trees
+- Basic [abstract](https://www.scaler.com/topics/abstract-class-in-python/) syntax trees
 - Ability to write numerous expressions per line. [(See Example)](ontology_test/example/OffChainOp/test_while2.py)
 - `global` keyword, works the same as [global](https://www.programiz.com/python-programming/global-keyword) in the standard python library. Allows functions to share variables. [(See Example #1)](ontology_test/example/ChainOp/test_global_and_appcall.py) [(See Example #2)](ontology_test/example/OffChainOp/test_global.py)
 - Cascade bool operation. [(See Example)](ontology_test/example/OffChainOp/test_boolop_origin.py)
