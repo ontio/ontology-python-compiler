@@ -37,7 +37,7 @@
 
 - Basic abstract syntax trees
 - Ability to write numerous expressions per line. [(See Example)](ontology_test/example/OffChainOp/test_while2.py)
-- `global` keyword, works the same as [global](https://www.programiz.com/python-programming/global-keyword) in the standard python library. Allows functions to share variables. [(See Example #1)](ontology_test/example/ChainOp/test_global_and_appcall.py) [(See Example #2)](ontology_test/example/OffChainOp/test_global.py)
+- `global` keyword, works the same as [global](https://www.programiz.com/python-programming/global-keyword) in the standard python library. Allows functions to share [variables](https://www.scaler.com/topics/python/variables-in-python/). [(See Example #1)](ontology_test/example/ChainOp/test_global_and_appcall.py) [(See Example #2)](ontology_test/example/OffChainOp/test_global.py)
 - Cascade bool operation. [(See Example)](ontology_test/example/OffChainOp/test_boolop_origin.py)
 - Augmented assignment operators such as `+= *= /= -=` [(See Example)](ontology_test/example/OffChainOp/test_iterate.py)
 - [Chained comparisons](https://www.geeksforgeeks.org/chaining-comparison-operators-python/) [(See Example)](ontology_test/example/OffChainOp/test_compare_1.py)
